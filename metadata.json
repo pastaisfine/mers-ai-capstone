@@ -1,0 +1,6 @@
+{
+  "name": "MERS-AI",
+  "description": "AI-powered 999 emergency dispatch assistant built for Malaysia. Professional real-time tactical dashboard and simulator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
