@@ -27,7 +27,7 @@ const INITIAL_INCIDENTS: Incident[] = [
     entities: ['👤 Adult Male (62yo)', '📍 Jalan Ampang', '🩺 Cardiac Arrest'],
     reason: 'Cardiac arrest keywords detected. Caller panic level extreme. Immediate medical intervention required.',
     confidence: 91,
-    contradiction: '⚠ CONTRADICTION DETECTED — Caller stated subject was \'breathing fine\' at 3:02PM, then \'tidak sedar diri\' at 3:04PM. Severity escalated automatically.',
+    contradiction: 'CONTRADICTION DETECTED — Caller stated subject was \'breathing fine\' at 3:02PM, then \'tidak sedar diri\' at 3:04PM. Severity escalated automatically.',
     sopCitation: 'WHO CPR Guidelines 2023 — Section 3.2 | Relevance: 94%',
     sopProcedure: [
       'Instruct caller to place phone on speaker next to patient.',
@@ -142,7 +142,7 @@ const INITIAL_INCIDENTS: Incident[] = [
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('dashboard');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Incidents state
   const [incidents, setIncidents] = useState<Incident[]>(INITIAL_INCIDENTS);
