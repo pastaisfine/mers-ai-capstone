@@ -26,6 +26,9 @@ export function LiveIntelligencePanel({
       "w-full lg:w-[380px] flex flex-col border-l shrink-0 h-[calc(100vh-64px)] z-10",
       isDark ? 'bg-[#0B0D12] border-[#2D334A] text-white' : 'bg-white border-black text-black'
     )}>
+      <div className="flex shrink-0 px-2 py-3 border-b border-black/10">
+        <h2 className="text-[14px] font-bold text-gray-400 font-mono">LIVE INTELLIGENCE</h2>
+      </div>
       {/* Header Labels */}
       <div className="flex shrink-0 px-2">
         {([
