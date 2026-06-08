@@ -10,6 +10,7 @@ import { LiveIntelligencePanel } from './components/LiveIntelligencePanel';
 import { TacticalFooter } from './components/TacticalFooter';
 import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { ReportsTab } from './components/ReportsTab';
+import { ReportProvider } from './context/report/ReportProvider';
 
 const INITIAL_INCIDENTS: Incident[] = [
   {
@@ -34,13 +35,13 @@ const INITIAL_INCIDENTS: Incident[] = [
       'Guide chest compressions immediately (100–120 compressions per minute).',
       'Instruct helper to locate nearest private/public AED if available.'
     ],
-    responder: { 
-      name: 'Ambulance A1 - EMS Unit', 
-      type: 'Emergency Medical Service', 
-      distance: '2.4km', 
-      eta: '06:45m', 
+    responder: {
+      name: 'Ambulance A1 - EMS Unit',
+      type: 'Emergency Medical Service',
+      distance: '2.4km',
+      eta: '06:45m',
       status: 'Ready',
-      paramedic: 'Rizal K.' 
+      paramedic: 'Rizal K.'
     },
     timeline: [
       { time: '14:22:00', event: 'Call Connected (Op: Khalid)' },
@@ -77,11 +78,11 @@ const INITIAL_INCIDENTS: Incident[] = [
       'Advise caller to shut principal electrical mains from outside if safe.',
       'Instruct neighbor structures to saturate fence borders to prevent spread.'
     ],
-    responder: { 
-      name: 'Bomba Melawati - Unit Engine 1', 
-      type: 'Fire Suppression & Rescue', 
-      distance: '1.8km', 
-      eta: '04:30m', 
+    responder: {
+      name: 'Bomba Melawati - Unit Engine 1',
+      type: 'Fire Suppression & Rescue',
+      distance: '1.8km',
+      eta: '04:30m',
       status: 'Ready',
       paramedic: 'Zubir A.'
     },
@@ -118,11 +119,11 @@ const INITIAL_INCIDENTS: Incident[] = [
       'Activate vehicle hazard flashers immediately.',
       'Advise local tow services to clear central flow lane.'
     ],
-    responder: { 
-      name: 'IPD Cheras - Traffic Patrol', 
-      type: 'Law Enforcement / Traffic Control', 
-      distance: '3.8km', 
-      eta: '08:00m', 
+    responder: {
+      name: 'IPD Cheras - Traffic Patrol',
+      type: 'Law Enforcement / Traffic Control',
+      distance: '3.8km',
+      eta: '08:00m',
       status: 'Ready',
       paramedic: 'Firdaus M.'
     },
@@ -141,7 +142,7 @@ const INITIAL_INCIDENTS: Incident[] = [
 ];
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('dashboard');
+  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('reports');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Incidents state
@@ -196,7 +197,7 @@ export default function App() {
       interval = setInterval(() => {
         setSimStep(prevStep => {
           const nextStep = prevStep + 1;
-          
+
           if (nextStep === 1) {
             setSimLogFeed(prev => [`[${currentTimeText}] Spawning incident vector at lat/long grid targets.`, ...prev]);
             setIncidents(prev => prev.map(inc => {
@@ -284,7 +285,7 @@ export default function App() {
       ],
       reason: `Simulation engine generated scenario for ${simIncidentType} involving a ${simPersona} in ${simLanguage}.`,
       confidence: 93,
-      sopCitation: simIncidentType === 'fire' 
+      sopCitation: simIncidentType === 'fire'
         ? 'Bomba Malaysia Incident Protocol Code 2.4 | Relevance: 95%'
         : 'SOP Malaysia First-Responder Standards | Relevance: 91%',
       sopProcedure: simIncidentType === 'fire' ? [
@@ -296,7 +297,7 @@ export default function App() {
         'Verify immediate airway clearance parameters.',
         'Keep patient warm and elevate extremities if fully conscious.'
       ],
-      responder: simIncidentType === 'fire' 
+      responder: simIncidentType === 'fire'
         ? { name: 'Bomba Cheras - Unit Engine 2', type: 'Fire Suppression & Rescue', distance: '2.5km', eta: '05:40m', status: 'Ready', paramedic: 'Amin' }
         : { name: 'Ambulance Pantai - Medic 3', type: 'Emergency Medical Service', distance: '3.1km', eta: '07:15m', status: 'Ready', paramedic: 'Rizal K.' },
       timeline: [
@@ -394,9 +395,9 @@ export default function App() {
 
   // Filter queue computed variables
   const filteredIncidents = incidents.filter(inc => {
-    const matchesSearch = inc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          inc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          inc.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = inc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inc.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSeverity = filterSeverity === 'ALL' || inc.severity === filterSeverity;
     return matchesSearch && matchesSeverity;
   });
@@ -415,10 +416,9 @@ export default function App() {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`flex flex-col h-screen w-full select-none overflow-hidden font-sans transition-all duration-200 ${
-      isDark ? 'bg-[#070A0F] text-[#F0F2F8]' : 'bg-slate-50 text-slate-900'
-    }`}>
-      
+    <div className={`flex flex-col h-screen w-full select-none overflow-hidden font-sans transition-all duration-200 ${isDark ? 'bg-[#070A0F] text-[#F0F2F8]' : 'bg-slate-50 text-slate-900'
+      }`}>
+
       {/* 1. Header component */}
       <MetricsHeader
         currentTab={currentTab}
@@ -434,11 +434,11 @@ export default function App() {
 
       {/* 2. Primary Screen renders */}
       <main className="flex-1 flex overflow-hidden">
-        
+
         {/* OP-DESK TAB SCREEN */}
         {currentTab === 'dashboard' && (
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-            
+
             {/* Sidebar Active Queue */}
             <ActiveIncidentsList
               incidents={filteredIncidents}
@@ -496,7 +496,7 @@ export default function App() {
           />
         )}
 
-        {currentTab === 'reports' && <ReportsTab theme={theme} />}
+        {currentTab === 'reports' && <ReportProvider><ReportsTab theme={theme} /></ReportProvider>}
 
       </main>
 

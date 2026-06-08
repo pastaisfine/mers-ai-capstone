@@ -1,9 +1,10 @@
+import { ArchivedReport as ArchivedReportModel } from "./models/report";
 export interface Incident {
   id: string;
-  type: 'medical' | 'fire' | 'crime' | 'accident' | 'flood';
+  type: "medical" | "fire" | "crime" | "accident" | "flood";
   title: string;
   location: string;
-  severity: 'CRITICAL' | 'URGENT' | 'MODERATE' | 'RESOLVED';
+  severity: "CRITICAL" | "URGENT" | "MODERATE" | "RESOLVED";
   priority: number;
   lang: string;
   caller: string;
@@ -25,7 +26,12 @@ export interface Incident {
     paramedic?: string;
   };
   timeline: { time: string; event: string; isAlert?: boolean }[];
-  transcript: { time: string; speaker: string; text: string; highlight?: boolean }[];
+  transcript: {
+    time: string;
+    speaker: string;
+    text: string;
+    highlight?: boolean;
+  }[];
   coordinates: { x: number; y: number; lat: number; lng: number };
   status: {
     location?: string;
@@ -36,22 +42,6 @@ export interface Incident {
   };
 }
 
-export interface ArchivedReport {
-  id: string;
-  type: 'medical' | 'fire' | 'crime' | 'accident' | 'flood';
-  title: string;
-  location: string;
-  severity: 'CRITICAL' | 'URGENT' | 'MODERATE' | 'RESOLVED';
-  status: 'APPROVED' | 'REJECTED';
-  caller: string;
-  lang: string;
-  confidence: number;
-  sopCitation: string;
-  responderName: string;
-  timestamp: string;
-  duration: string;
-  reasoning: string;
-  actionSOP: string[];
-  operatorVerdict: string;
-  notes: string;
-}
+export type ArchivedReport = ArchivedReportModel;
+
+export type Theme = "dark" | "light";
