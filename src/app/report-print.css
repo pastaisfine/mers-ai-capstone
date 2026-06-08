@@ -1,0 +1,15 @@
+@media print {
+  /* *:not(#printing):not(#printing *) {
+    display: none;
+  } */
+  header,
+  #report-panel-div,
+  #report-panel-div *,
+  #report-export-section {
+    display: none;
+  }
+
+  @page {
+    margin: 0;
+  }
+}
