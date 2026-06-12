@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { Incident } from './types';
+import { Incident, SeverityType } from './types';
 import { MetricsHeader } from './components/MetricsHeader';
 import { ActiveIncidentsList } from './components/ActiveIncidentsList';
 import { TacticalWorkspace } from './components/TacticalWorkspace';
@@ -10,136 +10,9 @@ import { LiveIntelligencePanel } from './components/LiveIntelligencePanel';
 import { TacticalFooter } from './components/TacticalFooter';
 import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { ReportsTab } from './components/ReportsTab';
+import { INITIAL_INCIDENTS } from './data/initialIncidents';
 import { ReportProvider } from './context/report/ReportProvider';
 
-const INITIAL_INCIDENTS: Incident[] = [
-  {
-    id: 'INC-0042',
-    type: 'medical',
-    title: 'Suspected Cardiac Arrest',
-    location: 'Jalan Ampang, KL (Near Mamak Pelita)',
-    severity: 'CRITICAL',
-    priority: 94,
-    lang: 'EN / BM',
-    caller: 'MR. TAN',
-    duration: '03:42',
-    distressScore: 87,
-    panicLevel: 'Extreme',
-    entities: ['👤 Adult Male (62yo)', '📍 Jalan Ampang', '🩺 Cardiac Arrest'],
-    reason: 'Cardiac arrest keywords detected. Caller panic level extreme. Immediate medical intervention required.',
-    confidence: 91,
-    contradiction: 'CONTRADICTION DETECTED — Caller stated subject was \'breathing fine\' at 3:02PM, then \'tidak sedar diri\' at 3:04PM. Severity escalated automatically.',
-    sopCitation: 'WHO CPR Guidelines 2023 — Section 3.2 | Relevance: 94%',
-    sopProcedure: [
-      'Instruct caller to place phone on speaker next to patient.',
-      'Guide chest compressions immediately (100–120 compressions per minute).',
-      'Instruct helper to locate nearest private/public AED if available.'
-    ],
-    responder: {
-      name: 'Ambulance A1 - EMS Unit',
-      type: 'Emergency Medical Service',
-      distance: '2.4km',
-      eta: '06:45m',
-      status: 'Ready',
-      paramedic: 'Rizal K.'
-    },
-    timeline: [
-      { time: '14:22:00', event: 'Call Connected (Op: Khalid)' },
-      { time: '14:22:05', event: 'AI Core Activation & Geo-Trilateration' },
-      { time: '14:22:18', event: 'Severity Escalated to CRITICAL' }
-    ],
-    transcript: [
-      { time: '03:00', speaker: 'Caller', text: 'Tolong! Ayah saya jatuh, dia TIDAK SEDAR DIRI!' },
-      { time: '03:05', speaker: 'Operator', text: 'Bertenang encik. Di mana lokasi anda?' },
-      { time: '03:12', speaker: 'Caller', text: 'Saya di Jalan Ampang, depan kedai mamak. Dia NOT BREATHING. Please hurry!' },
-      { time: '03:28', speaker: 'Operator', text: 'Bantuan dalam perjalanan. Adakah mangsa masih bernafas?' }
-    ],
-    coordinates: { x: 260, y: 140, lat: 3.158, lng: 101.714 },
-    status: {}
-  },
-  {
-    id: 'INC-0045',
-    type: 'fire',
-    title: 'Structure Fire (Residential)',
-    location: 'Taman Melawati, KL',
-    severity: 'URGENT',
-    priority: 72,
-    lang: 'BM',
-    caller: 'PUAN AMINAH',
-    duration: '01:58',
-    distressScore: 75,
-    panicLevel: 'High',
-    entities: ['🔥 Grade A Fire', '📍 Taman Melawati', '🏠 Double-Storey Terrace'],
-    reason: 'Active residential structure fire. Dark toxic smoke detected in hallway. Safe evacuation logged.',
-    confidence: 88,
-    sopCitation: 'Bomba Malaysia Incident Protocol Code 1.1 | Relevance: 96%',
-    sopProcedure: [
-      'Confirm all occupants have evacuated safety boundaries.',
-      'Advise caller to shut principal electrical mains from outside if safe.',
-      'Instruct neighbor structures to saturate fence borders to prevent spread.'
-    ],
-    responder: {
-      name: 'Bomba Melawati - Unit Engine 1',
-      type: 'Fire Suppression & Rescue',
-      distance: '1.8km',
-      eta: '04:30m',
-      status: 'Ready',
-      paramedic: 'Zubir A.'
-    },
-    timeline: [
-      { time: '14:10:10', event: 'Call Triggered from Taman Melawati Area' },
-      { time: '14:10:30', event: 'Bomba Melawati Base Alert Sent' }
-    ],
-    transcript: [
-      { time: '01:00', speaker: 'Caller', text: 'Tolong! Dapur rumah saya terbakar! Asap dah tebal sangat kat ruang tamu.' },
-      { time: '01:15', speaker: 'Operator', text: 'Sila keluar dari rumah segera puan. Adakah semua ahli keluarga sudah keluar?' },
-      { time: '01:30', speaker: 'Caller', text: 'Ya, kami semua kat luar sekarang, tapi api makin besar. Takut merebak ke jiran sebelah!' }
-    ],
-    coordinates: { x: 380, y: 70, lat: 3.210, lng: 101.748 },
-    status: {}
-  },
-  {
-    id: 'INC-0046',
-    type: 'accident',
-    title: 'MVA - Multi-Vehicle Collision',
-    location: 'Federal Highway, KM 4.2',
-    severity: 'MODERATE',
-    priority: 45,
-    lang: 'EN',
-    caller: 'SARAH JANE',
-    duration: '02:15',
-    distressScore: 40,
-    panicLevel: 'Moderate',
-    entities: ['🚗 3 Passenger Cars', '🛣 Express Route Blocked', '📍 Federal Highway Km 4.2'],
-    reason: 'Rear-end collision involving 3 vehicles. No passenger casualties reported. Heavy lane obstruction.',
-    confidence: 95,
-    sopCitation: 'Highway Patrol Incident Standards | Relevance: 90%',
-    sopProcedure: [
-      'Instruct all drivers to stand behind federal highway guardrails.',
-      'Activate vehicle hazard flashers immediately.',
-      'Advise local tow services to clear central flow lane.'
-    ],
-    responder: {
-      name: 'IPD Cheras - Traffic Patrol',
-      type: 'Law Enforcement / Traffic Control',
-      distance: '3.8km',
-      eta: '08:00m',
-      status: 'Ready',
-      paramedic: 'Firdaus M.'
-    },
-    timeline: [
-      { time: '14:05:15', event: 'Highway CCTV automated collision flag' },
-      { time: '14:05:45', event: 'Sarah Jane call verified' }
-    ],
-    transcript: [
-      { time: '01:20', speaker: 'Caller', text: 'I just got into an accident on the Federal Highway. Three cars bumped into each other.' },
-      { time: '01:40', speaker: 'Operator', text: 'Understood. Are you or anyone in the other vehicles injured?' },
-      { time: '02:00', speaker: 'Caller', text: 'No, everyone is walking fine, but the cars are blocking the center lane. It is causing heavy traffic!' }
-    ],
-    coordinates: { x: 120, y: 220, lat: 3.120, lng: 101.670 },
-    status: {}
-  }
-];
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('reports');
@@ -229,7 +102,7 @@ export default function App() {
                 return {
                   ...inc,
                   status: { ...inc.status, triage: 'DONE', sop: 'DONE' },
-                  severity: 'CRITICAL',
+                  severity: SeverityType.CRITICAL,
                   priority: 89,
                   timeline: [
                     ...inc.timeline,
@@ -271,9 +144,10 @@ export default function App() {
       type: simIncidentType,
       title: simScenarioName || 'Simulated Emergency Service Request',
       location: simLocation || 'Pusat Bandar Kuala Lumpur',
-      severity: 'URGENT',
+      severity: SeverityType.URGENT,
       priority: 65,
       lang: simLanguage.toUpperCase(),
+      occurDateTime: "2026-06-12T06:58:14.000Z",
       caller: simPersona.toUpperCase(),
       duration: '00:00',
       distressScore: 82,
@@ -354,7 +228,7 @@ export default function App() {
     setOverridesCount(prev => prev + 1);
     setIncidents(prev => prev.map(inc => {
       if (inc.id === id) {
-        const nextSeverity = inc.severity === 'CRITICAL' ? 'URGENT' : 'CRITICAL';
+        const nextSeverity = inc.severity === SeverityType.CRITICAL ? 'URGENT' : 'CRITICAL';
         return {
           ...inc,
           severity: nextSeverity as any,
@@ -374,7 +248,7 @@ export default function App() {
       if (inc.id === id) {
         return {
           ...inc,
-          severity: 'RESOLVED',
+          severity: SeverityType.RESOLVED,
           timeline: [...inc.timeline, { time: currentTimeText, event: `Incident officially CLOSED by operator.` }]
         };
       }
@@ -405,7 +279,7 @@ export default function App() {
   // Pulse voice waveform generator heights
   const [waveformHeights, setWaveformHeights] = useState<number[]>([12, 24, 8, 16, 32, 10, 4, 18, 22, 14, 28, 6, 12, 20]);
   useEffect(() => {
-    if (activeIncident.severity === 'CRITICAL' || isSimulating) {
+    if (activeIncident.severity === SeverityType.CRITICAL || isSimulating) {
       const pulseInterval = setInterval(() => {
         setWaveformHeights(prev => prev.map(() => Math.floor(Math.random() * 26) + 4));
       }, 150);
@@ -425,8 +299,8 @@ export default function App() {
         setCurrentTab={setCurrentTab}
         theme={theme}
         setTheme={setTheme}
-        activeCount={incidents.filter(i => i.severity !== 'RESOLVED').length}
-        criticalCount={incidents.filter(i => i.severity === 'CRITICAL').length}
+        activeCount={incidents.filter(i => i.severity !== SeverityType.RESOLVED).length}
+        criticalCount={incidents.filter(i => i.severity === SeverityType.CRITICAL).length}
         resolvedCount={resolvedCount}
         currentTimeText={currentTimeText}
         isSimulating={isSimulating}
