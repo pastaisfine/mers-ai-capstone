@@ -10,6 +10,7 @@ import { LiveIntelligencePanel } from './components/LiveIntelligencePanel';
 import { TacticalFooter } from './components/TacticalFooter';
 import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { ReportsTab } from './components/ReportsTab';
+import { CollapsibleSidebar } from './components/CollapsibleSidebar';
 
 const INITIAL_INCIDENTS: Incident[] = [
   {
@@ -440,22 +441,25 @@ export default function App() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
             
             {/* Sidebar Active Queue */}
-            <ActiveIncidentsList
-              incidents={filteredIncidents}
-              selectedIncidentId={selectedIncidentId}
-              setSelectedIncidentId={setSelectedIncidentId}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filterSeverity={filterSeverity}
-              setFilterSeverity={setFilterSeverity}
-              theme={theme}
-            />
+            <CollapsibleSidebar isDark={isDark}>
+              <ActiveIncidentsList
+                incidents={filteredIncidents}
+                selectedIncidentId={selectedIncidentId}
+                setSelectedIncidentId={setSelectedIncidentId}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filterSeverity={filterSeverity}
+                setFilterSeverity={setFilterSeverity}
+                theme={theme}
+              />
+            </CollapsibleSidebar>
 
             {/* Tactical GPS map custom workspace */}
             <TacticalWorkspace
               activeIncident={activeIncident}
               theme={theme}
               currentTimeText={currentTimeText}
+              allIncidents={incidents}
             />
 
             {/* Live speech transcription and diagnostic panels */}
