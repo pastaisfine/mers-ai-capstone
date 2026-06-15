@@ -1,8 +1,11 @@
 @import "tailwindcss";
+@import "./report-print.css";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-success: var(--color-success);
 }
 
 /* Custom, premium, thin scrollbar styling */
