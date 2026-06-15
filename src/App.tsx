@@ -16,7 +16,7 @@ import { ReportProvider } from './context/report/ReportProvider';
 
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('reports');
+  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Incidents state

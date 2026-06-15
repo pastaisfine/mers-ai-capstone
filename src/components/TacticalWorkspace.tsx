@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Map, Marker, AttributionControl, type MapRef } from 'react-map-gl/mapbox';
+import { SeverityType } from '../types';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   MapPin,
@@ -111,9 +112,9 @@ function IncidentMap({ activeIncident, allIncidents, pinColor, isDark }: Inciden
                 className="w-3 h-2.5 rounded-full ring-1 ring-black-400 opacity-70 hover:opacity-50 transition-opacity"
                 style={{
                   backgroundColor:
-                    inc.severity === 'CRITICAL' ? 'red' :
-                    inc.severity === 'URGENT'   ? 'orange' :
-                    inc.severity === 'MODERATE' ? 'yellow' : 'green',
+                   inc.severity === 'critical' ? 'red'    :
+                   inc.severity === 'urgent'   ? 'orange' :
+                   inc.severity === 'moderate' ? 'yellow' : 'green',
                 }}
                 title={`${inc.id} · ${inc.title}`}
               />
@@ -290,10 +291,10 @@ export interface TacticalWorkspaceProps {
 }
 
 const SEVERITY_COLORS: Record<Incident['severity'], { bg: string; text: string; ring: string; pin: string }> = {
-  CRITICAL: { bg: 'bg-[#E63946]/15', text: 'text-[#FF4D5C]', ring: 'ring-[#E63946]/50', pin: '#E63946' },
-  URGENT:   { bg: 'bg-[#F59E0B]/15', text: 'text-[#FBBF24]', ring: 'ring-[#F59E0B]/50', pin: '#F59E0B' },
-  MODERATE: { bg: 'bg-[#EAB308]/15', text: 'text-[#EAB308]', ring: 'ring-[#EAB308]/50', pin: '#EAB308' },
-  RESOLVED: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', ring: 'ring-emerald-500/50', pin: '#10B981' },
+  critical: { bg: 'bg-[#E63946]/15', text: 'text-[#FF4D5C]', ring: 'ring-[#E63946]/50', pin: '#E63946' },
+  urgent:   { bg: 'bg-[#F59E0B]/15', text: 'text-[#FBBF24]', ring: 'ring-[#F59E0B]/50', pin: '#F59E0B' },
+  moderate: { bg: 'bg-[#EAB308]/15', text: 'text-[#EAB308]', ring: 'ring-[#EAB308]/50', pin: '#EAB308' },
+  resolved: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', ring: 'ring-emerald-500/50', pin: '#10B981' },
 };
 
 export function TacticalWorkspace({
