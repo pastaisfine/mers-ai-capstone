@@ -10,12 +10,13 @@ import { LiveIntelligencePanel } from './components/LiveIntelligencePanel';
 import { TacticalFooter } from './components/TacticalFooter';
 import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { ReportsTab } from './components/ReportsTab';
+import { CollapsibleSidebar } from './components/CollapsibleSidebar';
 import { INITIAL_INCIDENTS } from './data/initialIncidents';
 import { ReportProvider } from './context/report/ReportProvider';
 
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('reports');
+  const [currentTab, setCurrentTab] = useState<'dashboard' | 'simulation' | 'reports'>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Incidents state
@@ -314,22 +315,25 @@ export default function App() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
             {/* Sidebar Active Queue */}
-            <ActiveIncidentsList
-              incidents={filteredIncidents}
-              selectedIncidentId={selectedIncidentId}
-              setSelectedIncidentId={setSelectedIncidentId}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filterSeverity={filterSeverity}
-              setFilterSeverity={setFilterSeverity}
-              theme={theme}
-            />
+            <CollapsibleSidebar isDark={isDark}>
+              <ActiveIncidentsList
+                incidents={filteredIncidents}
+                selectedIncidentId={selectedIncidentId}
+                setSelectedIncidentId={setSelectedIncidentId}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filterSeverity={filterSeverity}
+                setFilterSeverity={setFilterSeverity}
+                theme={theme}
+              />
+            </CollapsibleSidebar>
 
             {/* Tactical GPS map custom workspace */}
             <TacticalWorkspace
               activeIncident={activeIncident}
               theme={theme}
               currentTimeText={currentTimeText}
+              allIncidents={incidents}
             />
 
             {/* Live speech transcription and diagnostic panels */}
