@@ -7,7 +7,6 @@ import { MetricsHeader } from './components/MetricsHeader';
 import { ActiveIncidentsList } from './components/ActiveIncidentsList';
 import { TacticalWorkspace } from './components/TacticalWorkspace';
 import { LiveIntelligencePanel } from './components/LiveIntelligencePanel';
-import { TacticalFooter } from './components/TacticalFooter';
 import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { ReportsTab } from './components/ReportsTab';
 import { CollapsibleSidebar } from './components/CollapsibleSidebar';
@@ -241,33 +240,6 @@ export default function App() {
     setSimLogFeed(prev => [`[${currentTimeText}] Operator manual OVERRIDE registered on ${id}`, ...prev]);
   };
 
-  // Close Incident Event
-  const handleCloseIncidentAction = () => {
-    const id = activeIncident.id;
-    setResolvedCount(prev => prev + 1);
-    setIncidents(prev => prev.map(inc => {
-      if (inc.id === id) {
-        return {
-          ...inc,
-          severity: SeverityType.RESOLVED,
-          timeline: [...inc.timeline, { time: currentTimeText, event: `Incident officially CLOSED by operator.` }]
-        };
-      }
-      return inc;
-    }));
-    setSimLogFeed(prev => [`[${currentTimeText}] Incident ${id} marked as RESOLVED and archived.`, ...prev]);
-  };
-
-  // Ignore incident
-  const handleIgnoreAction = () => {
-    setSimLogFeed(prev => [`[${currentTimeText}] Incident ${activeIncident.id} ignore flag marked in session logs.`, ...prev]);
-  };
-
-  // Escalate case
-  const handleEscalateAction = () => {
-    setSimLogFeed(prev => [`[${currentTimeText}] Crisis level ESCALATION applied on ${activeIncident.id}. Notification forwarded to Supervisor.`, ...prev]);
-  };
-
   // Filter queue computed variables
   const filteredIncidents = incidents.filter(inc => {
     const matchesSearch = inc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -377,18 +349,6 @@ export default function App() {
         {currentTab === 'reports' && <ReportProvider><ReportsTab theme={theme} /></ReportProvider>}
 
       </main>
-
-      {/* 4. Bottom action command footer */}
-      {currentTab === 'dashboard' && (
-        <TacticalFooter
-          theme={theme}
-          onIgnore={handleIgnoreAction}
-          onCloseIncident={handleCloseIncidentAction}
-          onEscalate={handleEscalateAction}
-          onAcceptAndDispatch={() => handleDispatchAction(activeIncident.id, activeIncident.responder.name)}
-          dispatchStatus={activeIncident.status.dispatch || 'READY'}
-        />
-      )}
 
     </div>
   );
