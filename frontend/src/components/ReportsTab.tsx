@@ -19,13 +19,11 @@ export interface ReportsTabProps {
 export function ReportsTab(_props: ReportsTabProps) {
   const { showReport } = useReport();
   return <section className="flex w-full justify-center" data-component="ReportsTab" id="screen-reports" >
-    <ThemeProvider defaultTheme={_props.theme}>
-      <div id="report-panel-div" className="sm:basis-60 lg:basis-90 min-h-dvh">
-        <ReportPanel />
-      </div>
-      <div id="report-container-div" className="flex-1 overflow-y-auto max-h-screen">
-        {showReport && <ReportContainer report={showReport} />}
-      </div>
-    </ThemeProvider>
+    <div id="report-panel-div" className="sm:basis-60 lg:basis-90 min-h-dvh">
+      <ReportPanel />
+    </div>
+    <div id="report-container-div" className="flex-1 overflow-y-auto max-h-screen">
+      {showReport && <ReportContainer report={showReport} />}
+    </div>
   </section>;
 }

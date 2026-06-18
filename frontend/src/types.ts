@@ -4,7 +4,11 @@ export interface Incident {
   type: "medical" | "fire" | "crime" | "accident" | "flood";
   title: string;
   location: string;
-  severity: SeverityType.CRITICAL | SeverityType.URGENT | SeverityType.MODERATE | SeverityType.RESOLVED;
+  severity:
+    | SeverityType.CRITICAL
+    | SeverityType.URGENT
+    | SeverityType.MODERATE
+    | SeverityType.RESOLVED;
   priority: number;
   lang: string;
   occurDateTime: string;
@@ -47,10 +51,16 @@ export type ArchivedReport = ArchivedReportModel;
 
 export type Theme = "dark" | "light";
 
-export enum SeverityType{
+export enum SeverityType {
   ALL = "all",
   CRITICAL = "critical",
   URGENT = "urgent",
   MODERATE = "moderate",
   RESOLVED = "resolved",
+}
+
+export enum TabName {
+  DASHBOARD = "dashboard",
+  SIMULATION = "simulation",
+  REPORTS = "reports",
 }
