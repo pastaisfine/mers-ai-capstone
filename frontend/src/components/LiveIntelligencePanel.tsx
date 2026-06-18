@@ -1,26 +1,66 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Volume2, AlertCircle, Brain } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { type Incident } from '../types';
+import { SeverityType, type Incident } from '../types';
+import { useSimulator } from '@/context/simulator/useSimulator';
+import { useIncident } from '@/context/incident/useIncident';
+import { useTime } from '@/context/time/useTime';
 
 export interface LiveIntelligencePanelProps {
-  activeIncident: Incident;
   theme?: 'light' | 'dark';
-  onDispatch: (id: string, unitName: string) => void;
-  onOverride: (id: string) => void;
-  waveformHeights: number[];
 }
 
 export function LiveIntelligencePanel({
-  activeIncident,
   theme = 'light',
-  onDispatch,
-  onOverride,
-  waveformHeights,
 }: LiveIntelligencePanelProps) {
   const isDark = theme === 'dark';
+  const { isSimulating, setSimLogFeed } = useSimulator();
+  const { setIncidents, activeIncident } = useIncident();
+  const { currentTimeText } = useTime();
   const [activeTab, setActiveTab] = useState<'all' | 'feed' | 'triage' | 'sop'>('all');
-  
+  // Pulse voice waveform generator heights
+  const [waveformHeights, setWaveformHeights] = useState<number[]>([12, 24, 8, 16, 32, 10, 4, 18, 22, 14, 28, 6, 12, 20]);
+  useEffect(() => {
+    if (activeIncident.severity === SeverityType.CRITICAL || isSimulating) {
+      const pulseInterval = setInterval(() => {
+        setWaveformHeights(prev => prev.map(() => Math.floor(Math.random() * 26) + 4));
+      }, 150);
+      return () => clearInterval(pulseInterval);
+    }
+  }, [activeIncident, isSimulating]);
+
+  // Dispatch trigger handler
+  const onDispatch = (id: string, unitName: string) => {
+    setIncidents(prev => prev.map(inc => {
+      if (inc.id === id) {
+        return {
+          ...inc,
+          status: { ...inc.status, dispatch: 'DISPATCHED' },
+          responder: { ...inc.responder, status: 'DISPATCHED' },
+          timeline: [...inc.timeline, { time: currentTimeText, event: `Unit [${unitName}] dispatched to coordinates.` }]
+        };
+      }
+      return inc;
+    }));
+    setSimLogFeed(prev => [`[${currentTimeText}] Operator APPROVED dispatch of unit: ${unitName}`, ...prev]);
+  };
+
+  // Manual Override Severity
+  const onOverride = (id: string) => {
+    setIncidents(prev => prev.map(inc => {
+      if (inc.id === id) {
+        const nextSeverity = inc.severity === SeverityType.CRITICAL ? 'URGENT' : 'CRITICAL';
+        return {
+          ...inc,
+          severity: nextSeverity as any,
+          timeline: [...inc.timeline, { time: currentTimeText, event: `Operator manual override: Severity set to ${nextSeverity}.` }]
+        };
+      }
+      return inc;
+    }));
+    setSimLogFeed(prev => [`[${currentTimeText}] Operator manual OVERRIDE registered on ${id}`, ...prev]);
+  };
+
   return (
     <aside className={cn(
       "w-full lg:w-[380px] flex flex-col border-l shrink-0 h-[calc(100vh-64px)] z-10",
@@ -131,21 +171,21 @@ export function LiveIntelligencePanel({
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <p className={cn("text-xs leading-relaxed font-mono", isDark ? "text-gray-400" : "text-gray-600")}>
                 {activeIncident.reason}
               </p>
-              
+
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-black/10">
-                  <div>
-                    <div className="text-[10px] font-bold uppercase text-gray-500 mb-1">Distress Score</div>
-                    <div className="text-lg font-bold">{activeIncident.distressScore}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase text-gray-500 mb-1">Panic Level</div>
-                    <div className="text-lg font-bold">{activeIncident.panicLevel}</div>
-                  </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-gray-500 mb-1">Distress Score</div>
+                  <div className="text-lg font-bold">{activeIncident.distressScore}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-gray-500 mb-1">Panic Level</div>
+                  <div className="text-lg font-bold">{activeIncident.panicLevel}</div>
+                </div>
               </div>
 
               <div className="pt-4">
@@ -161,7 +201,7 @@ export function LiveIntelligencePanel({
                   ))}
                 </div>
               </div>
-              
+
               {activeIncident.contradiction && (
                 <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500 text-xs flex gap-3 font-mono text-amber-700 rounded-md">
                   <AlertCircle className="w-4 h-4 shrink-0" />
@@ -206,8 +246,8 @@ export function LiveIntelligencePanel({
       )}>
         <div className="flex items-center justify-between">
           <div>
-             <div className="font-bold text-sm uppercase">{activeIncident.responder?.name}</div>
-             <div className="text-xs text-gray-500 font-mono mt-1">{activeIncident.responder?.type} • ETA: {activeIncident.responder?.eta}</div>
+            <div className="font-bold text-sm uppercase">{activeIncident.responder?.name}</div>
+            <div className="text-xs text-gray-500 font-mono mt-1">{activeIncident.responder?.type} • ETA: {activeIncident.responder?.eta}</div>
           </div>
         </div>
         <div className="flex gap-4">

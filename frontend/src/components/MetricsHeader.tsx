@@ -8,6 +8,13 @@ import {
   SlidersHorizontal,
   Sun,
 } from 'lucide-react';
+import { useTime } from '@/context/time/useTime';
+import { useSimulator } from '@/context/simulator/useSimulator';
+import { useIncident } from '@/context/incident/useIncident';
+import { useMemo } from 'react';
+import { SeverityType, TabName } from '@/types';
+import { useTab } from '@/context/tab/useTab';
+import { useTheme } from '@/context/theme/useTheme';
 
 /**
  * Top navigation: branding, tab switcher (Dashboard / Simulation / Reports),
@@ -16,35 +23,32 @@ import {
  */
 
 export interface MetricsHeaderProps {
-  currentTab: 'dashboard' | 'simulation' | 'reports';
-  setCurrentTab: (tab: 'dashboard' | 'simulation' | 'reports') => void;
-  theme: 'dark' | 'light';
-  setTheme: (theme: 'dark' | 'light') => void;
-  activeCount: number;
-  criticalCount: number;
-  resolvedCount: number;
-  currentTimeText: string;
-  isSimulating: boolean;
+
 }
 
-const tabs = [
-  { id: 'dashboard', label: 'OP-Desk', icon: LayoutDashboard },
-  { id: 'simulation', label: 'Simulator', icon: SlidersHorizontal },
-  { id: 'reports', label: 'Reports', icon: FileText },
+const tabs: {
+  id: TabName;
+  label: string;
+  icon: typeof LayoutDashboard | typeof SlidersHorizontal | typeof FileText;
+}[] = [
+  { id: TabName.DASHBOARD, label: 'OP-Desk', icon: LayoutDashboard },
+  { id: TabName.SIMULATION, label: 'Simulator', icon: SlidersHorizontal },
+  { id: TabName.REPORTS, label: 'Reports', icon: FileText },
 ] as const;
 
 export function MetricsHeader({
-  currentTab,
-  setCurrentTab,
-  theme,
-  setTheme,
-  activeCount,
-  criticalCount,
-  resolvedCount,
-  currentTimeText,
-  isSimulating,
 }: MetricsHeaderProps) {
+  const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+
+  const { currentTimeText } = useTime();
+  const { isSimulating } = useSimulator();
+  const { incidents } = useIncident();
+  const { currentTab, setCurrentTab } = useTab();
+
+  const activeCount = useMemo(() => incidents.filter(i => i.severity !== SeverityType.RESOLVED).length, [incidents])
+  const criticalCount = useMemo(() => incidents.filter(i => i.severity === SeverityType.CRITICAL).length, [incidents])
+  const resolvedCount = useMemo(() => incidents.filter(i => i.severity === SeverityType.RESOLVED).length, [incidents])
 
   const tabClass = (tab: typeof currentTab) =>
     currentTab === tab
@@ -56,9 +60,8 @@ export function MetricsHeader({
   return (
     <header
       data-component="MetricsHeader"
-      className={`flex h-[56px] shrink-0 items-center justify-between gap-4 border-b px-5 ${
-        isDark ? 'border-[#141b29] bg-[#070a0f] text-white' : 'border-slate-200 bg-[#f8fafc] text-[#07142b]'
-      }`}
+      className={`flex h-[56px] shrink-0 items-center justify-between gap-4 border-b px-5 ${isDark ? 'border-[#141b29] bg-[#070a0f] text-white' : 'border-slate-200 bg-[#f8fafc] text-[#07142b]'
+        }`}
     >
       <div className="flex min-w-[420px] items-center gap-4">
         <h1 className="text-[22px] font-black uppercase leading-none tracking-normal">
@@ -68,9 +71,8 @@ export function MetricsHeader({
         </h1>
 
         <div
-          className={`flex h-[28px] items-center gap-2 rounded-full border px-4 ${
-            isDark ? 'border-emerald-400/20 bg-emerald-400/10' : 'border-emerald-200 bg-emerald-50'
-          }`}
+          className={`flex h-[28px] items-center gap-2 rounded-full border px-4 ${isDark ? 'border-emerald-400/20 bg-emerald-400/10' : 'border-emerald-200 bg-emerald-50'
+            }`}
         >
           <span className="h-[7px] w-[7px] rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
           <span className={`text-[11px] font-extrabold uppercase tracking-normal ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
@@ -85,9 +87,8 @@ export function MetricsHeader({
 
       <div className="flex min-w-0 flex-1 items-center justify-center gap-4">
         <nav
-          className={`grid h-[32px] grid-cols-3 gap-1 rounded-lg border p-[3px] ${
-            isDark ? 'border-[#1f293b] bg-[#0d1320]' : 'border-[#17233a] bg-white'
-          }`}
+          className={`grid h-[32px] grid-cols-3 gap-1 rounded-lg border p-[3px] ${isDark ? 'border-[#1f293b] bg-[#0d1320]' : 'border-[#17233a] bg-white'
+            }`}
           aria-label="Primary navigation"
         >
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -105,9 +106,8 @@ export function MetricsHeader({
         </nav>
 
         <div
-          className={`flex h-[32px] items-center gap-3 rounded-lg border px-4 font-mono text-[10px] font-extrabold uppercase ${
-            isDark ? 'border-[#1f293b] bg-[#0d1320]' : 'border-slate-300 bg-white'
-          }`}
+          className={`flex h-[32px] items-center gap-3 rounded-lg border px-4 font-mono text-[10px] font-extrabold uppercase ${isDark ? 'border-[#1f293b] bg-[#0d1320]' : 'border-slate-300 bg-white'
+            }`}
         >
           <div className="flex items-center gap-2">
             <span className={isDark ? 'text-[#9aa7bd]' : 'text-[#5e6f8e]'}>Active</span>
@@ -144,13 +144,12 @@ export function MetricsHeader({
       <div className="flex min-w-[190px] items-center justify-end gap-4">
         <button
           type="button"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => toggleTheme()}
           aria-label="Toggle theme"
-          className={`flex h-[34px] w-[34px] items-center justify-center rounded-lg border transition-colors ${
-            isDark
-              ? 'border-[#1f293b] bg-[#0d1320] text-yellow-400 hover:bg-white/10'
-              : 'border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-100'
-          }`}
+          className={`flex h-[34px] w-[34px] items-center justify-center rounded-lg border transition-colors ${isDark
+            ? 'border-[#1f293b] bg-[#0d1320] text-yellow-400 hover:bg-white/10'
+            : 'border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-100'
+            }`}
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
