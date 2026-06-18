@@ -18,7 +18,7 @@ export function PrimaryScreen() {
 
         {/* OP-DESK TAB SCREEN */}
         {currentTab === 'dashboard' && (
-            <ResizablePanelGroup direction="horizontal" className="flex-1 w-full overflow-hidden">
+            <ResizablePanelGroup orientation="horizontal" className="flex-1 w-full overflow-hidden">
                 <ResizablePanel defaultSize={70} className="flex flex-col lg:flex-row h-full">
                     {/* Sidebar Active Queue */}
                     <CollapsibleSidebar isDark={isDark}>
@@ -36,9 +36,11 @@ export function PrimaryScreen() {
                 <ResizableHandle withHandle className={isDark ? "bg-[#2D334A]" : "bg-slate-200"} />
 
                 {/* Live speech transcription and diagnostic panels */}
-                <LiveIntelligencePanel
-                    theme={theme}
-                />
+                <ResizablePanel defaultSize={30}>
+                    <LiveIntelligencePanel
+                        theme={theme}
+                    />
+                </ResizablePanel>
             </ResizablePanelGroup>
         )}
 

@@ -72,8 +72,8 @@ export function LiveIntelligencePanel({
 
   return (
     <aside className={cn(
-      "flex-1 flex flex-col border-l shrink-0 h-[calc(100vh-64px)] z-10 transition-all duration-200",
-      isDark ? 'bg-[#0B0D12] border-[#2D334A] text-white dark' : 'bg-white border-slate-200 text-slate-900'
+      "h-full w-full flex flex-col z-10",
+      isDark ? 'bg-[#0B0D12] text-white dark' : 'bg-white text-slate-900'
     )}>
       {/* Header */}
       <div className={cn(
@@ -122,7 +122,7 @@ export function LiveIntelligencePanel({
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
               isDark 
               ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-green-400 data-[state=active]:text-white")}>
+              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
               SOP
             </TabsTrigger>
           </TabsList>
@@ -227,7 +227,7 @@ export function LiveIntelligencePanel({
                       {activeIncident.confidence}%
                     </span>
                   </div>
-                  <Progress value={activeIncident.confidence} className="h-1.5 [&_[data-slot=progress-indicator]]:bg-red-500" />
+                  <Progress value={activeIncident.confidence} className="h-1.5 **:data-[slot=progress-indicator]:bg-red-500" />
                 </div>
               </div>
 
