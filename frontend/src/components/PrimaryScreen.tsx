@@ -7,6 +7,7 @@ import { LiveIntelligencePanel } from './LiveIntelligencePanel';
 import { ScenarioSimulator } from './ScenarioSimulator';
 import { ReportProvider } from '@/context/report/ReportProvider';
 import { ReportsTab } from './ReportsTab';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 export function PrimaryScreen() {
     const { currentTab } = useTab();
@@ -17,26 +18,28 @@ export function PrimaryScreen() {
 
         {/* OP-DESK TAB SCREEN */}
         {currentTab === 'dashboard' && (
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <ResizablePanelGroup direction="horizontal" className="flex-1 w-full overflow-hidden">
+                <ResizablePanel defaultSize={70} className="flex flex-col lg:flex-row h-full">
+                    {/* Sidebar Active Queue */}
+                    <CollapsibleSidebar isDark={isDark}>
+                        <ActiveIncidentsList
+                            theme={theme}
+                        />
+                    </CollapsibleSidebar>
 
-                {/* Sidebar Active Queue */}
-                <CollapsibleSidebar isDark={isDark}>
-                    <ActiveIncidentsList
+                    {/* Tactical GPS map custom workspace */}
+                    <TacticalWorkspace
                         theme={theme}
                     />
-                </CollapsibleSidebar>
+                </ResizablePanel>
 
-                {/* Tactical GPS map custom workspace */}
-                <TacticalWorkspace
-                    theme={theme}
-                />
+                <ResizableHandle withHandle className={isDark ? "bg-[#2D334A]" : "bg-slate-200"} />
 
                 {/* Live speech transcription and diagnostic panels */}
                 <LiveIntelligencePanel
                     theme={theme}
                 />
-
-            </div>
+            </ResizablePanelGroup>
         )}
 
         {/* SIMULATOR SCREEN TAB */}
