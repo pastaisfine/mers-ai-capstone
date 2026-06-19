@@ -104,10 +104,10 @@ export default function AuthPage() {
 
           <CardHeader className="pt-8 pb-4 text-center">
             <CardTitle className="text-lg font-semibold tracking-wide text-slate-100 uppercase">
-              {isSignUp ? 'Create Operator Profile' : 'Operator Authentication'}
+              {isSignUp ? 'Create Dispatcher Profile' : 'Dispatcher LOG IN'}
             </CardTitle>
             <CardDescription className="text-xs text-slate-400 font-mono">
-              {isSignUp ? 'Sign up to register a new dispatcher console' : 'Enter your credential codes to decrypt system access'}
+              {isSignUp ? 'Sign up to register a new dispatcher console' : 'Enter your email and password to login'}
             </CardDescription>
           </CardHeader>
 
@@ -167,7 +167,7 @@ export default function AuthPage() {
                   <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    {isSignUp ? 'Decrypt & Initialize Account' : 'Decrypt Console Access'}
+                    {isSignUp ? 'Create Profile' : 'Log in'}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -187,22 +187,13 @@ export default function AuthPage() {
             >
               {isSignUp 
                 ? 'Already registered? Return to Authentication Screen' 
-                : 'New Dispatcher? Request console creation credentials'}
+                : 'New Dispatcher? Request New Profile'}
             </button>
             <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mt-1">
               AUTHORIZED PERSONNEL ONLY // UNLAWFUL ACCESS PROHIBITED
             </div>
           </CardFooter>
         </Card>
-        
-        {/* Footer info stats */}
-        <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 px-1">
-          <div>SSL: AES_256_GCM</div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            SYS-STATUS: NOMINAL
-          </div>
-        </div>
       </div>
     </div>
   );

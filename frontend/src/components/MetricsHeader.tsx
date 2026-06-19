@@ -173,7 +173,7 @@ export function MetricsHeader({
                 {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'OP-KHALID'}
               </div>
               <div className={`mt-1 font-mono text-[8px] font-normal uppercase tracking-[0.2em] ${isDark ? 'text-[#8fa0bb]' : 'text-[#6f7f98]'}`}>
-                {user?.email === 'operator@999.gov.my' ? 'Shift A Team' : 'DISPATCH UNIT'}
+                DISPATCH UNIT
               </div>
             </div>
           </div>
