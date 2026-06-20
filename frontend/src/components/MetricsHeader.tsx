@@ -7,6 +7,7 @@ import {
   Moon,
   SlidersHorizontal,
   Sun,
+  LogOut,
 } from 'lucide-react';
 import { useTime } from '@/context/time/useTime';
 import { useSimulator } from '@/context/simulator/useSimulator';
@@ -15,6 +16,7 @@ import { useMemo } from 'react';
 import { SeverityType, TabName } from '@/types';
 import { useTab } from '@/context/tab/useTab';
 import { useTheme } from '@/context/theme/useTheme';
+import { useAuth } from '@/context/auth/useAuth';
 
 /**
  * Top navigation: branding, tab switcher (Dashboard / Simulation / Reports),
@@ -39,6 +41,7 @@ const tabs: {
 export function MetricsHeader({
 }: MetricsHeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
   const isDark = theme === 'dark';
 
   const { currentTimeText } = useTime();
@@ -157,21 +160,37 @@ export function MetricsHeader({
         <div className={`h-8 w-px ${isDark ? 'bg-[#253044]' : 'bg-slate-400'}`} />
 
         <div className="flex items-center gap-3">
-          <Image
-            src="/op-khalid-avatar.png"
-            alt="OP-Khalid"
-            width={32}
-            height={32}
-            className="h-8 w-8 rounded-full border-2 border-[#ef3347] object-cover"
-          />
-          <div className="leading-none">
-            <div className={`text-[12px] font-black uppercase tracking-normal ${isDark ? 'text-white' : 'text-[#07142b]'}`}>
-              OP-KHALID
-            </div>
-            <div className={`mt-1 font-mono text-[8px] font-normal uppercase tracking-[0.2em] ${isDark ? 'text-[#8fa0bb]' : 'text-[#6f7f98]'}`}>
-              Shift A Team
+          <div className="flex items-center gap-2">
+            <Image
+              src="/op-khalid-avatar.png"
+              alt="Operator Avatar"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full border-2 border-[#ef3347] object-cover"
+            />
+            <div className="leading-none text-left">
+              <div className={`text-[11px] font-black uppercase tracking-normal ${isDark ? 'text-white' : 'text-[#07142b]'}`}>
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'OP-KHALID'}
+              </div>
+              <div className={`mt-1 font-mono text-[8px] font-normal uppercase tracking-[0.2em] ${isDark ? 'text-[#8fa0bb]' : 'text-[#6f7f98]'}`}>
+                DISPATCH UNIT
+              </div>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => signOut()}
+            aria-label="Sign out"
+            title="Sign out of console"
+            className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+              isDark
+                ? 'border-[#1f293b] bg-[#0d1320] text-slate-400 hover:bg-red-950/20 hover:border-red-500/30 hover:text-red-400'
+                : 'border-slate-200 bg-white text-slate-500 shadow-sm hover:bg-red-50 hover:border-red-200 hover:text-red-600'
+            }`}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
     </header>

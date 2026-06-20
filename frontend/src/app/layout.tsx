@@ -1,16 +1,18 @@
 import type { Metadata } from 'next';
+import { AuthProvider } from '@/context/auth/AuthProvider';
 import './globals.css';
 
-export const metadata: Metadata = {
+// / A helper type from Next.js to configure search engine optimization (SEO) details.
+export const metadata: Metadata = { 
   title: 'MERS-AI — Malaysia 999 Unified Op-Center',
   description:
     'AI-powered 999 emergency dispatch assistant built for Malaysia. Professional real-time tactical dashboard and simulator.',
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
+  children, // 1. Take the nested page content...
+}: Readonly<{ // 2. Promise TypeScript we will not modify this input object...
+  children: React.ReactNode; // 3. And expect the nested content to be renderable React elements.
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -27,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#0D0F14] text-[#F0F2F8] font-sans antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
