@@ -101,28 +101,28 @@ export function LiveIntelligencePanel({
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
               isDark 
               ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              : "data-[state=active]:bg-red-600 data-[state=active]:text-white")}>
               All
             </TabsTrigger>
             <TabsTrigger value="feed" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
               isDark 
               ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              : "data-[state=active]:bg-red-600 data-[state=active]:text-white")}>
               Feed
             </TabsTrigger>
             <TabsTrigger value="triage" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
               isDark 
               ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              : "data-[state=active]:bg-red-600 data-[state=active]:text-white")}>
               Triage
             </TabsTrigger>
             <TabsTrigger value="sop" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
               isDark 
               ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              : "data-[state=active]:bg-red-600 data-[state=active]:text-white")}>
               SOP
             </TabsTrigger>
           </TabsList>

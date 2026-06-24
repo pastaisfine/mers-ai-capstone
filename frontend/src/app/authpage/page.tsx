@@ -72,6 +72,19 @@ export default function AuthPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  })
+
+  if (error) {
+    console.error(error)
+  }
+}
+
   return (
     <div className="relative min-h-screen bg-[#070A0F] text-[#F0F2F8] flex items-center justify-center p-4 overflow-hidden">
       <div className="w-full max-w-md relative z-10 space-y-6">
@@ -157,21 +170,31 @@ export default function AuthPage() {
                   className="w-full bg-slate-950/60 border border-[#1E293B] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 rounded-lg py-2 px-3 transition-all text-slate-100 placeholder-slate-600 font-mono text-sm outline-none"
                 />
               </div>
+              <div className="flex flex-col items-center gap-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold border-none h-10 shadow-lg shadow-emerald-500/20 gap-1.5 transition-all text-sm"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      {isSignUp ? "Create Profile" : "Log in"}
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
 
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold border-none h-10 shadow-lg shadow-emerald-500/20 gap-1.5 transition-all text-sm"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <>
-                    {isSignUp ? 'Create Profile' : 'Log in'}
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
+                <Button
+                  onClick={signInWithGoogle}
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold border-none h-10 shadow-lg shadow-emerald-500/20 transition-all text-sm"
+                >
+                  Sign in with Google
+                </Button>
+              </div>
+
             </form>
           </CardContent>
 
