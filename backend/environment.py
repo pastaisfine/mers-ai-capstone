@@ -5,3 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("POSTGRES_CONNECTION_STRING")
+NGROK_URL = os.getenv("NGROK_URL", "")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN=os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER=os.getenv("TWILIO_PHONE_NUMBER")
+MY_PHONE_NUMBER=os.getenv("MY_PHONE_NUMBER")
+RETELL_API_KEY=os.getenv("RETELL_API_KEY")
