@@ -9,9 +9,11 @@ from retell_module import retell_client
 
 @app.post("/voice")
 async def twilio_webhook(req: Request, res: Response):
+    body = req.values
+    print(body)
     phone_call_response = retell_client.call.register_phone_call(
         agent_id=RETELL_AGENT_ID,
-        from_number=req.body()["From"],
+        from_number=body["From"],
         to_number=TWILIO_PHONE_NUMBER,
         direction="inbound"
     )
