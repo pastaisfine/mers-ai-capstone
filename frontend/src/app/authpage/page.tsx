@@ -6,7 +6,8 @@ import { useAuth } from '@/context/auth/useAuth';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, KeyRound, Mail, Radio, AlertCircle, ArrowRight, Activity } from 'lucide-react';
+import { Shield, Sun, Moon, KeyRound, Mail, Radio, AlertCircle, ArrowRight, Activity } from 'lucide-react';
+import { FcGoogle } from "react-icons/fc";
 
 export default function AuthPage() {
   const [isDark, setIsDark] = useState(false);
@@ -98,7 +99,9 @@ export default function AuthPage() {
             : 'bg-white/80 border-slate-300 text-indigo-600 hover:bg-slate-100 shadow-sm'
         }`}
         aria-label="Toggle Theme"
-      ></button>
+      >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
       <div className="w-full max-w-md relative z-10 space-y-6">
         
         {/* Terminal Header Info */}
@@ -239,8 +242,9 @@ export default function AuthPage() {
                 <Button
                   onClick={signInWithGoogle}
                   disabled={loading}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold border-none h-10 shadow-lg shadow-emerald-500/20 transition-all text-sm"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-950 font-bold border-none h-10 shadow-lg shadow-emerald-500/20 transition-all text-sm"
                 >
+                  <FcGoogle className="w-5 h-5" />
                   Sign in with Google
                 </Button>
               </div>
