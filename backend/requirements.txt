@@ -6,3 +6,9 @@ alembic
 twilio
 websockets
 retell-sdk
+transformers
+librosa
+torch
+
+numpy
+pydantic

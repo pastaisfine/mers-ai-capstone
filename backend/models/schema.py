@@ -1,4 +1,5 @@
-from sqlalchemy import null
+from datetime import datetime
+
 from sqlalchemy import Column, String, Integer, Float, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 from sqlalchemy.orm import declarative_base
@@ -8,7 +9,12 @@ from models.enum.index import IncidentType
 Base = declarative_base()
 # --- Models ---
 
-class Dispatcher(Base):
+class BaseTable(Base):
+    __abstract__ = True
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+class Dispatcher(BaseTable):
     __tablename__ = "dispatchers"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -18,29 +24,38 @@ class Dispatcher(Base):
     status = Column(String, nullable=False)
 
 
-class Incident(Base):
+class Incident(BaseTable):
     __tablename__ = "incidents"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
-    type = Column(Enum(IncidentType), nullable=False)
+    type = Column(Enum(IncidentType), nullable=True)
+    coordinates = Column(ARRAY(Float), nullable=True)
+    title= Column(String, nullable=False)
+    location = Column(String, nullable=True)
+    ai_confidence = Column(Float, nullable=True)
+    ai_summary = Column(String, nullable=True)
     dispatcher_id = Column(UUID(as_uuid=True), ForeignKey("dispatchers.id"), nullable=True)
-    created_at = Column(DateTime, nullable=False)
     resolved_at = Column(DateTime, nullable=True)
 
+class IncidentLog(BaseTable):
+    __tablename__ = "incident_logs"
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    incident_id = Column(UUID(as_uuid=True), ForeignKey("incidents.id"), nullable=False)
+    payload = Column(JSONB, nullable=False)
 
-class Call(Base):
+class Call(BaseTable):
     __tablename__ = "calls"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     incident_id = Column(UUID(as_uuid=True), ForeignKey("incidents.id"), nullable=False)
     caller_number = Column(String, nullable=False)
-    transcript = Column(Text, nullable=True)
+    caller_name = Column(String, nullable=True)
     audio_url = Column(String, nullable=True)
     received_at = Column(DateTime, nullable=False)
     lang = Column(String, nullable=True)
 
 
-class CallTranscript(Base):
+class CallTranscript(BaseTable):
     __tablename__ = "call_transcripts"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -51,7 +66,7 @@ class CallTranscript(Base):
     seq = Column(Integer, nullable=False)
 
 
-class AITriageAssessment(Base):
+class AITriageAssessment(BaseTable):
     __tablename__ = "ai_triage_assessments"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -59,19 +74,17 @@ class AITriageAssessment(Base):
     severity_score = Column(Integer, nullable=False)
     priority_level = Column(String, nullable=False)
     confidence = Column(Float, nullable=False)
-    created_at = Column(DateTime, nullable=False)
 
 
-class AIEmotionAnalysis(Base):
+class AIEmotionAnalysis(BaseTable):
     __tablename__ = "ai_emotion_analyses"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     emotion_embeddings = Column(ARRAY(Float), nullable=False)
-    created_at = Column(DateTime, nullable=False)
 
 
-class Hospital(Base):
+class Hospital(BaseTable):
     __tablename__ = "hospitals"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -83,7 +96,7 @@ class Hospital(Base):
     specializations = Column(JSONB, nullable=True)
 
 
-class AIDispatchRecommendation(Base):
+class AIDispatchRecommendation(BaseTable):
     __tablename__ = "ai_dispatch_recommendations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -92,10 +105,9 @@ class AIDispatchRecommendation(Base):
     status = Column(String, nullable=False)
     recommended_unit_ids = Column(JSONB, nullable=False)
     recommended_hospital_id = Column(UUID(as_uuid=True), ForeignKey("hospitals.id"), nullable=True)
-    created_at = Column(DateTime, nullable=False)
 
 
-class DispatcherAction(Base):
+class DispatcherAction(BaseTable):
     __tablename__ = "dispatcher_actions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -104,11 +116,10 @@ class DispatcherAction(Base):
     recommendation_id = Column(UUID(as_uuid=True), ForeignKey("ai_dispatch_recommendations.id"), nullable=False)
     action_type = Column(String, nullable=False)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, nullable=False)
     age = Column(String, nullable=False)
 
 
-class ResponseUnit(Base):
+class ResponseUnit(BaseTable):
     __tablename__ = "response_units"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -117,10 +128,9 @@ class ResponseUnit(Base):
     status = Column(String, nullable=False)
     lat = Column(Float, nullable=False)
     lng = Column(Float, nullable=False)
-    last_updated = Column(DateTime, nullable=False)
 
 
-class Dispatch(Base):
+class Dispatch(BaseTable):
     __tablename__ = "dispatches"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
@@ -142,4 +152,3 @@ class HospitalCapacity(Base):
     available_beds = Column(Integer, nullable=False)
     icu_beds = Column(Integer, nullable=False)
     er_status = Column(String, nullable=False)
-    updated_at = Column(DateTime, nullable=False)

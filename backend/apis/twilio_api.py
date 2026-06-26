@@ -1,29 +1,49 @@
+from models.dto.webhook import TwilioWebhookRequest
+from datetime import datetime
+
 from twilio.twiml.voice_response import VoiceResponse, Connect, Dial
 
 from environment import RETELL_AGENT_ID, TWILIO_PHONE_NUMBER
-from main import app
-from fastapi import Request, Response
+from main import app, db_dependency
+from fastapi import Request, Form, Response
 
+from models.call import InitCallPayload
+from models.incident import InitIncidentPayload
+from modules import call_module, db_module, incident_module
 from retell_module import retell_client
 
 
 @app.post("/voice")
-async def twilio_webhook(req: Request, res: Response):
-    body = req.values
-    print(body)
+async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...),):
+    caller_number = From
+    print(caller_number)
     phone_call_response = retell_client.call.register_phone_call(
         agent_id=RETELL_AGENT_ID,
-        from_number=body["From"],
+        from_number=caller_number,
         to_number=TWILIO_PHONE_NUMBER,
         direction="inbound"
     )
+    print("What is happening~~~")
     response = VoiceResponse()
     dial = Dial()
     dial.sip(f"sip:{phone_call_response.call_id}@sip.retellai.com")
     response.append(dial)
     connect = Connect()
-    connect.stream(url=f"wss://{req.headers.get("host")}/media-stream")
+    connect.stream(url=f"wss://{req.headers.get('host')}/media-stream")
     response.append(connect)
+    # create incident
+    print("creating incident now...")
+
+    def _execute_single_transaction():
+        init_incident_payload = InitIncidentPayload(title="DRAFT INCIDENT")
+        new_incident = incident_module.init_incident(init_incident_payload, db)
+        init_call_payload = InitCallPayload(received_at=datetime.now(), caller_number=caller_number, incident_id=new_incident.id)
+        call_module.init_call(init_call_payload, db)
+
+
+    db_module.execute_table_operation(db, db_execute_operation=_execute_single_transaction)
+    print("response say start")
     # Uncomment for testing
     response.say("Hello! This is your AI voice agent. Let me connect you.")
-    return response.to_xml()
+    print("response say end")
+    return Response(content=str(response), media_type="text/xml")
