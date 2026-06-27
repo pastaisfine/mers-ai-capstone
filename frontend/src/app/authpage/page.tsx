@@ -273,6 +273,12 @@ export default function AuthPage() {
             <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mt-1">
               AUTHORIZED PERSONNEL ONLY // UNLAWFUL ACCESS PROHIBITED
             </div>
+           <Button asChild>
+            <a href="/landing" className='underline'>
+              Back to Home
+              <ArrowRight size={16} />
+            </a>
+          </Button>
           </CardFooter>
         </Card>
       </div>
