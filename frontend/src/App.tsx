@@ -15,7 +15,7 @@ export default function App() {
       <ThemeProvider defaultTheme='light'>
         <IncidentProvider>
           <SimulatorProvider>
-            <TabProvider defaultTab={TabName.DASHBOARD}>
+            <TabProvider defaultTab={TabName.OPERATIONS}>
               <TabLayout />
             </TabProvider>
           </SimulatorProvider>

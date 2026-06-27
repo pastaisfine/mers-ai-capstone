@@ -1,4 +1,5 @@
 import { useTheme } from '@/context/theme/useTheme';
+import { useTime } from '@/context/time/useTime';
 import { Incident, SeverityType } from '@/types';
 import { Clock, MapPin } from 'lucide-react';
 import { useMemo } from 'react';
@@ -14,6 +15,7 @@ export function IncidentHeader({ activeIncident }: {
     activeIncident: Incident;
 }) {
     const { theme } = useTheme();
+    const { currentTimeText } = useTime();
     const isDark = useMemo(() => theme === 'dark', [theme]);
     const sev = SEVERITY_COLORS[activeIncident.severity];
 
