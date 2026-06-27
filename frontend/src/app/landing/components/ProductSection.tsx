@@ -35,7 +35,7 @@ export default function ProductSection() {
   return (
     <section
       id="product"
-      className="py-24 relative bg-[oklch(0.08_0.01_160)]"
+      className="py-24 relative bg-[oklch(0.08_0.01_160)] overflow-hidden"
     >
       {/* Background glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[400px] opacity-[0.05] pointer-events-none bg-[radial-gradient(ellipse,oklch(0.67_0.19_162)_0%,transparent_70%)] blur-[60px]" />

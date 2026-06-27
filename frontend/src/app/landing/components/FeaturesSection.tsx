@@ -82,7 +82,7 @@ export default function FeaturesSection() {
   return (
     <section
       id="features"
-      className="py-24 relative bg-[oklch(0.08_0.01_160)]"
+      className="py-24 relative bg-[oklch(0.08_0.01_160)] overflow-hidden"
     >
       {/* Emerald glow blob */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] opacity-[0.06] pointer-events-none bg-[radial-gradient(ellipse,oklch(0.67_0.19_162)_0%,transparent_70%)] blur-[40px]" />

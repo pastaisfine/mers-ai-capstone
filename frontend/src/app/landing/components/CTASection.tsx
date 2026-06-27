@@ -27,7 +27,7 @@ export default function CTASection() {
   return (
     <section
       id="signup"
-      className="py-24 relative bg-background"
+      className="py-24 relative bg-background overflow-hidden"
     >
       <div className="container" ref={ref}>
         <div

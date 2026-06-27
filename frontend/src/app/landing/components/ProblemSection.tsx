@@ -54,7 +54,7 @@ export default function ProblemSection() {
   return (
     <section
       id="problem"
-      className="py-24 relative bg-background"
+      className="py-24 relative bg-background overflow-hidden"
     >
       {/* Subtle grid texture */}
       <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(oklch(1_0_0)_1px,transparent_1px),linear-gradient(90deg,oklch(1_0_0)_1px,transparent_1px)] bg-[size:48px_48px]" />

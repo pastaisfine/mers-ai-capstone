@@ -54,7 +54,7 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-24 relative bg-background"
+      className="py-24 relative bg-background overflow-hidden"
     >
       <div className="container" ref={ref}>
         {/* Header */}
