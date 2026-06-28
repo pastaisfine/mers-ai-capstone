@@ -1,4 +1,5 @@
 import { useTab } from '@/context/tab/useTab';
+import { TabName } from '@/types';
 import { useTheme } from '@/context/theme/useTheme';
 import { CollapsibleSidebar } from './CollapsibleSidebar';
 import { ActiveIncidentsList } from './ActiveIncidentsList';
@@ -17,7 +18,7 @@ export function PrimaryScreen() {
     return <main className="flex-1 flex overflow-hidden">
 
         {/* OP-DESK TAB SCREEN */}
-        {currentTab === 'dashboard' && (
+        {currentTab === TabName.OPERATIONS && (
             <ResizablePanelGroup orientation="horizontal" className="flex-1 w-full overflow-hidden">
                 <ResizablePanel defaultSize={70} className="flex flex-col lg:flex-row h-full">
                     {/* Sidebar Active Queue */}
@@ -45,11 +46,11 @@ export function PrimaryScreen() {
         )}
 
         {/* SIMULATOR SCREEN TAB */}
-        {currentTab === 'simulation' && (
+        {currentTab === TabName.SIMULATION && (
             <ScenarioSimulator />
         )}
 
-        {currentTab === 'reports' && <ReportProvider><ReportsTab theme={theme} /></ReportProvider>}
+        {currentTab === TabName.HISTORY && <ReportProvider><ReportsTab theme={theme} /></ReportProvider>}
 
     </main>
 }

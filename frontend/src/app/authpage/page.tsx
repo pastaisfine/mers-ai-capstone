@@ -24,7 +24,7 @@ export default function AuthPage() {
   // If already logged in, redirect to dashboard
   useEffect(() => {
     if (user) {
-      router.replace('/primary');
+      router.replace('/dashboard');
     }
   }, [user, router]);
 
