@@ -11,6 +11,8 @@ export function DashboardTab() {
       <div className="mx-auto flex max-w-7xl flex-col gap-4">
         <StatCards />
 
+        <CasesOverviewChart />
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
           <div className="lg:col-span-3">
             <RecentActivity />
@@ -19,8 +21,6 @@ export function DashboardTab() {
             <StaffPanel />
           </div>
         </div>
-
-        <CasesOverviewChart />
       </div>
     </div>
   )

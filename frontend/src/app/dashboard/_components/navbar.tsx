@@ -69,7 +69,7 @@ export function Navbar() {
               <TabsTrigger
                 key={id}
                 value={id}
-                className="gap-1.5 rounded-full px-3 text-xs font-semibold uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground  dark:data-[state=active]:text-primary-foreground text-white"
+                className="gap-1.5 rounded-full px-3 text-xs font-semibold uppercase data-[state=active]:bg-secondary data-[state=active]:text-primary-foreground  dark:data-[state=active]:text-primary-foreground text-white"
               >
                 <Icon className="size-3.5" />
                 {label}
@@ -98,7 +98,7 @@ export function Navbar() {
           )}
         </div> */}
 
-        <Badge variant="secondary" className="gap-1.5 p-3 text-white animate-pulse font-mono text-md font-bold">
+        <Badge variant="secondary" className="gap-1.5 p-3 text-white animate-pulse font-mono text-[14px] font-semibold bg-red-400">
           <span className="size-2 rounded-full bg-white" />
           SYSTEM OPERATIONAL
         </Badge>
