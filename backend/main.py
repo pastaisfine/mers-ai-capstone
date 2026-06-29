@@ -3,13 +3,18 @@ from typing import Annotated
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
+from constants.queue import EMOTION_ANALYSIS_QUEUE
 from database import engine, SessionLocal
-# from database import db_setup, db_dependency
-from models.schema import Dispatcher
-import uuid
 import models.schema as models
+from modules.pika_module import PikaPublisher
 
-app = FastAPI()
+
+class MersAIBackendApp(FastAPI):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pika_emotion_analyse_publisher = PikaPublisher(EMOTION_ANALYSIS_QUEUE)
+        
+app = MersAIBackendApp()
 def db_setup():
     models.Base.metadata.create_all(engine)
 
@@ -23,10 +28,8 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-@app.get("/")
-async def read_root(db: db_dependency):
-    new_dispatcher = Dispatcher(id=uuid.uuid4(), user_id=uuid.uuid4(), name="Testing123", status="Test", badge_number="abc123")
-    db.add(new_dispatcher)
-    db.commit()
-    db.refresh(new_dispatcher)
-    return
+
+
+import apis.incidents
+import websocket
+import apis.twilio_api
