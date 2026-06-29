@@ -47,7 +47,7 @@ class Call(BaseTable):
     __tablename__ = "calls"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
-    provider_sid = Column(String, nullable=False)
+    provider_sid = Column(String, nullable=True)
     incident_id = Column(UUID(as_uuid=True), ForeignKey("incidents.id"), nullable=False)
     caller_number = Column(String, nullable=False)
     caller_name = Column(String, nullable=True)

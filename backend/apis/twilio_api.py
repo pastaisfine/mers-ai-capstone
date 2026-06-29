@@ -22,7 +22,6 @@ async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...),
         to_number=TWILIO_PHONE_NUMBER,
         direction="inbound"
     )
-    print("What is happening~~~")
     response = VoiceResponse()
     dial = Dial()
     dial.sip(f"sip:{phone_call_response.call_id}@sip.retellai.com")
@@ -41,8 +40,7 @@ async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...),
 
 
     db_module.execute_table_operation(db, db_execute_operation=_execute_single_transaction)
-    print("response say start")
     # Uncomment for testing
-    response.say("Hello! This is your AI voice agent. Let me connect you.")
-    print("response say end")
+    # response.say("Hello! This is your AI voice agent. Let me connect you.")
+
     return Response(content=str(response), media_type="text/xml")

@@ -15,3 +15,4 @@ pydantic
 supabase
 pika
 aio_pika
+redis[hiredis]
