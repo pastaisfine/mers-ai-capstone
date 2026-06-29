@@ -14,7 +14,7 @@ from database import SessionLocal, engine
 from ml_models import audio_classification_model
 from models.database.ai_emotion_analysis import InitAiEmotionAnalysisPayload
 from models.redis.ai_emotion_analysis import RedisEmotionAnalysisHash
-from modules import storage_module, sound_module, db_module, ai_emotion_analysis_module, redis_module
+from modules import storage_module, sound_module, db_module, ai_emotion_analysis_module
 from modules.pika_module import PikaPublisher, PikaConsumer
 from modules.redis_module import redis_client
 import models.schema as models
@@ -127,7 +127,3 @@ async def lifespan(app: MersAIBackendApp):
     except asyncio.CancelledError:
         print("RabbitMQ emotion analyse consumer successfully stopped.")
 
-import apis.incidents
-import websocket
-import apis.twilio_api
-import listeners.index
