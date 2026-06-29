@@ -1,4 +1,3 @@
-from models.dto.webhook import TwilioWebhookRequest
 from datetime import datetime
 
 from twilio.twiml.voice_response import VoiceResponse, Connect, Dial
@@ -14,7 +13,7 @@ from retell_module import retell_client
 
 
 @app.post("/voice")
-async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...),):
+async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...), CallSid: str = Form(...)):
     caller_number = From
     print(caller_number)
     phone_call_response = retell_client.call.register_phone_call(
@@ -37,7 +36,7 @@ async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...),
     def _execute_single_transaction():
         init_incident_payload = InitIncidentPayload(title="DRAFT INCIDENT")
         new_incident = incident_module.init_incident(init_incident_payload, db)
-        init_call_payload = InitCallPayload(received_at=datetime.now(), caller_number=caller_number, incident_id=new_incident.id)
+        init_call_payload = InitCallPayload(received_at=datetime.now(), caller_number=caller_number, provider_sid=CallSid, incident_id=new_incident.id)
         call_module.init_call(init_call_payload, db)
 
 

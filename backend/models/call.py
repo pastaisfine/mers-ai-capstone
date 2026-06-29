@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class InitCallPayload(BaseModel):
     incident_id: UUID
+    provider_sid: str
     caller_number: str
     received_at: datetime
 

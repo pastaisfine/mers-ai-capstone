@@ -47,6 +47,7 @@ class Call(BaseTable):
     __tablename__ = "calls"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    provider_sid = Column(String, nullable=False)
     incident_id = Column(UUID(as_uuid=True), ForeignKey("incidents.id"), nullable=False)
     caller_number = Column(String, nullable=False)
     caller_name = Column(String, nullable=True)
@@ -82,6 +83,7 @@ class AIEmotionAnalysis(BaseTable):
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     emotion_embeddings = Column(ARRAY(Float), nullable=False)
+    model_used = Column(String, nullable=False)
 
 
 class Hospital(BaseTable):
