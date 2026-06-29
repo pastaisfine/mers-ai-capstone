@@ -130,3 +130,4 @@ async def lifespan(app: MersAIBackendApp):
 import apis.incidents
 import websocket
 import apis.twilio_api
+import listeners.index
