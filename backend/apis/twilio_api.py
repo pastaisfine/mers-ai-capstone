@@ -6,8 +6,8 @@ from environment import RETELL_AGENT_ID, TWILIO_PHONE_NUMBER
 from main import app, db_dependency
 from fastapi import Request, Form, Response
 
-from models.call import InitCallPayload
-from models.incident import InitIncidentPayload
+from models.database.call import InitCallPayload
+from models.database.incident import InitIncidentPayload
 from modules import call_module, db_module, incident_module
 from retell_module import retell_client
 

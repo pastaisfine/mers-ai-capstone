@@ -83,6 +83,8 @@ class AIEmotionAnalysis(BaseTable):
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     emotion_embeddings = Column(ARRAY(Float), nullable=False)
+    start_duration = Column(Float, nullable=False)
+    end_duration = Column(Float, nullable=False)
     model_used = Column(String, nullable=False)
 
 
