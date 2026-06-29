@@ -42,8 +42,9 @@ async def media_stream(websocket: WebSocket):
                     upload_response = storage_module.upload_file(file_name, bytes_buffer.getvalue())
 
                     #5 add emotional analysis task to pending queue based on one voice file with 5 seconds at one
-
-
+                    # stream_sid
+                    # done
+                    app.pika_emotion_analyse_publisher.publish()
                     #6 add messaging queue
 
                 case "stop":

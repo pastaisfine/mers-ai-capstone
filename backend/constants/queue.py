@@ -1,0 +1,1 @@
+EMOTION_ANALYSIS_QUEUE = "emotion_analysis_queue"

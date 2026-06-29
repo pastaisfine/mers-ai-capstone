@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 1. RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    # AMQP protocol port
+      - "15672:15672"  # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  # 2. Your FastAPI Application Service
+  foo_app:
+    build: . # Looks for a Dockerfile in the current directory
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"    # Expose FastAPI port
+    environment:
+      - RABBITMQ_HOST=rabbitmq  # Matches the service name above
+      - RABBITMQ_PORT=5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy # Waits for RabbitMQ to be fully ready, not just started
+    networks:
+      - app-network
+
+# Persistent volume so RabbitMQ doesn't lose data/queues when restarted
+volumes:
+  rabbitmq_data:
+
+# Shared network so containers can talk to each other
+networks:
+  app-network:
+    driver: bridge
