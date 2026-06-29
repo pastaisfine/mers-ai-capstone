@@ -31,7 +31,7 @@ export enum ReleaseType {
 }
 
 const ReportBase = z.object({
-  id: z.string(), // RECORD TOKEN
+  id: z.string(),
   title: z.string(),
   approvedStatus: z.enum(ApprovalType),
   createAt: z.date(),
@@ -45,9 +45,7 @@ const SupervisingReleaseInfoSchema = z.object({
   status: z.enum(ReleaseType),
 });
 
-export type SupervisingReleaseInfo = z.infer<
-  typeof SupervisingReleaseInfoSchema
->;
+export type SupervisingReleaseInfo = z.infer<typeof SupervisingReleaseInfoSchema>;
 
 export const OperatorNoteSchema = z.object({
   operatorVerdict: z.string(),
@@ -65,10 +63,70 @@ export const ArchivedReportSchema = ReportBase.extend(
   }),
   sopActions: z.array(z.string()),
   supervisingRelease: SupervisingReleaseInfoSchema,
-  incidentSHA: z.string(), //MERS999-SECURE-AUDIT-SESSION-2026-001
+  incidentSHA: z.string(),
   caller: z.string(),
+  callerNumber: z.string().optional(),
   spokenDialects: z.array(z.string()),
-  dispatchConfindece: z.number(), // 0 ~ 1  1 = 100%
+  dispatchConfindece: z.number(),
+
+  // Call metadata
+  callDuration: z.string(),
+  callReceivedAt: z.date(),
+  dispatchedAt: z.date().optional(),
+  arrivedAt: z.date().optional(),
+  resolvedAt: z.date().optional(),
+  responseTimeSeconds: z.number().nullable().optional(),
+
+  // Emotional analysis
+  emotionalAnalysis: z.object({
+    panicLevel: z.string(),
+    distressScore: z.number(),
+    speechRate: z.string(),
+    tremorDetected: z.boolean(),
+    volumeTrend: z.enum(["Escalating", "Stable", "Declining"]),
+    aiConfidence: z.number(),
+    contradiction: z.string().optional(),
+  }),
+
+  // Call transcript
+  transcript: z.array(
+    z.object({
+      time: z.string(),
+      speaker: z.string(),
+      text: z.string(),
+    })
+  ),
+
+  // Human intervention
+  humanIntervention: z
+    .object({
+      required: z.boolean(),
+      interventionBy: z.string().optional(),
+      role: z.string().optional(),
+      action: z.string().optional(),
+      reason: z.string().optional(),
+      timestampLabel: z.string().optional(),
+    })
+    .optional(),
+
+  // Closing report
+  closingReport: z.object({
+    closedBy: z.string(),
+    closedAt: z.date(),
+    outcome: z.string(),
+    caseStatus: z.enum(["CLOSED", "PENDING_REVIEW", "ESCALATED"]),
+  }),
+
+  // Full event timeline
+  eventTimeline: z.array(
+    z.object({
+      time: z.string(),
+      event: z.string(),
+      type: z
+        .enum(["system", "ai", "human", "dispatch", "close"])
+        .optional(),
+    })
+  ),
 });
 
 export type ArchivedReport = z.infer<typeof ArchivedReportSchema>;
