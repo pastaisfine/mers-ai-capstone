@@ -77,10 +77,10 @@ export function OperationsTab() {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
-                <EmotionalAnalysis incident={activeIncident} compact />
+                {activeIncident && <EmotionalAnalysis incident={activeIncident} compact />}
                 <Separator className="my-4" />
                 <div className="min-h-0 flex-1">
-                  <TranscriptFeed incident={activeIncident} fillHeight />
+                  {activeIncident && <TranscriptFeed incident={activeIncident} fillHeight />}
                 </div>
               </div>
             </SheetContent>
