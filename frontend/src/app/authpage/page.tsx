@@ -10,7 +10,7 @@ import { Shield, Sun, Moon, KeyRound, Mail, Radio, AlertCircle, ArrowRight, Acti
 import { FcGoogle } from "react-icons/fc";
 
 export default function AuthPage() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
