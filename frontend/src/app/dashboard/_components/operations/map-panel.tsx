@@ -23,12 +23,14 @@ export function MapPanel() {
 
   return (
     <div className="absolute inset-0 bg-muted/30">
-      <IncidentMap
-        activeIncident={activeIncident}
-        allIncidents={incidents}
-        pinColor={pinColor}
-        isDark={isDark}
-      />
+      {activeIncident && (
+        <IncidentMap
+          activeIncident={activeIncident}
+          allIncidents={incidents}
+          pinColor={pinColor}
+          isDark={isDark}
+        />
+      )}
 
       {/* {activeIncident?.contradiction && (
         <ContradictionCard activeIncident={activeIncident} />

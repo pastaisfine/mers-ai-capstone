@@ -237,8 +237,8 @@ export function HistoryTab() {
 
                     <TableCell>
                       {hasHuman
-                        ? <Badge className="bg-warning/20 text-warning-foreground text-[10px]"><UserCheck className="mr-1 size-2.5" />Yes</Badge>
-                        : <Badge className="bg-secondary/15 text-secondary text-[10px]"><Zap className="mr-1 size-2.5" />AI Only</Badge>
+                        ? <Badge className="bg-warning dark:bg-warning/50 border-2 border-black dark:border-warning text-white text-[10px]"><UserCheck className="mr-1 size-2.5" />Yes</Badge>
+                        : <Badge className="bg-secondary dark:bg-secondary/50 border-2 border-black dark:border-secondary text-white text-[10px]"><Zap className="mr-1 size-2.5" />AI Only</Badge>
                       }
                     </TableCell>
 

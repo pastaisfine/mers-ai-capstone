@@ -201,3 +201,31 @@
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
 
+/* Pinpoint Popup Hover color mode*/
+
+/* Light mode */
+.incident-hover-popup-light .mapboxgl-popup-content {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0;
+  max-width: none;
+  width: max-content;
+}
+.incident-hover-popup-light .mapboxgl-popup-tip {
+  border-top-color: #ffffff;
+}
+
+/* Dark mode */
+.incident-hover-popup-dark .mapboxgl-popup-content {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  padding: 0;
+  max-width: none;
+  width: max-content;
+}
+.incident-hover-popup-dark .mapboxgl-popup-tip {
+  border-top-color: #1e293b;
+}
+
