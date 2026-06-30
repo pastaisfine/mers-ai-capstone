@@ -11,10 +11,8 @@ function OperatorNote({ note, status }: {
                 return 'APPROVED & DISPATCHED';
             case ApprovalType.REJECTED:
                 return 'REJECTED';
-            case ApprovalType.PENDING:
-                return 'PENDING';
             default:
-                return '';
+                return 'PENDING';
         }
     }, [status]);
     const boxVariantClass = useMemo(() => {
@@ -23,10 +21,8 @@ function OperatorNote({ note, status }: {
                 return 'bg-emerald-50/40 border-emerald-200'
             case ApprovalType.REJECTED:
                 return 'bg-red-50/40 border-red-200'
-            case ApprovalType.PENDING:
-                return 'bg-amber-50/40 border-amber-200'
             default:
-                return '';
+                return 'bg-amber-50/40 border-amber-200'
         }
     }, [status]);
     const titleClass = useMemo(() => {
@@ -35,10 +31,8 @@ function OperatorNote({ note, status }: {
                 return 'text-emerald-800';
             case ApprovalType.REJECTED:
                 return 'text-red-800';
-            case ApprovalType.PENDING:
-                return 'text-amber-800';
             default:
-                return '';
+                return 'text-amber-800';
         }
     }, [status])
     return (

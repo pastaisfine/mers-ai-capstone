@@ -33,9 +33,9 @@ const tabs: {
   label: string;
   icon: typeof LayoutDashboard | typeof SlidersHorizontal | typeof FileText;
 }[] = [
-  { id: TabName.DASHBOARD, label: 'OP-Desk', icon: LayoutDashboard },
+  { id: TabName.OPERATIONS, label: 'OP-Desk', icon: LayoutDashboard },
   { id: TabName.SIMULATION, label: 'Simulator', icon: SlidersHorizontal },
-  { id: TabName.REPORTS, label: 'Reports', icon: FileText },
+  { id: TabName.HISTORY, label: 'Reports', icon: FileText },
 ] as const;
 
 export function MetricsHeader({

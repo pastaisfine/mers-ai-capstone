@@ -61,6 +61,14 @@ export enum SeverityType {
 
 export enum TabName {
   DASHBOARD = "dashboard",
+  OPERATIONS = "operations",
+  HISTORY = "history",
   SIMULATION = "simulation",
-  REPORTS = "reports",
+}
+
+export interface UserProfile {
+  avatar_url?: string
+  full_name: string
+  role: string
+  unit: string
 }

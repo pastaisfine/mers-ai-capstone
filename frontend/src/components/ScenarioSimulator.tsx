@@ -182,7 +182,7 @@ export function ScenarioSimulator(_props: ScenarioSimulatorProps) {
       `[${currentTimeText}] Injecting complication vector: ${simInjectComplication ? 'Enabled' : 'Disabled'}`
     ]);
     setIsSimulating(true);
-    setCurrentTab(TabName.DASHBOARD);
+    setCurrentTab(TabName.OPERATIONS);
   };
 
   return <section data-component="ScenarioSimulator" />;

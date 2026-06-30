@@ -1,5 +1,8 @@
-export function cn(...inputs: (string | undefined | null | boolean)[]) {
-  return inputs.filter(Boolean).join(" ");
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 export function timeAgo(occurDateTime: string): string {
@@ -28,6 +31,15 @@ export function timeAgo(occurDateTime: string): string {
   }
 
   return "just now";
+}
+
+export function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 export function removeUndefinedFields<T extends Record<string, any>>(
