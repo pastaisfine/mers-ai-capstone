@@ -66,7 +66,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon: Icon, iconColor, iconBg, sub }: StatCardProps) {
   return (
-    <Card className="cursor-default overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md">
+    <Card className="cursor-default overflow-hidden border-black transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md dark:border-neutral-700">
       <CardContent className="px-4">
         <div className="flex justify-between">
           <div>
@@ -184,7 +184,7 @@ export function HistoryTab() {
         </div>
 
         {/* table */}
-        <div className="rounded-xl border overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-black transition-all duration-200 hover:shadow-secondary hover:shadow-md dark:border-neutral-700">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">

@@ -7,6 +7,7 @@ interface Context {
   selectedIncidentId: string;
   setIncidents: Dispatch<SetStateAction<Incident[]>>;
   setSelectedIncidentId: Dispatch<SetStateAction<string>>;
+  fetchIncidents: () => void;
 }
 
 export const IncidentContext = createContext<null | Context>(null);

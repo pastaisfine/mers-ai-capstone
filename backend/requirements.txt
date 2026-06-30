@@ -7,7 +7,6 @@ twilio
 websockets
 retell-sdk
 transformers
-librosa
 torch
 
 numpy
@@ -16,3 +15,5 @@ supabase
 pika
 aio_pika
 redis[hiredis]
+soundfile
+uuid-v7

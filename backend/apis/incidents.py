@@ -1,12 +1,13 @@
-import uuid
-from models.schema import Dispatcher
-from main import db_dependency
-from main import app
+from fastapi import APIRouter, Query
 
-@app.get("/")
-async def read_root(db: db_dependency):
-    new_dispatcher = Dispatcher(id=uuid.uuid4(), user_id=uuid.uuid4(), name="Testing123", status="Test", badge_number="abc123")
-    db.add(new_dispatcher)
-    db.commit()
-    db.refresh(new_dispatcher)
-    return
+from database import db_dependency
+from models.database.incident import QueryIncidentPayload
+from modules import incident_module
+
+router = APIRouter(prefix="/incidents", tags=["incidents"])
+
+@router.get('')
+async def read_incidents(db: db_dependency, page: int = Query(1, ge=1, description="Page number"),
+                         size: int = Query(10, ge=1, le=100, description="Page size"), pattern: str | None = Query(None, description="Search pattern")):
+    return incident_module.read_incidents(QueryIncidentPayload(page=int(page), pattern=pattern, size=int(size)),db)
+

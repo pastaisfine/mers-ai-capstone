@@ -1,14 +1,14 @@
 import json
-import uuid
 
 import pika
 from aio_pika import connect_robust
+from uuid_v7.base import uuid7
 
 from environment import RABBIT_HOST
 
 
 class PikaPublisher:
-    def __init__(self, queue_name):
+    def __init__(self, queue_name: str):
         self.publish_queue_name = queue_name
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=RABBIT_HOST)
@@ -22,12 +22,12 @@ class PikaPublisher:
         """Method to publish message to RabbitMQ"""
         self.channel.basic_publish(exchange='', routing_key=self.publish_queue_name, properties=pika.BasicProperties(
                 reply_to=self.callback_queue,
-                correlation_id=str(uuid.uuid4())
+                correlation_id=str(uuid7())
             ),
             body=json.dumps(message))
 
 class PikaConsumer:
-    def __init__(self, queue_name, process_callable):
+    def __init__(self, queue_name: str, process_callable):
         self.consume_queue = queue_name
         self.process_callable = process_callable
     async def consume(self, loop):

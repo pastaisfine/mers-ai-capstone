@@ -1,6 +1,5 @@
 import redis
 
-
 class RedisClient:
 
     def __init__(self):
@@ -9,6 +8,11 @@ class RedisClient:
     def hgetall(self, key):
         return self.client.hgetall(key)
 
-    def hset(self, key, value):
-        self.client.hset(key, value)
+    def hset(self, key, values: dict):
+        self.client.hset(key, mapping=values)
         self.client.expire(key, 300)
+
+    def hdel(self, key):
+        self.client.hdel(key)
+
+redis_client = RedisClient()

@@ -8,3 +8,8 @@ class InitIncidentPayload(BaseModel):
 class InitIncidentLogPayload(BaseModel):
     incident_id: UUID
     payload: InitIncidentPayload
+
+class QueryIncidentPayload(BaseModel):
+    page: int
+    size: int
+    pattern: str | None

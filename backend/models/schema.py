@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, Integer, Float, Text, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, String, Integer, Float, Text, DateTime, ForeignKey, Enum, JSON
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
-from models.enum.index import IncidentType
+from models.enum.index import IncidentType, SeverityType
 
 Base = declarative_base()
 # --- Models ---
@@ -35,7 +35,22 @@ class Incident(BaseTable):
     ai_confidence = Column(Float, nullable=True)
     ai_summary = Column(String, nullable=True)
     dispatcher_id = Column(UUID(as_uuid=True), ForeignKey("dispatchers.id"), nullable=True)
+    call= relationship("Call", lazy="joined")
     resolved_at = Column(DateTime, nullable=True)
+    severity = Column(Enum(SeverityType), nullable=True)
+    priority = Column(Integer, nullable=True)
+    occur_date_time = Column(DateTime, nullable=True)
+    distress_score = Column(Float, nullable=True)
+    panic_level = Column(String, nullable=True)
+    entities = Column(JSON, nullable=True)
+    reason = Column(String, nullable=True)
+    contradiction = Column(String, nullable=True)
+    sop_citation = Column(String, nullable=True)
+    sop_procedure = Column(JSON, nullable=True)
+    responder = Column(JSON, nullable=True)  # Dict / Object
+    timeline = Column(JSON, nullable=True)  # List[Dict]
+    transcript = Column(JSON, nullable=True)  # List[Dict]
+    status = Column(JSON, nullable=True)
 
 class IncidentLog(BaseTable):
     __tablename__ = "incident_logs"
@@ -64,6 +79,7 @@ class CallTranscript(BaseTable):
     end_duration = Column(Integer, nullable=False)   # In milliseconds
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     transcript = Column(String, nullable=False)
+    role = Column(String, nullable=False, server_default="user")  # "agent" or "user"
     seq = Column(Integer, nullable=False)
 
 
@@ -83,6 +99,8 @@ class AIEmotionAnalysis(BaseTable):
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     emotion_embeddings = Column(ARRAY(Float), nullable=False)
+    start_duration = Column(Float, nullable=False)
+    end_duration = Column(Float, nullable=False)
     model_used = Column(String, nullable=False)
 
 
