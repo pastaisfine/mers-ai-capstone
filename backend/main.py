@@ -18,6 +18,7 @@ from modules import storage_module, sound_module, db_module, ai_emotion_analysis
 from modules.pika_module import PikaPublisher, PikaConsumer
 from modules.redis_module import redis_client
 import models.schema as models
+import apis.incidents as incidents_api
 
 
 def _perform_emotional_analysis(voice_bytes, start, end) -> RedisEmotionAnalysisHash:
@@ -127,3 +128,4 @@ async def lifespan(app: MersAIBackendApp):
     except asyncio.CancelledError:
         print("RabbitMQ emotion analyse consumer successfully stopped.")
 
+app.include_router(incidents_api.router)

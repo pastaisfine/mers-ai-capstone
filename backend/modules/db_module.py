@@ -2,6 +2,7 @@ from typing import Type, Any, Callable
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+
 from models.schema import Base
 
 def init_data(payload: dict[str, Any], db: Session, model: Type[Base]):
