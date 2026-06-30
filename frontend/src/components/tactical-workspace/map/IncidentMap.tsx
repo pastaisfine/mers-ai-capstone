@@ -41,7 +41,8 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
     const [hoveredIncident, setHoveredIncident] = useState<Incident | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
-    const { lat, lng } = activeIncident.coordinates;
+    const lat = activeIncident.coordinates?.lat ?? 0;
+    const lng = activeIncident.coordinates?.lng ?? 0;
 
     const styles = isDark ? MAP_STYLES_DARK : MAP_STYLES_LIGHT;
     const currentStyle = styles[styleIndex];
@@ -62,6 +63,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
     ).slice(0, 6);}, [searchQuery, searchableIncidents]);
     
   const flyToIncident = useCallback((inc: Incident) => {
+    if (!inc.coordinates) return;
     mapRef.current?.flyTo({
       center: [inc.coordinates.lng, inc.coordinates.lat],
       zoom: 16,
@@ -168,7 +170,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                 </Marker>
 
                         {/* Hover detail popup */}
-                        {hoveredIncident && (
+                        {hoveredIncident && hoveredIncident.coordinates && (
                           <Popup
                             longitude={hoveredIncident.coordinates.lng}
                             latitude={hoveredIncident.coordinates.lat}
