@@ -1,5 +1,8 @@
 - to run server
-`fastapi dev`
+  - run ngrok first
+    - `ngrok http 3000`
+  - then run server
+    - `fastapi dev`
 
 - to autogenerate migration file 
 `alembic revision --autogenerate -m <message>`

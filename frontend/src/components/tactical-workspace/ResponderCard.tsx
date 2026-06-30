@@ -21,35 +21,35 @@ export function ResponderCard({ activeIncident }: { activeIncident: Incident }) 
             >
                 <div className="flex items-start justify-between gap-2 mb-1">
                     <h4 className={`text-xs font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        {activeIncident.responder.name}
+                        {activeIncident?.responder.name}
                     </h4>
                     <span
-                        className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${activeIncident.responder.status === 'DISPATCHED'
+                        className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${activeIncident?.responder.status === 'DISPATCHED'
                             ? 'bg-cyan-500/15 text-cyan-400 ring-1 ring-cyan-500/40'
                             : 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/40'
                             }`}
                     >
-                        {activeIncident.responder.status}
+                        {activeIncident?.responder.status}
                     </span>
                 </div>
                 <p className={`text-[10px] mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {activeIncident.responder.type}
+                    {activeIncident?.responder.type}
                 </p>
                 <div className="grid grid-cols-3 gap-2 text-[10px] font-mono">
                     <div>
                         <div className={isDark ? 'text-slate-500' : 'text-slate-400'}>DISTANCE</div>
                         <div className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                            {activeIncident.responder.distance}
+                            {activeIncident?.responder.distance}
                         </div>
                     </div>
                     <div>
                         <div className={isDark ? 'text-slate-500' : 'text-slate-400'}>ETA</div>
-                        <div className="font-bold text-emerald-400">{activeIncident.responder.eta}</div>
+                        <div className="font-bold text-emerald-400">{activeIncident?.responder.eta}</div>
                     </div>
                     <div>
                         <div className={isDark ? 'text-slate-500' : 'text-slate-400'}>PARAMEDIC</div>
                         <div className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                            {activeIncident.responder.paramedic ?? '—'}
+                            {activeIncident?.responder.paramedic ?? '—'}
                         </div>
                     </div>
                 </div>

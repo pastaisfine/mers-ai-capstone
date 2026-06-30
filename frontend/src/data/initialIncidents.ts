@@ -2,132 +2,184 @@ import { Incident, SeverityType } from "@/types";
 
 export const INITIAL_INCIDENTS: Incident[] = [
   {
-    id: 'INC-0042',
-    type: 'medical',
-    title: 'Suspected Cardiac Arrest',
-    location: 'Jalan Ampang, KL (Near Mamak Pelita)',
+    id: "INC-0042",
+    type: "medical",
+    title: "Suspected Cardiac Arrest",
+    location: "Jalan Ampang, KL (Near Mamak Pelita)",
     severity: SeverityType.CRITICAL,
     priority: 94,
-    lang: 'EN / BM',
-    occurDateTime: '2026-06-01T15:00:00Z',
-    caller: 'MR. TAN',
-    duration: '03:42',
+    lang: "EN / BM",
+    occurDateTime: "2026-06-01T15:00:00Z",
+    caller: "MR. TAN",
+    duration: "03:42",
     distressScore: 87,
-    panicLevel: 'Extreme',
-    entities: ['👤 Adult Male (62yo)', '📍 Jalan Ampang', '🩺 Cardiac Arrest'],
-    reason: 'Cardiac arrest keywords detected. Caller panic level extreme. Immediate medical intervention required.',
+    panicLevel: "Extreme",
+    entities: ["👤 Adult Male (62yo)", "📍 Jalan Ampang", "🩺 Cardiac Arrest"],
+    reason:
+      "Cardiac arrest keywords detected. Caller panic level extreme. Immediate medical intervention required.",
     confidence: 91,
-    contradiction: 'CONTRADICTION DETECTED — Caller stated subject was \'breathing fine\' at 3:02PM, then \'tidak sedar diri\' at 3:04PM. Severity escalated automatically.',
-    sopCitation: 'WHO CPR Guidelines 2023 — Section 3.2 | Relevance: 94%',
+    contradiction:
+      "CONTRADICTION DETECTED — Caller stated subject was 'breathing fine' at 3:02PM, then 'tidak sedar diri' at 3:04PM. Severity escalated automatically.",
+    sopCitation: "WHO CPR Guidelines 2023 — Section 3.2 | Relevance: 94%",
     sopProcedure: [
-      'Instruct caller to place phone on speaker next to patient.',
-      'Guide chest compressions immediately (100–120 compressions per minute).',
-      'Instruct helper to locate nearest private/public AED if available.'
+      "Instruct caller to place phone on speaker next to patient.",
+      "Guide chest compressions immediately (100–120 compressions per minute).",
+      "Instruct helper to locate nearest private/public AED if available.",
     ],
-    responder: { 
-      name: 'Ambulance A1 - EMS Unit', 
-      type: 'Emergency Medical Service', 
-      distance: '2.4km', 
-      eta: '06:45m', 
-      status: 'Ready',
-      paramedic: 'Rizal K.' 
+    responder: {
+      name: "Ambulance A1 - EMS Unit",
+      type: "Emergency Medical Service",
+      distance: "2.4km",
+      eta: "06:45m",
+      status: "Ready",
+      paramedic: "Rizal K.",
     },
     timeline: [
-      { time: '14:22:00', event: 'Call Connected (Op: Khalid)' },
-      { time: '14:22:05', event: 'AI Core Activation & Geo-Trilateration' },
-      { time: '14:22:18', event: 'Severity Escalated to CRITICAL' }
+      { time: "14:22:00", event: "Call Connected (Op: Khalid)" },
+      { time: "14:22:05", event: "AI Core Activation & Geo-Trilateration" },
+      { time: "14:22:18", event: "Severity Escalated to CRITICAL" },
     ],
     transcript: [
-      { time: '03:00', speaker: 'Caller', text: 'Tolong! Ayah saya jatuh, dia TIDAK SEDAR DIRI!' },
-      { time: '03:05', speaker: 'Operator', text: 'Bertenang encik. Di mana lokasi anda?' },
-      { time: '03:12', speaker: 'Caller', text: 'Saya di Jalan Ampang, depan kedai mamak. Dia NOT BREATHING. Please hurry!' },
-      { time: '03:28', speaker: 'Operator', text: 'Bantuan dalam perjalanan. Adakah mangsa masih bernafas?' }
+      {
+        time: "03:00",
+        speaker: "Caller",
+        text: "Tolong! Ayah saya jatuh, dia TIDAK SEDAR DIRI!",
+      },
+      {
+        time: "03:05",
+        speaker: "Operator",
+        text: "Bertenang encik. Di mana lokasi anda?",
+      },
+      {
+        time: "03:12",
+        speaker: "Caller",
+        text: "Saya di Jalan Ampang, depan kedai mamak. Dia NOT BREATHING. Please hurry!",
+      },
+      {
+        time: "03:28",
+        speaker: "Operator",
+        text: "Bantuan dalam perjalanan. Adakah mangsa masih bernafas?",
+      },
     ],
-    coordinates: { x: 260, y: 140, lat: 3.158, lng: 101.714 },
-    status: {}
+    coordinates: { lat: 3.158, lng: 101.714 },
+    status: {},
   },
   {
-    id: 'INC-0045',
-    type: 'fire',
-    title: 'Structure Fire (Residential)',
-    location: 'Taman Melawati, KL',
+    id: "INC-0045",
+    type: "fire",
+    title: "Structure Fire (Residential)",
+    location: "Taman Melawati, KL",
     severity: SeverityType.URGENT,
     priority: 72,
-    lang: 'BM',
-    occurDateTime: '2026-06-03T14:10:00Z',
-    caller: 'PUAN AMINAH',
-    duration: '01:58',
+    lang: "BM",
+    occurDateTime: "2026-06-03T14:10:00Z",
+    caller: "PUAN AMINAH",
+    duration: "01:58",
     distressScore: 75,
-    panicLevel: 'High',
-    entities: ['🔥 Grade A Fire', '📍 Taman Melawati', '🏠 Double-Storey Terrace'],
-    reason: 'Active residential structure fire. Dark toxic smoke detected in hallway. Safe evacuation logged.',
-    confidence: 88,
-    sopCitation: 'Bomba Malaysia Incident Protocol Code 1.1 | Relevance: 96%',
-    sopProcedure: [
-      'Confirm all occupants have evacuated safety boundaries.',
-      'Advise caller to shut principal electrical mains from outside if safe.',
-      'Instruct neighbor structures to saturate fence borders to prevent spread.'
+    panicLevel: "High",
+    entities: [
+      "🔥 Grade A Fire",
+      "📍 Taman Melawati",
+      "🏠 Double-Storey Terrace",
     ],
-    responder: { 
-      name: 'Bomba Melawati - Unit Engine 1', 
-      type: 'Fire Suppression & Rescue', 
-      distance: '1.8km', 
-      eta: '04:30m', 
-      status: 'Ready',
-      paramedic: 'Zubir A.'
+    reason:
+      "Active residential structure fire. Dark toxic smoke detected in hallway. Safe evacuation logged.",
+    confidence: 88,
+    sopCitation: "Bomba Malaysia Incident Protocol Code 1.1 | Relevance: 96%",
+    sopProcedure: [
+      "Confirm all occupants have evacuated safety boundaries.",
+      "Advise caller to shut principal electrical mains from outside if safe.",
+      "Instruct neighbor structures to saturate fence borders to prevent spread.",
+    ],
+    responder: {
+      name: "Bomba Melawati - Unit Engine 1",
+      type: "Fire Suppression & Rescue",
+      distance: "1.8km",
+      eta: "04:30m",
+      status: "Ready",
+      paramedic: "Zubir A.",
     },
     timeline: [
-      { time: '14:10:10', event: 'Call Triggered from Taman Melawati Area' },
-      { time: '14:10:30', event: 'Bomba Melawati Base Alert Sent' }
+      { time: "14:10:10", event: "Call Triggered from Taman Melawati Area" },
+      { time: "14:10:30", event: "Bomba Melawati Base Alert Sent" },
     ],
     transcript: [
-      { time: '01:00', speaker: 'Caller', text: 'Tolong! Dapur rumah saya terbakar! Asap dah tebal sangat kat ruang tamu.' },
-      { time: '01:15', speaker: 'Operator', text: 'Sila keluar dari rumah segera puan. Adakah semua ahli keluarga sudah keluar?' },
-      { time: '01:30', speaker: 'Caller', text: 'Ya, kami semua kat luar sekarang, tapi api makin besar. Takut merebak ke jiran sebelah!' }
+      {
+        time: "01:00",
+        speaker: "Caller",
+        text: "Tolong! Dapur rumah saya terbakar! Asap dah tebal sangat kat ruang tamu.",
+      },
+      {
+        time: "01:15",
+        speaker: "Operator",
+        text: "Sila keluar dari rumah segera puan. Adakah semua ahli keluarga sudah keluar?",
+      },
+      {
+        time: "01:30",
+        speaker: "Caller",
+        text: "Ya, kami semua kat luar sekarang, tapi api makin besar. Takut merebak ke jiran sebelah!",
+      },
     ],
-    coordinates: { x: 380, y: 70, lat: 3.210, lng: 101.748 },
-    status: {}
+    coordinates: { lat: 3.21, lng: 101.748 },
+    status: {},
   },
   {
-    id: 'INC-0046',
-    type: 'accident',
-    title: 'MVA - Multi-Vehicle Collision',
-    location: 'Federal Highway, KM 4.2',
+    id: "INC-0046",
+    type: "accident",
+    title: "MVA - Multi-Vehicle Collision",
+    location: "Federal Highway, KM 4.2",
     severity: SeverityType.MODERATE,
     priority: 45,
-    lang: 'EN',
-    occurDateTime: '2026-06-10T14:05:00Z',
-    caller: 'SARAH JANE',
-    duration: '02:15',
+    lang: "EN",
+    occurDateTime: "2026-06-10T14:05:00Z",
+    caller: "SARAH JANE",
+    duration: "02:15",
     distressScore: 40,
-    panicLevel: 'Moderate',
-    entities: ['🚗 3 Passenger Cars', '🛣 Express Route Blocked', '📍 Federal Highway Km 4.2'],
-    reason: 'Rear-end collision involving 3 vehicles. No passenger casualties reported. Heavy lane obstruction.',
-    confidence: 95,
-    sopCitation: 'Highway Patrol Incident Standards | Relevance: 90%',
-    sopProcedure: [
-      'Instruct all drivers to stand behind federal highway guardrails.',
-      'Activate vehicle hazard flashers immediately.',
-      'Advise local tow services to clear central flow lane.'
+    panicLevel: "Moderate",
+    entities: [
+      "🚗 3 Passenger Cars",
+      "🛣 Express Route Blocked",
+      "📍 Federal Highway Km 4.2",
     ],
-    responder: { 
-      name: 'IPD Cheras - Traffic Patrol', 
-      type: 'Law Enforcement / Traffic Control', 
-      distance: '3.8km', 
-      eta: '08:00m', 
-      status: 'Ready',
-      paramedic: 'Firdaus M.'
+    reason:
+      "Rear-end collision involving 3 vehicles. No passenger casualties reported. Heavy lane obstruction.",
+    confidence: 95,
+    sopCitation: "Highway Patrol Incident Standards | Relevance: 90%",
+    sopProcedure: [
+      "Instruct all drivers to stand behind federal highway guardrails.",
+      "Activate vehicle hazard flashers immediately.",
+      "Advise local tow services to clear central flow lane.",
+    ],
+    responder: {
+      name: "IPD Cheras - Traffic Patrol",
+      type: "Law Enforcement / Traffic Control",
+      distance: "3.8km",
+      eta: "08:00m",
+      status: "Ready",
+      paramedic: "Firdaus M.",
     },
     timeline: [
-      { time: '14:05:15', event: 'Highway CCTV automated collision flag' },
-      { time: '14:05:45', event: 'Sarah Jane call verified' }
+      { time: "14:05:15", event: "Highway CCTV automated collision flag" },
+      { time: "14:05:45", event: "Sarah Jane call verified" },
     ],
     transcript: [
-      { time: '01:20', speaker: 'Caller', text: 'I just got into an accident on the Federal Highway. Three cars bumped into each other.' },
-      { time: '01:40', speaker: 'Operator', text: 'Understood. Are you or anyone in the other vehicles injured?' },
-      { time: '02:00', speaker: 'Caller', text: 'No, everyone is walking fine, but the cars are blocking the center lane. It is causing heavy traffic!' }
+      {
+        time: "01:20",
+        speaker: "Caller",
+        text: "I just got into an accident on the Federal Highway. Three cars bumped into each other.",
+      },
+      {
+        time: "01:40",
+        speaker: "Operator",
+        text: "Understood. Are you or anyone in the other vehicles injured?",
+      },
+      {
+        time: "02:00",
+        speaker: "Caller",
+        text: "No, everyone is walking fine, but the cars are blocking the center lane. It is causing heavy traffic!",
+      },
     ],
-    coordinates: { x: 120, y: 220, lat: 3.120, lng: 101.670 },
-    status: {}
-  }
+    coordinates: { lat: 3.12, lng: 101.67 },
+    status: {},
+  },
 ];

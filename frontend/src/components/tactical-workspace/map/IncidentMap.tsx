@@ -79,7 +79,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
         const map = mapRef.current;
         if (!map) return;
         map.flyTo({
-            center: [lng, lat],
+            center: lng && lat && [lng, lat] || undefined,
             zoom: 15,
             pitch: 40,
             bearing: -18,
@@ -96,7 +96,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
     const handleZoomOut = () => mapRef.current?.zoomOut({ duration: 250 });
     const handleCycleStyle = () => setStyleIndex(i => (i + 1) % styles.length);
     const handleRecenter = () =>
-        mapRef.current?.flyTo({ center: [lng, lat], zoom: 15, pitch: 40, bearing: -18, duration: 700 });
+        mapRef.current?.flyTo({ center: lng && lat && [lng, lat] || undefined, zoom: 15, pitch: 40, bearing: -18, duration: 700 });
 
     return (
     <div className="absolute inset-0">
@@ -118,25 +118,28 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                 {/* Other incidents (smaller, dimmer) */}
                 {allIncidents
                     ?.filter(inc => inc.id !== activeIncident.id)
-                    .map(inc => (
-                        <Marker
-                            key={inc.id}
-                            longitude={inc.coordinates.lng}
-                            latitude={inc.coordinates.lat}
-                            anchor="center"
-                        >
-                            <div
-                                className="w-3 h-2.5 rounded-full ring-1 ring-black-400 opacity-70 hover:opacity-50 transition-opacity"
-                                style={{
-                                    backgroundColor:
-                                        inc.severity === 'critical' ? 'red' :
-                                            inc.severity === 'urgent' ? 'orange' :
-                                                inc.severity === 'moderate' ? 'yellow' : 'green',
-                                }}
-                                title={`${inc.id} · ${inc.title}`}
-                            />
-                        </Marker>
-                    ))}
+                    .map(inc => {
+                        if (inc.coordinates)
+                            return (
+                                <Marker
+                                    key={inc.id}
+                                    longitude={inc.coordinates?.lng}
+                                    latitude={inc.coordinates?.lat}
+                                    anchor="center"
+                                >
+                                    <div
+                                        className="w-3 h-2.5 rounded-full ring-1 ring-black-400 opacity-70 hover:opacity-50 transition-opacity"
+                                        style={{
+                                            backgroundColor:
+                                                inc.severity === 'critical' ? 'red' :
+                                                    inc.severity === 'urgent' ? 'orange' :
+                                                        inc.severity === 'moderate' ? 'yellow' : 'green',
+                                        }}
+                                        title={`${inc.id} · ${inc.title}`}
+                                    />
+                                </Marker>
+                            )
+                    })}
 
                 {/* Active incident pin */}
                 <Marker longitude={lng} latitude={lat} anchor="center">

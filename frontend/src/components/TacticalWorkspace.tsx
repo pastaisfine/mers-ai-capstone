@@ -40,8 +40,9 @@ export function TacticalWorkspace({
 }: TacticalWorkspaceProps) {
   const { incidents: allIncidents, activeIncident } = useIncident();
   const isDark = theme === 'dark';
-  const { lat, lng } = activeIncident.coordinates;
-  const sev = SEVERITY_COLORS[activeIncident.severity];
+  const lat = activeIncident?.coordinates?.lat
+  const lng = activeIncident?.coordinates?.lng
+  const sev = activeIncident?.severity ? SEVERITY_COLORS[activeIncident.severity] : SEVERITY_COLORS.moderate;
 
 
   return (
@@ -130,12 +131,12 @@ export function TacticalWorkspace({
 
         {/* HUD overlays */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none z-10">
-          <GpsTriangulationCard lat={lat} lng={lng} />
+          {lat && lng && <GpsTriangulationCard lat={lat} lng={lng} />}
           <AiConfidenceCard activeIncident={activeIncident} />
         </div>
 
         {/* Contradiction warning banner */}
-        {activeIncident.contradiction && (
+        {activeIncident?.contradiction && (
           <ContradictionCard activeIncident={activeIncident} />
         )}
       </div>

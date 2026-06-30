@@ -14,28 +14,28 @@ import { SeverityType } from "@/types"
 
 const SEVERITY_BORDER: Record<string, string> = {
   [SeverityType.CRITICAL]: "border-destructive/70",
-  [SeverityType.URGENT]:   "border-warning/70",
+  [SeverityType.URGENT]: "border-warning/70",
   [SeverityType.MODERATE]: "border-primary/70",
   [SeverityType.RESOLVED]: "border-secondary/70",
 }
 
 const SEVERITY_BADGE: Record<string, string> = {
   [SeverityType.CRITICAL]: "border-destructive/60 bg-destructive/10 text-destructive",
-  [SeverityType.URGENT]:   "border-warning/60 bg-warning/10 text-warning",
+  [SeverityType.URGENT]: "border-warning/60 bg-warning/10 text-warning",
   [SeverityType.MODERATE]: "border-primary/60 bg-primary/10 text-primary",
   [SeverityType.RESOLVED]: "border-secondary/60 bg-secondary/10 text-secondary",
 }
 
 const SEVERITY_BASE_SHADOW: Record<string, string> = {
   [SeverityType.CRITICAL]: "shadow-sm shadow-destructive/15",
-  [SeverityType.URGENT]:   "shadow-sm shadow-warning/15",
+  [SeverityType.URGENT]: "shadow-sm shadow-warning/15",
   [SeverityType.MODERATE]: "shadow-sm shadow-primary/15",
   [SeverityType.RESOLVED]: "shadow-sm shadow-secondary/15",
 }
 
 const SEVERITY_HOVER_SHADOW: Record<string, string> = {
   [SeverityType.CRITICAL]: "hover:shadow-lg hover:shadow-destructive/30",
-  [SeverityType.URGENT]:   "hover:shadow-lg hover:shadow-warning/30",
+  [SeverityType.URGENT]: "hover:shadow-lg hover:shadow-warning/30",
   [SeverityType.MODERATE]: "hover:shadow-lg hover:shadow-primary/30",
   [SeverityType.RESOLVED]: "hover:shadow-lg hover:shadow-secondary/30",
 }
@@ -43,19 +43,19 @@ const SEVERITY_HOVER_SHADOW: Record<string, string> = {
 /* ─── Incident type maps ────────────────────────────────────────────────── */
 
 const TYPE_ICON: Record<Incident["type"], React.ElementType> = {
-  medical:  Heart,
-  fire:     Flame,
-  crime:    Shield,
+  medical: Heart,
+  fire: Flame,
+  crime: Shield,
   accident: Car,
-  flood:    Droplets,
+  flood: Droplets,
 }
 
 const TYPE_ICON_STYLE: Record<Incident["type"], string> = {
-  medical:  "bg-destructive/20 text-destructive",
-  fire:     "bg-warning/20 text-warning",
-  crime:    "bg-muted text-muted-foreground",
+  medical: "bg-destructive/20 text-destructive",
+  fire: "bg-warning/20 text-warning",
+  crime: "bg-muted text-muted-foreground",
   accident: "bg-primary/20 text-primary",
-  flood:    "bg-primary/15 text-primary",
+  flood: "bg-primary/15 text-primary",
 }
 
 /* ─── Dispatch status badge ─────────────────────────────────────────────── */
@@ -63,8 +63,8 @@ const TYPE_ICON_STYLE: Record<Incident["type"], string> = {
 function dispatchStyle(status: string): string {
   const s = status.toUpperCase()
   if (s === "DISPATCHED" || s === "APPROVED") return "border-secondary/60 bg-secondary/10 text-secondary"
-  if (s === "PENDING")                         return "border-warning/60 bg-warning/10 text-warning"
-  if (s === "REJECTED")                        return "border-destructive/60 bg-destructive/10 text-destructive"
+  if (s === "PENDING") return "border-warning/60 bg-warning/10 text-warning"
+  if (s === "REJECTED") return "border-destructive/60 bg-destructive/10 text-destructive"
   return "border-border text-muted-foreground"
 }
 
@@ -93,15 +93,15 @@ export function RecentActivity() {
         <ScrollArea className="h-[400px] pr-3">
           <div className="space-y-3">
             {events.map((incident) => {
-              const TypeIcon      = TYPE_ICON[incident.type] ?? Shield
-              const dispatchStatus = incident.status?.dispatch ?? "PENDING"
+              const TypeIcon = TYPE_ICON[incident?.type ?? "crime"] ?? Shield
+              const dispatchStatus = incident?.status?.dispatch ?? "PENDING"
 
               return (
                 <div
                   key={incident.id}
                   className={cn(
                     "group cursor-default rounded-lg border-2 p-4 transition-all duration-200",
-                    SEVERITY_BORDER[incident.severity]      ?? "border-border",
+                    SEVERITY_BORDER[incident.severity] ?? "border-border",
                     SEVERITY_BASE_SHADOW[incident.severity] ?? "shadow-sm",
                     SEVERITY_HOVER_SHADOW[incident.severity]
                   )}
