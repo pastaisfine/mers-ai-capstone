@@ -25,12 +25,12 @@ export function LiveIntelligencePanel({
   const { setIncidents, activeIncident } = useIncident();
   const { currentTimeText } = useTime();
   const [activeTab, setActiveTab] = useState<'all' | 'feed' | 'triage' | 'sop'>('all');
-  
+
   // Pulse voice waveform generator heights
   const [waveformHeights, setWaveformHeights] = useState<number[]>([12, 24, 8, 16, 32, 10, 4, 18, 22, 14, 28, 6, 12, 20]);
-  
+
   useEffect(() => {
-    if (activeIncident.severity === SeverityType.CRITICAL || isSimulating) {
+    if (activeIncident?.severity === SeverityType.CRITICAL || isSimulating) {
       const pulseInterval = setInterval(() => {
         setWaveformHeights(prev => prev.map(() => Math.floor(Math.random() * 26) + 4));
       }, 150);
@@ -99,30 +99,30 @@ export function LiveIntelligencePanel({
           <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-0.5 rounded-lg">
             <TabsTrigger value="all" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
-              isDark 
-              ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              isDark
+                ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100"
+                : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
               All
             </TabsTrigger>
             <TabsTrigger value="feed" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
-              isDark 
-              ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              isDark
+                ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100"
+                : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
               Feed
             </TabsTrigger>
             <TabsTrigger value="triage" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
-              isDark 
-              ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              isDark
+                ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100"
+                : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
               Triage
             </TabsTrigger>
             <TabsTrigger value="sop" className={cn(
               "text-[10px] font-semibold tracking-wider uppercase py-1 transition-all",
-              isDark 
-              ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100" 
-              : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
+              isDark
+                ? "data-[state=active]:bg-red-900 data-[state=active]:text-blue-100"
+                : "data-[state=active]:bg-blue-600 data-[state=active]:text-white")}>
               SOP
             </TabsTrigger>
           </TabsList>
@@ -151,12 +151,12 @@ export function LiveIntelligencePanel({
                   Active Connection
                 </span>
               </div>
-              
+
               <div className="font-mono text-xs flex flex-col gap-3 leading-relaxed max-h-[240px] overflow-y-auto pr-1">
-                {activeIncident.transcript.length === 0 ? (
+                {activeIncident?.transcript.length === 0 ? (
                   <div className="text-muted-foreground text-center py-4 text-xs italic">No transcript logs yet...</div>
                 ) : (
-                  activeIncident.transcript.map((line, i) => (
+                  activeIncident?.transcript.map((line, i) => (
                     <div key={i} className="flex gap-2">
                       <span className="text-muted-foreground w-11 shrink-0 select-none text-[10px]">{line.time}</span>
                       <div className="flex-1">
@@ -224,35 +224,35 @@ export function LiveIntelligencePanel({
                   <div className="flex justify-between items-baseline mb-1">
                     <span className="text-[10px] text-muted-foreground uppercase font-mono">AI Confidence</span>
                     <span className="text-xl font-extrabold tracking-tight text-red-500">
-                      {activeIncident.confidence}%
+                      {activeIncident?.confidence ?? 0}%
                     </span>
                   </div>
-                  <Progress value={activeIncident.confidence} className="h-1.5 **:data-[slot=progress-indicator]:bg-red-500" />
+                  <Progress value={activeIncident?.confidence ?? 0} className="h-1.5 **:data-[slot=progress-indicator]:bg-red-500" />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <p className={cn("text-xs leading-relaxed font-mono p-2.5 rounded-lg border", 
+                <p className={cn("text-xs leading-relaxed font-mono p-2.5 rounded-lg border",
                   isDark ? "bg-black/20 border-slate-800 text-slate-300" : "bg-white border-slate-100 text-slate-600"
                 )}>
-                  {activeIncident.reason}
+                  {activeIncident?.reason}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className={cn("p-2 rounded-lg border text-center", isDark ? "bg-black/20 border-slate-800" : "bg-white border-slate-100")}>
                     <div className="text-[9px] font-bold uppercase text-muted-foreground font-mono mb-0.5">Distress Score</div>
-                    <div className="text-base font-extrabold text-red-500">{activeIncident.distressScore}</div>
+                    <div className="text-base font-extrabold text-red-500">{activeIncident?.distressScore}</div>
                   </div>
                   <div className={cn("p-2 rounded-lg border text-center", isDark ? "bg-black/20 border-slate-800" : "bg-white border-slate-100")}>
                     <div className="text-[9px] font-bold uppercase text-muted-foreground font-mono mb-0.5">Panic Level</div>
-                    <div className="text-base font-extrabold text-red-500">{activeIncident.panicLevel}</div>
+                    <div className="text-base font-extrabold text-red-500">{activeIncident?.panicLevel}</div>
                   </div>
                 </div>
 
                 <div className="pt-1">
                   <div className="text-[9px] font-bold uppercase text-muted-foreground font-mono mb-1.5">Extracted Entities</div>
                   <div className="flex flex-wrap gap-1.5">
-                    {activeIncident.entities.map((e) => (
+                    {activeIncident?.entities.map((e) => (
                       <Badge key={e} variant="secondary" className="text-[9px] font-mono px-2 py-0.5 rounded-md">
                         {e}
                       </Badge>
@@ -260,12 +260,12 @@ export function LiveIntelligencePanel({
                   </div>
                 </div>
 
-                {activeIncident.contradiction && (
+                {activeIncident?.contradiction && (
                   <Alert variant="destructive" className="border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400">
                     <AlertCircle className="w-4 h-4" />
                     <AlertTitle className="font-mono text-[10px] font-bold uppercase tracking-wider">Contradiction Warning</AlertTitle>
                     <AlertDescription className="font-mono text-[10px] leading-snug mt-0.5">
-                      {activeIncident.contradiction}
+                      {activeIncident?.contradiction}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -284,11 +284,11 @@ export function LiveIntelligencePanel({
                   SOP PROTOCOL
                 </span>
                 <Badge variant="outline" className="text-[9px] border-blue-500/30 text-blue-500 bg-blue-500/5 font-mono px-1.5 py-0 h-4">
-                  {activeIncident.sopCitation}
+                  {activeIncident?.sopCitation}
                 </Badge>
               </div>
               <ol className="space-y-2">
-                {activeIncident.sopProcedure.map((step, i) => (
+                {activeIncident?.sopProcedure.map((step, i) => (
                   <li key={i} className={cn(
                     "flex items-start gap-2.5 text-xs p-2 rounded-lg border",
                     isDark ? "bg-black/10 border-slate-800/50 text-slate-300" : "bg-white border-slate-100 text-slate-700"
@@ -314,12 +314,12 @@ export function LiveIntelligencePanel({
       )}>
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-bold text-xs uppercase tracking-wider">{activeIncident.responder?.name}</div>
+            <div className="font-bold text-xs uppercase tracking-wider">{activeIncident?.responder?.name}</div>
             <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
-              {activeIncident.responder?.type} • ETA: {activeIncident.responder?.eta}
+              {activeIncident?.responder?.type} • ETA: {activeIncident?.responder?.eta}
             </div>
           </div>
-          {activeIncident.status?.dispatch === 'DISPATCHED' && (
+          {activeIncident?.status?.dispatch === 'DISPATCHED' && (
             <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-mono text-[9px] uppercase">
               Dispatched
             </Badge>
@@ -330,16 +330,16 @@ export function LiveIntelligencePanel({
             type="button"
             variant="default"
             size="sm"
-            onClick={() => onDispatch(activeIncident.id, activeIncident.responder.name)}
+            onClick={() => onDispatch(activeIncident?.id, activeIncident?.responder.name)}
             className="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-[10px] uppercase tracking-wider h-9"
           >
-            Dispatch {activeIncident.responder.name}
+            Dispatch {activeIncident?.responder.name}
           </Button>
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => onOverride(activeIncident.id)}
+            onClick={() => onOverride(activeIncident?.id)}
             className="flex-1 font-bold text-[10px] uppercase tracking-wider border-red-500/40 text-red-500 hover:bg-red-500/10 h-9"
           >
             Override

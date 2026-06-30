@@ -4,7 +4,8 @@ import io
 from fastapi import WebSocketDisconnect
 
 from constants.file import to_voice_file_name
-from main import app, db_dependency
+from main import app
+from database import db_dependency
 from fastapi import WebSocket
 
 from modules import storage_module, call_module

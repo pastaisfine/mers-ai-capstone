@@ -4,9 +4,10 @@ import { SeverityType } from '../types';
 import { ShieldAlert } from 'lucide-react';
 import { Funnel } from 'lucide-react';
 import { Search } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ActiveIncidentsListBox } from './ActiveIncidentsListBox';
 import { useIncident } from '@/context/incident/useIncident';
+import { IncidentApi } from '@/apis/incidents';
 
 
 /**
@@ -19,8 +20,11 @@ export interface ActiveIncidentsListProps {
 }
 
 export function ActiveIncidentsList({ }: ActiveIncidentsListProps) {
-  const { incidents, selectedIncidentId, setSelectedIncidentId } = useIncident();
+  const { incidents, selectedIncidentId, setSelectedIncidentId, fetchIncidents } = useIncident();
 
+  useEffect(() => {
+    fetchIncidents()
+  }, [])
 
   // Incidents state
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,8 +42,7 @@ export function ActiveIncidentsList({ }: ActiveIncidentsListProps) {
         .toLowerCase()
         .includes(searchQuery.toLocaleLowerCase());
 
-      const matchesSearchLocation = incident.location
-        .toLowerCase()
+      const matchesSearchLocation = incident.location?.toLowerCase()
         .includes(searchQuery.toLocaleLowerCase());
 
       const matchesSeverity =

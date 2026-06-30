@@ -3,7 +3,8 @@ from datetime import datetime
 from twilio.twiml.voice_response import VoiceResponse, Connect, Dial
 
 from environment import RETELL_AGENT_ID, TWILIO_PHONE_NUMBER
-from main import app, db_dependency
+from main import app
+from database import db_dependency
 from fastapi import Request, Form, Response
 
 from models.database.call import InitCallPayload

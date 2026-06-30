@@ -19,11 +19,11 @@ export function TimelineCard({ activeIncident }: {
                 EVENT TIMELINE
             </h3>
             <span className={`text-[10px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                {activeIncident.timeline.length} events
+                {activeIncident?.timeline.length ?? 0} events
             </span>
         </div>
         <ul className="space-y-1 text-[11px] font-mono max-h-28 overflow-y-auto pr-1">
-            {activeIncident.timeline.map((entry, i) => (
+            {activeIncident?.timeline.map((entry, i) => (
                 <li
                     key={i}
                     className={`flex gap-2 leading-relaxed ${entry.isAlert

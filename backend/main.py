@@ -1,17 +1,17 @@
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Annotated
 
 import math
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import convertor
-from apis.base import incident_router
+from apis.incidents import router as incident_router
 from constants import file
 from constants.queue import EMOTION_ANALYSIS_QUEUE
 from constants.redis_key import get_redis_emotional_analysis_key
-from database import SessionLocal, engine
+from database import SessionLocal, engine, get_db
+from environment import ALLOW_ORIGINS
 from ml_models import audio_classification_model
 from models.database.ai_emotion_analysis import InitAiEmotionAnalysisPayload
 from models.redis.ai_emotion_analysis import RedisEmotionAnalysisHash
@@ -25,10 +25,11 @@ def _perform_emotional_analysis(voice_bytes, start, end) -> RedisEmotionAnalysis
     duration = 5
     clipped_voice_bytes = sound_module.get_audio_clip_part(voice_bytes, start=start, duration=duration)
     emotion_logits = audio_classification_model.generate_emotion_logits(clipped_voice_bytes)
+
     return RedisEmotionAnalysisHash(
         start=start,
         end=end,
-        emotion_logits=emotion_logits,
+        emotion_logits=emotion_logits.tolist() if emotion_logits is not None else None,
     )
 
 
@@ -103,15 +104,6 @@ def db_setup():
     models.Base.metadata.create_all(engine)
 
 db_setup()
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 @asynccontextmanager
 async def lifespan(app: MersAIBackendApp):
@@ -129,3 +121,16 @@ async def lifespan(app: MersAIBackendApp):
         print("RabbitMQ emotion analyse consumer successfully stopped.")
 
 app.include_router(incident_router)
+import apis.twilio_api
+import apis.sse
+import apis.websocket
+
+origins = ALLOW_ORIGINS
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

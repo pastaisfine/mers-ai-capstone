@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 from uuid_v7.base import uuid7
 
-from main import db_dependency
+from database import db_dependency
 from models.database.call import InitCallPayload, UpdateCallPayload
 from models.schema import Call
 import modules.db_module as db_module

@@ -18,3 +18,6 @@ SUPABASE_KEY=os.getenv("SUPABASE_KEY")
 RABBIT_HOST=os.getenv("RABBIT_HOST")
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_EXPIRE_DURATION_IN_SECONDS= os.getenv("REDIS_EXPIRE_DURATION_IN_SECONDS", "300")
+ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS").split(",") if os.getenv("ALLOW_ORIGINS") is not None else None
+
+

@@ -1,7 +1,7 @@
 import { ArchivedReport as ArchivedReportModel } from "./models/report";
 export interface Incident {
   id: string;
-  type: "medical" | "fire" | "crime" | "accident" | "flood";
+  type?: "medical" | "fire" | "crime" | "accident" | "flood";
   title: string;
   location: string;
   severity:
@@ -37,7 +37,7 @@ export interface Incident {
     text: string;
     highlight?: boolean;
   }[];
-  coordinates: { x: number; y: number; lat: number; lng: number };
+  coordinates?: { lat: number; lng: number };
   status: {
     location?: string;
     transcription?: string;
