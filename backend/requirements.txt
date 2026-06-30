@@ -3,3 +3,17 @@ python-dotenv
 sqlalchemy
 psycopg2
 alembic
+twilio
+websockets
+retell-sdk
+transformers
+torch
+
+numpy
+pydantic
+supabase
+pika
+aio_pika
+redis[hiredis]
+soundfile
+uuid-v7

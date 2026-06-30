@@ -28,7 +28,7 @@ export function EmotionalAnalysis({ incident, compact }: EmotionalAnalysisProps)
             panicClass
           )}
         >
-          {incident.panicLevel.toUpperCase()}
+          {incident.panicLevel?.toUpperCase()}
         </Badge>
       </div>
 

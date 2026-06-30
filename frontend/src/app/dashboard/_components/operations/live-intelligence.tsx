@@ -25,14 +25,14 @@ export function LiveIntelligence() {
 
       {/* Emotional analysis — top */}
       <div className="shrink-0 border-b bg-muted/10 p-4">
-        <EmotionalAnalysis incident={activeIncident} />
+        {activeIncident && <EmotionalAnalysis incident={activeIncident} />}
       </div>
 
       <Separator className="shrink-0" />
 
       {/* Transcript — fills remaining height */}
       <div className="flex min-h-0 flex-1 flex-col p-4">
-        <TranscriptFeed incident={activeIncident} fillHeight />
+        {activeIncident && <TranscriptFeed incident={activeIncident} fillHeight />}
       </div>
     </aside>
   )
