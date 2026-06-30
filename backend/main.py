@@ -7,6 +7,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
 import convertor
+from apis.base import incident_router
 from constants import file
 from constants.queue import EMOTION_ANALYSIS_QUEUE
 from constants.redis_key import get_redis_emotional_analysis_key
@@ -18,7 +19,6 @@ from modules import storage_module, sound_module, db_module, ai_emotion_analysis
 from modules.pika_module import PikaPublisher, PikaConsumer
 from modules.redis_module import redis_client
 import models.schema as models
-import apis.incidents as incidents_api
 
 
 def _perform_emotional_analysis(voice_bytes, start, end) -> RedisEmotionAnalysisHash:
@@ -128,4 +128,4 @@ async def lifespan(app: MersAIBackendApp):
     except asyncio.CancelledError:
         print("RabbitMQ emotion analyse consumer successfully stopped.")
 
-app.include_router(incidents_api.router)
+app.include_router(incident_router)
