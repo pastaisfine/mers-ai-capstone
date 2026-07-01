@@ -68,7 +68,7 @@ export function TacticalWorkspace({
                 {activeIncident.id}
               </span>
               <span className={`text-[10px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                · {activeIncident.type.toUpperCase()}
+                · {activeIncident?.type?.toUpperCase()}
               </span>
             </div>
             <h1
