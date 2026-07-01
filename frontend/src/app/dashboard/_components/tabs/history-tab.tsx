@@ -128,7 +128,7 @@ export function HistoryTab() {
     { label: "Dispatched",      value: totalApproved,             icon: CheckCircle2,  iconColor: "text-secondary",   iconBg: "bg-secondary/15",   sub: "Approved & deployed" },
     { label: "Rejected / False",value: totalRejected,             icon: XCircle,       iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "No resources deployed" },
     { label: "Approval Rate",   value: `${approvalRate}%`,        icon: ThumbsUp,      iconColor: "text-primary",     iconBg: "bg-primary/15",     sub: "SLA target 95%" },
-    { label: "Avg Response",    value: formatResponseTime(avgResponseSecs), icon: Timer, iconColor: "text-warning", iconBg: "bg-warning/15",     sub: "Call to dispatch" },
+    { label: "Avg Response",    value: formatResponseTime(avgResponseSecs), icon: Timer, iconColor: "text-warning", iconBg: "bg-warning/15",     sub: "End call to Dispatch Request" },
     { label: "Human Involved",  value: humanInvolved,             icon: HeartPulse,    iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "Override or assist" },
   ]
 
