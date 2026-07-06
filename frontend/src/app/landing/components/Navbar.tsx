@@ -29,7 +29,7 @@ export default function Navbar() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-background/85 backdrop-blur-[20px] border-b border-white/6'
-          : 'bg-transparent border-b-transparent'
+          : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent border-b-transparent'
       }`}
     >
       <div className="container">
