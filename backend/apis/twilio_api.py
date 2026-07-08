@@ -2,27 +2,20 @@ from datetime import datetime
 
 from twilio.twiml.voice_response import VoiceResponse, Connect, Dial
 
-from environment import RETELL_AGENT_ID, TWILIO_PHONE_NUMBER
 from main import app
 from database import db_dependency
 from fastapi import Request, Form, Response
 
 from models.database.call import InitCallPayload
 from models.database.incident import InitIncidentPayload
-from modules import call_module, db_module, incident_module
-from retell_module import retell_client
+from modules import call_module, db_module, incident_module, retell_module
 
 
 @app.post("/voice")
-async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...), CallSid: str = Form(...)):
-    caller_number = From
-    print(caller_number)
-    phone_call_response = retell_client.call.register_phone_call(
-        agent_id=RETELL_AGENT_ID,
-        from_number=caller_number,
-        to_number=TWILIO_PHONE_NUMBER,
-        direction="inbound"
-    )
+async def twilio_webhook(req: Request, db: db_dependency, From: str = Form(...), CallSid: str = Form(...), To: str = Form(...)):
+    # TODO: Pass created agent ID to this response to use custom agent
+    phone_call_response = retell_module.register_phone_call(From, To)
+
     response = VoiceResponse()
     dial = Dial()
     dial.sip(f"sip:{phone_call_response.call_id}@sip.retellai.com")

@@ -7,8 +7,7 @@ from database import db_dependency
 from environment import RETELL_AGENT_ID
 from main import app
 from models.schema import Call, CallTranscript
-from modules.connection_modules import CONNECTED_SSE_CLIENTS
-from retell_module import retell_client
+from modules.retell_module import retell_client
 from uuid_v7.base import uuid7
 
 
