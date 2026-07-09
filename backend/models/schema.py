@@ -80,7 +80,6 @@ class CallTranscript(BaseTable):
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     transcript = Column(String, nullable=False)
     role = Column(String, nullable=False, server_default="user")  # "agent" or "user"
-    seq = Column(Integer, nullable=False)
 
 
 class AITriageAssessment(BaseTable):
