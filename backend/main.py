@@ -17,7 +17,6 @@ app.include_router(incident_router)
 import apis.twilio_api
 import apis.sse
 import apis.websocket
-import apis.retell_api
 
 origins = ALLOW_ORIGINS
 
