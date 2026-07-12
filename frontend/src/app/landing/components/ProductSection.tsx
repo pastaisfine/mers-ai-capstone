@@ -35,7 +35,7 @@ export default function ProductSection() {
   return (
     <section
       id="product"
-      className="py-24 relative bg-[oklch(0.08_0.01_160)] overflow-hidden"
+      className="py-24 relative bg-muted/35 dark:bg-[oklch(0.08_0.01_160)] overflow-hidden"
     >
       {/* Background glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[400px] opacity-[0.05] pointer-events-none bg-[radial-gradient(ellipse,oklch(0.67_0.19_162)_0%,transparent_70%)] blur-[60px]" />
@@ -64,18 +64,18 @@ export default function ProductSection() {
 
         {/* Dashboard mockup */}
         <div
-          className={`relative rounded-2xl overflow-hidden border border-emerald/20 shadow-[0_0_80px_oklch(0.67_0.19_162_/_0.08),_0_40px_80px_oklch(0_0_0_/_0.4)] transition-all duration-800 delay-[150ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          className={`relative rounded-2xl overflow-hidden border border-emerald/20 shadow-[0_0_80px_oklch(0.67_0.19_162_/_0.08),_0_30px_70px_oklch(0_0_0_/_0.12)] dark:shadow-[0_0_80px_oklch(0.67_0.19_162_/_0.08),_0_40px_80px_oklch(0_0_0_/_0.4)] transition-all duration-800 delay-[150ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
             inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
           {/* Browser chrome */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-[oklch(0.11_0.01_160)] border-b border-white/6">
+          <div className="flex items-center gap-2 px-4 py-3 bg-card border-b border-border dark:bg-[oklch(0.11_0.01_160)] dark:border-white/6">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-destructive" />
               <div className="w-3 h-3 rounded-full bg-[oklch(0.75_0.18_80)]" />
               <div className="w-3 h-3 rounded-full bg-emerald" />
             </div>
-            <div className="flex-1 mx-4 rounded-md px-3 py-1 text-center bg-[oklch(0.14_0.01_160)] border border-white/6 font-mono text-[0.7rem] text-slate-400">
+            <div className="flex-1 mx-4 rounded-md px-3 py-1 text-center bg-muted border border-border font-mono text-[0.7rem] text-muted-foreground dark:bg-[oklch(0.14_0.01_160)] dark:border-white/6">
               mers-ai.gov.my/dashboard
             </div>
             <div className="emerald-badge text-xs">
@@ -92,7 +92,7 @@ export default function ProductSection() {
           />
 
           {/* Bottom overlay gradient */}
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-[linear-gradient(to_top,oklch(0.08_0.01_160_/_0.8),oklch(0.08_0.01_160_/_0))]" />
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-[linear-gradient(to_top,hsl(var(--background)_/_0.5),hsl(var(--background)_/_0))] dark:bg-[linear-gradient(to_top,oklch(0.08_0.01_160_/_0.8),oklch(0.08_0.01_160_/_0))]" />
         </div>
 
         {/* Stats row */}
@@ -115,7 +115,7 @@ export default function ProductSection() {
                   <div className="font-display font-bold text-[1.2rem] text-foreground leading-none">
                     {stat.value}
                   </div>
-                  <div className="font-body text-[0.75rem] text-slate-400">
+                  <div className="font-body text-[0.75rem] text-muted-foreground">
                     {stat.label}
                   </div>
                 </div>

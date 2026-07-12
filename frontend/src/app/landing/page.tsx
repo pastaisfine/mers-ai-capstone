@@ -15,10 +15,7 @@ import Footer from './components/Footer';
 
 export default function Home() {
   return (
-    <div
-      className="min-h-screen overflow-x-hidden w-full relative"
-      style={{ background: 'oklch(0.09 0.012 160)' }}
-    >
+    <div className="min-h-screen overflow-x-hidden w-full relative bg-background text-foreground">
       <Navbar />
       <HeroSection />
       <ProblemSection />

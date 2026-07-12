@@ -82,7 +82,7 @@ export default function FeaturesSection() {
   return (
     <section
       id="features"
-      className="py-24 relative bg-[oklch(0.08_0.01_160)] overflow-hidden"
+      className="py-24 relative bg-muted/35 dark:bg-[oklch(0.08_0.01_160)] overflow-hidden"
     >
       {/* Emerald glow blob */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] opacity-[0.06] pointer-events-none bg-[radial-gradient(ellipse,oklch(0.67_0.19_162)_0%,transparent_70%)] blur-[40px]" />
@@ -131,7 +131,7 @@ export default function FeaturesSection() {
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald/12 border border-emerald-400 bg-emerald-950">
                     <Icon size={18} className="text-emerald-500" />
                   </div>
-                  <span className="font-mono text-[0.7rem] text-slate-400 bg-white/4 border border-white/7 rounded-full px-2.5 py-1">
+                  <span className="font-mono text-[0.7rem] text-muted-foreground bg-background/70 border border-border rounded-full px-2.5 py-1 dark:bg-white/4 dark:border-white/7">
                     {feat.tag}
                   </span>
                 </div>
@@ -152,7 +152,7 @@ export default function FeaturesSection() {
 
         {/* Agent network illustration */}
         <div
-          className={`mt-16 rounded-2xl overflow-hidden relative border border-white/6 transition-all duration-800 delay-[400ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          className={`mt-16 rounded-2xl overflow-hidden relative border border-border/70 dark:border-white/6 transition-all duration-800 delay-[400ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
             inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         />

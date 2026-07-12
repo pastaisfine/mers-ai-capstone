@@ -31,7 +31,7 @@ export default function CTASection() {
     >
       <div className="container" ref={ref}>
         <div
-          className={`relative rounded-3xl overflow-hidden p-12 md:p-16 text-center bg-[linear-gradient(135deg,oklch(0.12_0.015_160)_0%,oklch(0.11_0.02_165)_50%,oklch(0.12_0.015_160)_100%)] border border-emerald/20 shadow-[0_0_60px_oklch(0.67_0.19_162_/_0.06)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          className={`relative rounded-3xl overflow-hidden p-12 md:p-16 text-center bg-card border border-emerald/20 shadow-[0_0_60px_oklch(0.67_0.19_162_/_0.06)] dark:bg-[linear-gradient(135deg,oklch(0.12_0.015_160)_0%,oklch(0.11_0.02_165)_50%,oklch(0.12_0.015_160)_100%)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
@@ -66,7 +66,7 @@ export default function CTASection() {
 
             </div>
 
-            <p className="mt-4 font-mono text-[0.72rem] text-slate-500">
+            <p className="mt-4 font-mono text-[0.72rem] text-muted-foreground">
               Secure access · Authorized personnel only
             </p>
           </div>
