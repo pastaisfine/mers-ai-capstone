@@ -166,7 +166,7 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
               />
             </div>
 
-            {MAPBOX_TOKEN && (
+            {/* {MAPBOX_TOKEN && (
               <div className="overflow-hidden rounded-lg border">
                 <Map
                   mapboxAccessToken={MAPBOX_TOKEN}
@@ -188,7 +188,7 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
                   </Marker>
                 </Map>
               </div>
-            )}
+            )} */}
 
             <Button variant="outline" size="sm" className="w-full" asChild>
               <a

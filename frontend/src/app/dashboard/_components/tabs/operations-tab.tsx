@@ -53,7 +53,7 @@ export function OperationsTab() {
         </div>
       )}
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_1fr] overflow-hidden md:grid-cols-[minmax(280px,26%)_1fr] md:grid-rows-1 lg:grid-cols-[minmax(320px,26%)_1fr_minmax(280px,28%)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_1fr] overflow-hidden md:grid-cols-[auto_1fr] md:grid-rows-1 lg:grid-cols-[auto_1fr_minmax(280px,28%)]">
         <IncidentList />
 
         <div className="relative min-h-0 overflow-hidden border-t md:border-t-0 md:border-l lg:border-r-0">

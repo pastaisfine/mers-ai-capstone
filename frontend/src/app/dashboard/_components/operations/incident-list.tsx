@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Filter, Flame, Heart, Shield, Car, Droplets, Search, ShieldAlert } from "lucide-react"
+import { Filter, Flame, Heart, Shield, Car, Droplets, Search, ShieldAlert, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
@@ -21,17 +21,17 @@ import type { Incident } from "@/types"
 /* ─── Severity colour maps ──────────────────────────────────────────────── */
 
 const SEVERITY_BORDER: Record<string, string> = {
-  [SeverityType.CRITICAL]: "border-destructive/70",
-  [SeverityType.URGENT]: "border-warning/70",
-  [SeverityType.MODERATE]: "border-primary/70",
-  [SeverityType.RESOLVED]: "border-secondary/70",
+  [SeverityType.CRITICAL]: "border-gray hover:border-destructive hover:border-2",
+  [SeverityType.URGENT]: "border-gray hover:border-warning hover:border-2",
+  [SeverityType.MODERATE]: "border-gray hover:border-primary hover:border-2",
+  [SeverityType.RESOLVED]: "border-gray hover:border-secondary hover:border-2",
 }
 
 const SEVERITY_BORDER_SELECTED: Record<string, string> = {
-  [SeverityType.CRITICAL]: "border-destructive",
-  [SeverityType.URGENT]: "border-warning",
-  [SeverityType.MODERATE]: "border-primary",
-  [SeverityType.RESOLVED]: "border-secondary",
+  [SeverityType.CRITICAL]: "border-destructive border-2",
+  [SeverityType.URGENT]: "border-warning border-2",
+  [SeverityType.MODERATE]: "border-primary border-2",
+  [SeverityType.RESOLVED]: "border-secondary border-2",
 }
 
 const SEVERITY_BADGE: Record<string, string> = {
@@ -93,6 +93,7 @@ export function IncidentList() {
   const { incidents, selectedIncidentId, setSelectedIncidentId, fetchIncidents } = useIncident()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterSeverity, setFilterSeverity] = useState<SeverityType>(SeverityType.ALL)
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     fetchIncidents()
@@ -126,7 +127,7 @@ export function IncidentList() {
             type="button"
             onClick={() => setSelectedIncidentId(incident.id)}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-full border-2 px-3 py-1.5 transition-all duration-150",
+              "flex shrink-0 items-center gap-2 rounded-full border-1 px-3 py-1.5 transition-all duration-150",
               selectedIncidentId === incident.id
                 ? cn(SEVERITY_BORDER_SELECTED[incident.severity], SEVERITY_SELECTED_BG[incident.severity])
                 : cn(SEVERITY_BORDER[incident.severity], "hover:brightness-110")
@@ -141,115 +142,154 @@ export function IncidentList() {
       </div>
 
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden min-h-0 flex-col border-r bg-card md:flex">
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
-          <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            <ShieldAlert className="size-3.5 text-destructive" />
-            Active ({activeIncidents.length})
-          </h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-xs" className="text-muted-foreground">
-                <Filter className="size-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuRadioGroup
-                value={filterSeverity}
-                onValueChange={(v) => setFilterSeverity(v as SeverityType)}
-              >
-                <DropdownMenuRadioItem value={SeverityType.ALL}>All</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={SeverityType.CRITICAL}>Critical</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={SeverityType.URGENT}>Urgent</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={SeverityType.MODERATE}>Moderate</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <aside className={cn(
+        "hidden min-h-0 flex-col border-r bg-card transition-all duration-300 md:flex",
+        collapsed ? "w-12" : "w-[350px]"
+      )}>
+        {collapsed ? (
+          <div className="flex h-full flex-col items-center gap-0 py-2">
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              title="Expand sidebar"
+              className="mb-2 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <PanelLeftOpen className="size-4" />
+            </button>
 
-        {/* Search */}
-        <div className="relative shrink-0 border-b px-3 py-2.5">
-          <Search className="absolute left-6 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search code, address..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 border-muted bg-muted/30 pl-8 text-xs"
-          />
-        </div>
+            <div className="mx-2 mb-2 h-px w-6 bg-border" />
 
-        {/* Incident cards */}
-        <ScrollArea className="min-h-0 flex-1">
-          <div className="space-y-2 p-2">
-            {results.map((incident) => {
-              const selected = selectedIncidentId === incident.id
-              const TypeIcon = TYPE_ICON[incident.type] ?? Shield
+            <div className="mb-1 flex flex-col items-center gap-1">
+              <div className="relative">
+                <ShieldAlert className="size-4 text-destructive" />
+                <span className="absolute -right-1.5 -top-1 flex size-3.5 items-center justify-center rounded-full bg-destructive text-[8px] font-bold text-white">
+                  {activeIncidents.length}
+                </span>
+              </div>
+              <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                Active
+              </span>
+            </div>
 
-              return (
-                <button
-                  key={incident.id}
-                  type="button"
-                  onClick={() => setSelectedIncidentId(incident.id)}
-                  className={cn(
-                    "w-full rounded-lg border-2 p-3 text-left transition-all duration-200",
-                    selected
-                      ? cn(
-                        SEVERITY_BORDER_SELECTED[incident.severity],
-                        SEVERITY_SELECTED_BG[incident.severity],
-                        SEVERITY_SELECTED_SHADOW[incident.severity]
-                      )
-                      : cn(
-                        SEVERITY_BORDER[incident.severity],
-                        SEVERITY_BASE_SHADOW[incident.severity],
-                        SEVERITY_HOVER_SHADOW[incident.severity]
-                      )
-                  )}
-                >
-                  {/* Row 1: severity badge + time */}
-                  <div className="mb-2 flex items-center  justify-between gap-2">
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest",
-                        SEVERITY_BADGE[incident.severity]
-                      )}
-                    >
-                      {incident.severity}
-                    </span>
-                    {/* <span className="shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
-                      {timeAgo(incident.occurDateTime)}
-                    </span> */}
-
-                    {/* Incident ID */}
-                    <p className="mt-2 font-mono text-[9px] text-muted-foreground/70">
-                      {incident.id}
-                    </p>
-                  </div>
-
-                  {/* Row 2: icon + title + location */}
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={cn(
-                        "flex size-8 shrink-0 items-center justify-center rounded-lg",
-                        TYPE_ICON_STYLE[incident.type]
-                      )}
-                    >
-                      <TypeIcon className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold leading-snug">
-                        {incident.title}
-                      </p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {incident.location}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
           </div>
-        </ScrollArea>
+        ) : (
+          <>
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
+              <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                <ShieldAlert className="size-3.5 text-destructive" />
+                Active ({activeIncidents.length})
+              </h2>
+              <div className="flex items-center gap-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon-xs" className="text-muted-foreground">
+                      <Filter className="size-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup
+                      value={filterSeverity}
+                      onValueChange={(v) => setFilterSeverity(v as SeverityType)}
+                    >
+                      <DropdownMenuRadioItem value={SeverityType.ALL}>All</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={SeverityType.CRITICAL}>Critical</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={SeverityType.URGENT}>Urgent</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={SeverityType.MODERATE}>Moderate</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-muted-foreground"
+                  onClick={() => setCollapsed(true)}
+                  title="Collapse sidebar"
+                >
+                  <PanelLeftClose className="size-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="relative shrink-0 border-b px-3 py-2.5">
+              <Search className="absolute left-6 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search code, address..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 border-muted bg-muted/30 pl-8 text-xs"
+              />
+            </div>
+
+            {/* Incident cards */}
+            <ScrollArea className="min-h-0 flex-1">
+              <div className="space-y-2 p-2">
+                {results.map((incident) => {
+                  const selected = selectedIncidentId === incident.id
+                  const TypeIcon = TYPE_ICON[incident.type] ?? Shield
+
+                  return (
+                    <button
+                      key={incident.id}
+                      type="button"
+                      onClick={() => setSelectedIncidentId(incident.id)}
+                      className={cn(
+                        "w-full rounded-lg border-1 p-3 text-left transition-all duration-200",
+                        selected
+                          ? cn(
+                            SEVERITY_BORDER_SELECTED[incident.severity],
+                            SEVERITY_SELECTED_BG[incident.severity],
+                            SEVERITY_SELECTED_SHADOW[incident.severity]
+                          )
+                          : cn(
+                            SEVERITY_BORDER[incident.severity],
+                            SEVERITY_BASE_SHADOW[incident.severity],
+                            SEVERITY_HOVER_SHADOW[incident.severity]
+                          )
+                      )}
+                    >
+                      {/* Row 1: severity badge + time */}
+                      <div className="mb-2 flex items-center  justify-between gap-2">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest",
+                            SEVERITY_BADGE[incident.severity]
+                          )}
+                        >
+                          {incident.severity}
+                        </span>
+                        <p className="mt-2 font-mono text-[9px] text-muted-foreground/70">
+                          {incident.id}
+                        </p>
+                      </div>
+
+                      {/* Row 2: icon + title + location */}
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={cn(
+                            "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                            TYPE_ICON_STYLE[incident.type]
+                          )}
+                        >
+                          <TypeIcon className="size-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold leading-snug">
+                            {incident.title}
+                          </p>
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {incident.location}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </ScrollArea>
+          </>
+        )}
       </aside>
     </>
   )

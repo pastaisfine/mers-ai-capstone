@@ -80,11 +80,11 @@ interface OverrideForm {
 function severityClassName(severity: Incident["severity"]) {
   switch (severity) {
     case SeverityType.CRITICAL:
-      return "bg-red-500 text-white"
+      return "bg-destructive text-white"
     case SeverityType.URGENT:
-      return "bg-orange-500 text-white"
+      return "bg-warning text-white"
     case SeverityType.MODERATE:
-      return "bg-blue-500 text-white"
+      return "bg-primary text-white"
     default:
       return ""
   }
@@ -456,7 +456,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               />
             </section>
 
-            <div className="flex flex-col gap-2 pt-1 sm:flex-row">
+            <div className="flex flex-col gap-2 pt-1 sm:flex-row mb-3">
               <Button
                 variant="outline"
                 className="flex-1 border-destructive/40 text-destructive hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:text-white dark:bg-destructive dark:hover:bg-red-800"
@@ -712,7 +712,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Responder</span>
-              <span className="font-medium">{incident.responder.name}</span>
+              <span className="text-right font-medium">{incident.responder.name}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Location</span>
