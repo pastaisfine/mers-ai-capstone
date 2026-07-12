@@ -1,12 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { Ambulance, ChevronDown, ChevronUp, XCircle, CheckCircle2 } from "lucide-react"
+import {
+  AlertTriangle,
+  Ambulance,
+  Brain,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  GripVertical,
+  Pencil,
+  User,
+  X,
+  XCircle,
+} from "lucide-react"
 import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -19,9 +33,53 @@ import { Label } from "@/components/ui/label"
 import { useIncident } from "@/context/incident/useIncident"
 import { useTime } from "@/context/time/useTime"
 import type { Incident } from "@/types"
+import { SeverityType } from "@/types"
+import { DispatchLocationPanel } from "./dispatch-location-panel"
+import {
+  LOCATION_OPTIONS,
+  RESPONDER_UNITS,
+  PANIC_LEVELS,
+  REJECT_REASON_PRESETS,
+  findLocationOption,
+  formatCallDuration,
+} from "./dispatch-constants"
+
+function MetricBar({ label, value, tone }: { label: string; value: number; tone?: "destructive" | "default" }) {
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-mono font-semibold ${tone === "destructive" ? "text-destructive" : ""}`}>
+        {value}
+      </span>
+    </div>
+  )
+}
 
 interface DispatchModalProps {
   incident: Incident
+}
+
+interface OverrideForm {
+  title: string
+  locationLabel: string
+  caller: string
+  severity: Incident["severity"]
+  panicLevel: string
+  responderNames: string[]
+  reason: string
+}
+
+function severityVariant(severity: Incident["severity"]) {
+  switch (severity) {
+    case SeverityType.CRITICAL:
+      return "destructive" as const
+    case SeverityType.URGENT:
+      return "secondary" as const
+    case SeverityType.MODERATE:
+      return "outline" as const
+    default:
+      return "outline" as const
+  }
 }
 
 export function DispatchModal({ incident }: DispatchModalProps) {
@@ -29,11 +87,55 @@ export function DispatchModal({ incident }: DispatchModalProps) {
   const [note, setNote] = useState("")
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState("")
+  const [overrideOpen, setOverrideOpen] = useState(false)
+  const [overrideForm, setOverrideForm] = useState<OverrideForm>({
+    title: "",
+    locationLabel: "",
+    caller: "",
+    severity: SeverityType.MODERATE,
+    panicLevel: "Moderate",
+    responderNames: [],
+    reason: "",
+  })
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false)
   const { setIncidents } = useIncident()
   const { currentTimeText } = useTime()
 
   const isPending = incident.status?.dispatch !== "DISPATCHED"
   const pendingCount = isPending ? 1 : 0
+
+  function buildOverrideForm(): OverrideForm {
+    const matchedLocation = LOCATION_OPTIONS.find(
+      (opt) => opt.label === incident.location || incident.location.includes(opt.label)
+    )
+    return {
+      title: incident.title,
+      locationLabel: matchedLocation?.label ?? "",
+      caller: incident.caller,
+      severity: incident.severity,
+      panicLevel: incident.panicLevel,
+      responderNames: [incident.responder.name],
+      reason: "",
+    }
+  }
+
+  function openOverrideDialog() {
+    setOverrideForm(buildOverrideForm())
+    setOverrideOpen(true)
+  }
+
+  function updateOverrideField<K extends keyof OverrideForm>(key: K, value: OverrideForm[K]) {
+    setOverrideForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  function toggleResponder(unit: string) {
+    setOverrideForm((prev) => {
+      const names = prev.responderNames.includes(unit)
+        ? prev.responderNames.filter((n) => n !== unit)
+        : [...prev.responderNames, unit]
+      return { ...prev, responderNames: names }
+    })
+  }
 
   async function handleApprove() {
     try {
@@ -97,6 +199,67 @@ export function DispatchModal({ incident }: DispatchModalProps) {
     setExpanded(false)
   }
 
+  function handleOverride() {
+    const changes: string[] = []
+
+    if (overrideForm.title !== incident.title)
+      changes.push(`title → "${overrideForm.title}"`)
+
+    const matchedLoc = findLocationOption(overrideForm.locationLabel)
+    if (overrideForm.locationLabel !== incident.location && matchedLoc)
+      changes.push(`location → "${overrideForm.locationLabel}"`)
+
+    if (overrideForm.caller !== incident.caller)
+      changes.push(`caller → "${overrideForm.caller}"`)
+
+    if (overrideForm.severity !== incident.severity)
+      changes.push(`severity → ${overrideForm.severity}`)
+
+    if (overrideForm.panicLevel !== incident.panicLevel)
+      changes.push(`panic → ${overrideForm.panicLevel}`)
+
+    const responderJoined = overrideForm.responderNames.join(", ")
+    if (responderJoined !== incident.responder.name)
+      changes.push(`responder → "${responderJoined}"`)
+
+    if (changes.length === 0) {
+      setOverrideOpen(false)
+      return
+    }
+
+    setIncidents((prev) =>
+      prev.map((inc) =>
+        inc.id === incident.id
+          ? {
+              ...inc,
+              title: overrideForm.title || inc.title,
+              location: matchedLoc ? matchedLoc.formatted : overrideForm.locationLabel || inc.location,
+              caller: overrideForm.caller || inc.caller,
+              severity: overrideForm.severity,
+              panicLevel: overrideForm.panicLevel,
+              responder: {
+                ...inc.responder,
+                name: responderJoined || inc.responder.name,
+              },
+              coordinates: matchedLoc
+                ? { lat: matchedLoc.lat, lng: matchedLoc.lng }
+                : inc.coordinates,
+              timeline: [
+                ...inc.timeline,
+                {
+                  time: currentTimeText,
+                  event: `Dispatcher override: ${changes.join("; ")}`,
+                },
+              ],
+            }
+          : inc
+      )
+    )
+
+    toast.info(`Override applied — ${changes.length} field(s) updated`)
+    setOverrideOpen(false)
+  }
+
   if (!isPending && !expanded) return null
 
   if (!expanded) {
@@ -120,94 +283,187 @@ export function DispatchModal({ incident }: DispatchModalProps) {
 
   return (
     <>
-      <Card className="absolute bottom-6 left-1/2 z-20 max-h-[70%] w-[96%] max-w-2xl -translate-x-1/2 overflow-hidden rounded-t-xl border shadow-2xl">
+      <Card className="absolute bottom-6 left-1/2 z-20 max-h-[78%] w-[96%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-t-xl border shadow-2xl">
         <CardContent className="p-0">
           <div className="flex items-center justify-between border-b bg-destructive/10 px-4 py-3">
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase">
-              🚨 Dispatch Request — {incident.id}
-            </h3>
-            <Button variant="ghost" size="icon-xs" onClick={() => setExpanded(false)}>
-              <ChevronDown className="size-4" />
-            </Button>
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="text-lg">🚨</span>
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-bold uppercase">
+                  Dispatch Request — {incident.id}
+                </h3>
+                <p className="truncate text-xs text-muted-foreground">
+                  {incident.title}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Badge variant={severityVariant(incident.severity)} className="uppercase">
+                {incident.severity}
+              </Badge>
+              <Badge variant="outline" className="font-mono">
+                P{incident.priority}
+              </Badge>
+              <Button variant="ghost" size="icon-xs" onClick={() => setExpanded(false)}>
+                <ChevronDown className="size-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="max-h-[50vh] space-y-4 overflow-y-auto p-4 text-sm">
-            <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Incident Summary
-              </p>
-              <p><strong>Type:</strong> {incident.title}</p>
-              <p><strong>Location:</strong> {incident.location}</p>
-              <p className="font-mono text-xs">
-                <strong>GPS:</strong> {incident.coordinates.lat.toFixed(3)}°N,{" "}
-                {incident.coordinates.lng.toFixed(3)}°E
-              </p>
-            </section>
-
-            <Separator />
-
-            <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Caller Intel
-              </p>
-              <p>
-                Language: {incident.lang} | Distress Score: {incident.distressScore}
-              </p>
-              <p>
-                Panic Level: {incident.panicLevel.toUpperCase()} | Confidence:{" "}
-                {incident.confidence}%
-              </p>
-              {incident.contradiction && (
-                <p className="mt-1 text-xs text-warning">
-                  ⚠ {incident.contradiction}
+          <div className="max-h-[58vh] space-y-4 overflow-y-auto p-4 text-sm">
+            <div className="grid gap-4 md:grid-cols-2">
+              <section className="space-y-3 rounded-lg border bg-muted/15 p-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <AlertTriangle className="size-3.5" />
+                  Incident Summary
                 </p>
-              )}
-            </section>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Type</span>
+                    <span className="text-right font-medium capitalize">
+                      {incident.type ?? "unknown"} — {incident.title}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Reported at</span>
+                    <span className="font-mono">{incident.occurDateTime}</span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Call duration</span>
+                    <span className="font-mono">{formatCallDuration(incident.duration)}</span>
+                  </div>
+                  <p className="rounded-md bg-background/80 p-2 text-[11px] leading-relaxed text-muted-foreground">
+                    {incident.reason}
+                  </p>
+                </div>
+              </section>
+
+              <section className="space-y-3 rounded-lg border bg-muted/15 p-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <Brain className="size-3.5" />
+                  Caller Intel
+                </p>
+                <div className="space-y-2">
+                  <div className="rounded-md bg-background/80 px-2 py-1.5 text-xs">
+                    <div className="flex items-center gap-2">
+                      <User className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="font-semibold">{incident.caller}</span>
+                      <Badge variant="outline" className="ml-auto text-[10px]">
+                        {incident.lang}
+                      </Badge>
+                    </div>
+                  </div>
+                  <MetricBar
+                    label="Distress Score"
+                    value={incident.distressScore}
+                    tone="destructive"
+                  />
+                  <MetricBar label="AI Confidence" value={incident.confidence} />
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Panic level</span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                        incident.panicLevel === "Extreme"
+                          ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                          : incident.panicLevel === "High"
+                            ? "bg-orange-500/15 text-orange-600 dark:text-orange-400"
+                            : incident.panicLevel === "Moderate"
+                              ? "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400"
+                              : incident.panicLevel === "Low"
+                                ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                                : "bg-green-500/15 text-green-600 dark:text-green-400"
+                      }`}
+                    >
+                      {incident.panicLevel}
+                    </span>
+                  </div>
+                  {incident.contradiction && (
+                    <p className="rounded-md border border-warning/30 bg-warning/10 p-2 text-[11px] text-warning">
+                      ⚠ {incident.contradiction}
+                    </p>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <DispatchLocationPanel incident={incident} />
 
             <Separator />
 
-            <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <section className="space-y-2 rounded-lg border bg-muted/15 p-3">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                <Ambulance className="size-3.5 text-secondary" />
                 Assigned Responder
               </p>
-              <p className="flex items-center gap-2">
-                <Ambulance className="size-4 text-secondary" />
-                {incident.responder.name} — {incident.responder.type}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Distance: {incident.responder.distance} | ETA: {incident.responder.eta}
-                {incident.responder.paramedic && ` | Paramedic: ${incident.responder.paramedic}`}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-medium">{incident.responder.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {incident.responder.type}
+                  </p>
+                </div>
+                <Badge variant="secondary">{incident.responder.status}</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div className="rounded-md bg-background/80 p-2">
+                  <p className="text-muted-foreground">Distance</p>
+                  <p className="font-mono font-semibold">{incident.responder.distance}</p>
+                </div>
+                <div className="rounded-md bg-background/80 p-2">
+                  <p className="text-muted-foreground">ETA</p>
+                  <p className="flex items-center justify-center gap-1 font-mono font-semibold">
+                    <Clock className="size-3" />
+                    {incident.responder.eta}
+                  </p>
+                </div>
+                <div className="rounded-md bg-background/80 p-2">
+                  <p className="text-muted-foreground">Lead</p>
+                  <p className="font-semibold">
+                    {incident.responder.paramedic ?? "—"}
+                  </p>
+                </div>
+              </div>
             </section>
 
-            <Separator />
-
             <section>
-              <Label htmlFor="dispatcher-note" className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <Label
+                htmlFor="dispatcher-note"
+                className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+              >
                 Dispatcher Note (optional)
               </Label>
               <Input
                 id="dispatcher-note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Add dispatch note..."
+                placeholder="Add dispatch note before approval..."
                 className="mt-2"
               />
             </section>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-2 pt-1 sm:flex-row">
               <Button
                 variant="outline"
-                className="flex-1 text-destructive hover:text-destructive"
+                className="flex-1 border-destructive/40 text-destructive hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:text-white dark:bg-destructive dark:hover:bg-red-800"
                 onClick={() => setRejectOpen(true)}
               >
                 <XCircle className="mr-2 size-4" />
                 Reject Request
               </Button>
+
               <Button
-                variant="secondary"
-                className="flex-1"
-                onClick={handleApprove}
+                variant="outline"
+                className="flex-1 border-amber-400/60 bg-amber-300/20 text-amber-900 hover:border-amber-400 hover:bg-amber-300/40 dark:bg-amber-400 dark:text-white dark:hover:bg-amber-600"
+                onClick={openOverrideDialog}
+              >
+                <Pencil className="mr-2 size-4" />
+                Override Request
+              </Button>
+
+              <Button
+                variant="outline"
+                className="flex-1 border-secondary bg-secondary text-black hover:border-secondary hover:bg-secondary/80 dark:text-white dark:hover:bg-emerald-600 dark:bg-secondary"
+                onClick={() => setApproveConfirmOpen(true)}
               >
                 <CheckCircle2 className="mr-2 size-4" />
                 Approve & Dispatch
@@ -226,11 +482,37 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               {incident.id}.
             </DialogDescription>
           </DialogHeader>
-          <Input
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Rejection reason..."
-          />
+          <div className="space-y-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="reject-reason-select">Rejection reason</Label>
+              <select
+                id="reject-reason-select"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="">Select a reason...</option>
+                {REJECT_REASON_PRESETS.map((preset) => (
+                  <option key={preset.value} value={preset.label}>
+                    {preset.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="reject-reason-text" className="flex items-center gap-1.5">
+                <GripVertical className="size-3 text-muted-foreground" />
+                Additional details
+              </Label>
+              <textarea
+                id="reject-reason-text"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Add optional details..."
+                className="flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectOpen(false)}>
               Cancel
@@ -241,6 +523,212 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               disabled={!rejectReason.trim()}
             >
               Confirm Rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Override Request Details</DialogTitle>
+            <DialogDescription>
+              Correct AI-extracted details before dispatching {incident.id}. All
+              changes are logged in the incident timeline.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 py-1">
+            <div className="grid gap-1.5">
+              <Label htmlFor="override-title">Incident title</Label>
+              <Input
+                id="override-title"
+                value={overrideForm.title}
+                onChange={(e) => updateOverrideField("title", e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="override-location">Location</Label>
+              <select
+                id="override-location"
+                value={overrideForm.locationLabel}
+                onChange={(e) => updateOverrideField("locationLabel", e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="">Select a location...</option>
+                {LOCATION_OPTIONS.map((opt) => (
+                  <option key={opt.label} value={opt.label}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {overrideForm.locationLabel && (
+                <p className="text-[11px] text-muted-foreground">
+                  {findLocationOption(overrideForm.locationLabel)?.formatted}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="override-caller">Caller name</Label>
+              <Input
+                id="override-caller"
+                value={overrideForm.caller}
+                onChange={(e) => updateOverrideField("caller", e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="override-severity">Severity</Label>
+                <select
+                  id="override-severity"
+                  value={overrideForm.severity}
+                  onChange={(e) =>
+                    updateOverrideField(
+                      "severity",
+                      e.target.value as Incident["severity"]
+                    )
+                  }
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value={SeverityType.CRITICAL}>Critical</option>
+                  <option value={SeverityType.URGENT}>Urgent</option>
+                  <option value={SeverityType.MODERATE}>Moderate</option>
+                </select>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="override-panic">Panic level</Label>
+                <select
+                  id="override-panic"
+                  value={overrideForm.panicLevel}
+                  onChange={(e) => updateOverrideField("panicLevel", e.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  {PANIC_LEVELS.map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label>Responder unit(s)</Label>
+              <div className="space-y-1 rounded-md border p-2">
+                {RESPONDER_UNITS.map((unit) => (
+                  <label
+                    key={unit}
+                    className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={overrideForm.responderNames.includes(unit)}
+                      onChange={() => toggleResponder(unit)}
+                      className="size-3.5 shrink-0 rounded border-input"
+                    />
+                    <span>{unit}</span>
+                  </label>
+                ))}
+              </div>
+              {overrideForm.responderNames.length > 0 && (
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {overrideForm.responderNames.map((name) => (
+                    <Badge
+                      key={name}
+                      variant="secondary"
+                      className="gap-1 text-[10px]"
+                    >
+                      {name}
+                      <button
+                        type="button"
+                        onClick={() => toggleResponder(name)}
+                        className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20"
+                      >
+                        <X className="size-2.5" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="override-reason">Override reason (required)</Label>
+              <textarea
+                id="override-reason"
+                value={overrideForm.reason}
+                onChange={(e) => updateOverrideField("reason", e.target.value)}
+                placeholder="e.g. Caller corrected address; AI misheard location..."
+                className="flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOverrideOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleOverride}
+              disabled={!overrideForm.reason.trim()}
+              className="bg-amber-500 text-black hover:bg-amber-400"
+            >
+              Save Override
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={approveConfirmOpen} onOpenChange={setApproveConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Dispatch</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to approve and dispatch{" "}
+              <span className="font-bold text-black dark:text-white">
+                {incident.responder.name}
+              </span>
+              {" "}to{" "}
+              <span className="font-bold text-black dark:text-white">
+                {incident.location}
+              </span>
+              ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border bg-muted/30 p-3 text-sm space-y-1">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Incident</span>
+              <span className="font-medium">{incident.id}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Responder</span>
+              <span className="font-medium">{incident.responder.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Location</span>
+              <span className="text-right font-medium">{incident.location}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Severity</span>
+              <span className="font-medium uppercase">{incident.severity}</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setApproveConfirmOpen(false)
+                handleApprove()
+              }}
+              className="bg-secondary text-black hover:bg-secondary/80"
+            >
+              <CheckCircle2 className="mr-2 size-4" />
+              Confirm Dispatch
             </Button>
           </DialogFooter>
         </DialogContent>
