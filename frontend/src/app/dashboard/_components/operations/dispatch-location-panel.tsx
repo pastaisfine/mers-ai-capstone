@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Incident } from "@/types"
+import { LOCATION_OPTIONS } from "./dispatch-constants"
 
 interface CallerAddress {
   formatted: string
@@ -64,13 +65,28 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
   const lng = incident.coordinates?.lng
   const hasCoords = lat != null && lng != null
 
-  const address: CallerAddress = {
-    formatted: incident.location,
-    landmark: incident.location.includes("(")
-      ? incident.location.split("(")[1]?.replace(")", "").trim()
-      : undefined,
-    source: "ai",
-  }
+  const matchedLocation = LOCATION_OPTIONS.find(
+    (opt) => opt.label === incident.location || incident.location.includes(opt.label)
+  )
+
+  const address: CallerAddress = matchedLocation
+    ? {
+        formatted: matchedLocation.formatted,
+        street: matchedLocation.street,
+        area: matchedLocation.area,
+        city: matchedLocation.city,
+        state: matchedLocation.state,
+        postalCode: matchedLocation.postalCode,
+        landmark: matchedLocation.landmark,
+        source: "ai",
+      }
+    : {
+        formatted: incident.location,
+        landmark: incident.location.includes("(")
+          ? incident.location.split("(")[1]?.replace(")", "").trim()
+          : undefined,
+        source: "ai",
+      }
 
   const spotImageUrl = hasCoords
     ? buildSpotImageUrl(lat, lng)

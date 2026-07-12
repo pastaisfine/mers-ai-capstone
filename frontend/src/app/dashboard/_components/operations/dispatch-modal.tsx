@@ -46,11 +46,19 @@ import {
 
 function MetricBar({ label, value, tone }: { label: string; value: number; tone?: "destructive" | "default" }) {
   return (
-    <div className="flex items-center justify-between text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={`font-mono font-semibold ${tone === "destructive" ? "text-destructive" : ""}`}>
-        {value}
-      </span>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={`font-mono font-semibold ${tone === "destructive" ? "text-destructive" : ""}`}>
+          {value}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full transition-all ${tone === "destructive" ? "bg-destructive" : "bg-primary"}`}
+          style={{ width: `${Math.min(value, 100)}%` }}
+        />
+      </div>
     </div>
   )
 }
@@ -69,16 +77,16 @@ interface OverrideForm {
   reason: string
 }
 
-function severityVariant(severity: Incident["severity"]) {
+function severityClassName(severity: Incident["severity"]) {
   switch (severity) {
     case SeverityType.CRITICAL:
-      return "destructive" as const
+      return "bg-red-500 text-white"
     case SeverityType.URGENT:
-      return "secondary" as const
+      return "bg-orange-500 text-white"
     case SeverityType.MODERATE:
-      return "outline" as const
+      return "bg-blue-500 text-white"
     default:
-      return "outline" as const
+      return ""
   }
 }
 
@@ -274,7 +282,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
           <span className="relative inline-flex size-2 rounded-full bg-destructive" />
         </span>
         <span className="text-sm font-semibold">
-          {pendingCount} Dispatch Request Pending
+          Dispatch Request Pending
         </span>
         <ChevronUp className="size-4" />
       </button>
@@ -298,7 +306,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <Badge variant={severityVariant(incident.severity)} className="uppercase">
+              <Badge className={`uppercase ${severityClassName(incident.severity)}`}>
                 {incident.severity}
               </Badge>
               <Badge variant="outline" className="font-mono">
@@ -352,6 +360,13 @@ export function DispatchModal({ incident }: DispatchModalProps) {
                         {incident.lang}
                       </Badge>
                     </div>
+                    {(incident.callerAge || incident.callerGender) && (
+                      <div className="ml-5.5 mt-0.5 text-[11px] text-muted-foreground">
+                        {incident.callerAge && <span>{incident.callerAge} yrs</span>}
+                        {incident.callerAge && incident.callerGender && <span> · </span>}
+                        {incident.callerGender && <span>{incident.callerGender}</span>}
+                      </div>
+                    )}
                   </div>
                   <MetricBar
                     label="Distress Score"
@@ -550,19 +565,11 @@ export function DispatchModal({ incident }: DispatchModalProps) {
 
             <div className="grid gap-1.5">
               <Label htmlFor="override-location">Location</Label>
-              <select
+              <Input
                 id="override-location"
                 value={overrideForm.locationLabel}
                 onChange={(e) => updateOverrideField("locationLabel", e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <option value="">Select a location...</option>
-                {LOCATION_OPTIONS.map((opt) => (
-                  <option key={opt.label} value={opt.label}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              />
               {overrideForm.locationLabel && (
                 <p className="text-[11px] text-muted-foreground">
                   {findLocationOption(overrideForm.locationLabel)?.formatted}

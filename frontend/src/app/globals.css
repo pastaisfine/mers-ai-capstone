@@ -300,3 +300,9 @@
   border-top-color: #1e293b;
 }
 
+/* Dark mode — native <select> dropdown options */
+.dark select option {
+  background-color: hsl(165 7% 11%);
+  color: hsl(0 0% 100%);
+}
+
