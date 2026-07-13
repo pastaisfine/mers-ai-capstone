@@ -137,22 +137,11 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
 
       {hasCoords ? (
         <Tabs defaultValue="map" className="flex flex-col gap-2">
-          <TabsList className="grid h-9 w-full grid-cols-2 rounded-full bg-muted p-1">
-            <TabsTrigger
-              value="map"
-              className="gap-1.5 rounded-full px-3 text-xs font-semibold uppercase data-[state=active]:bg-secondary data-[state=active]:text-primary-foreground dark:data-[state=active]:text-primary-foreground text-white"
-            >
-              <Navigation className="size-3.5" />
-              Map View
-            </TabsTrigger>
-            <TabsTrigger
-              value="spot"
-              className="gap-1.5 rounded-full px-3 text-xs font-semibold uppercase data-[state=active]:bg-secondary data-[state=active]:text-primary-foreground dark:data-[state=active]:text-primary-foreground text-white"
-            >
-              <Satellite className="size-3.5" />
-              Spot Image
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between p-2">
+            <p className="flex text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <Navigation className="mr-2 size-3.5"/> Map View
+            </p>
+          </div>
 
           <TabsContent value="map" className="space-y-2">
             <div className="overflow-hidden rounded-lg border">
@@ -166,30 +155,6 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
               />
             </div>
 
-            {/* {MAPBOX_TOKEN && (
-              <div className="overflow-hidden rounded-lg border">
-                <Map
-                  mapboxAccessToken={MAPBOX_TOKEN}
-                  initialViewState={{
-                    longitude: lng,
-                    latitude: lat,
-                    zoom: 16,
-                    pitch: 45,
-                    bearing: -20,
-                  }}
-                  mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
-                  style={{ width: "100%", height: 140 }}
-                  attributionControl={false}
-                  interactive={false}
-                  reuseMaps
-                >
-                  <Marker longitude={lng} latitude={lat} anchor="center">
-                    <div className="size-4 rounded-full border-2 border-white bg-destructive shadow-lg" />
-                  </Marker>
-                </Map>
-              </div>
-            )} */}
-
             <Button variant="outline" size="sm" className="w-full" asChild>
               <a
                 href={buildGoogleMapsUrl(lat, lng)}
@@ -200,29 +165,6 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
                 Open in Google Maps
               </a>
             </Button>
-          </TabsContent>
-
-          <TabsContent value="spot" className="space-y-2">
-            {spotImageUrl ? (
-              <div className="relative overflow-hidden rounded-lg border">
-                <Image
-                  src={spotImageUrl}
-                  alt={`Incident spot — ${incident.location}`}
-                  width={800}
-                  height={450}
-                  className="h-48 w-full object-cover"
-                  unoptimized
-                />
-                <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-[10px] font-mono text-white">
-                  {GOOGLE_MAPS_KEY ? "Google Maps Satellite" : "Satellite capture"}
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-48 items-center justify-center rounded-lg border border-dashed bg-muted/30 text-xs text-muted-foreground">
-                No spot image available — add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or
-                NEXT_PUBLIC_MAPBOX_TOKEN
-              </div>
-            )}
           </TabsContent>
         </Tabs>
       ) : (
