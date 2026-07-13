@@ -15,7 +15,6 @@ db_setup()
 
 app.include_router(incident_router)
 import apis.twilio_api
-import apis.sse
 import apis.websocket
 
 origins = ALLOW_ORIGINS
