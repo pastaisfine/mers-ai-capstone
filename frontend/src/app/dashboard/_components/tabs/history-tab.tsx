@@ -66,7 +66,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon: Icon, iconColor, iconBg, sub }: StatCardProps) {
   return (
-    <Card className="cursor-default overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md">
+    <Card className="cursor-default overflow-hidden border-black transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md dark:border-neutral-700">
       <CardContent className="px-4">
         <div className="flex justify-between">
           <div>
@@ -128,7 +128,7 @@ export function HistoryTab() {
     { label: "Dispatched",      value: totalApproved,             icon: CheckCircle2,  iconColor: "text-secondary",   iconBg: "bg-secondary/15",   sub: "Approved & deployed" },
     { label: "Rejected / False",value: totalRejected,             icon: XCircle,       iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "No resources deployed" },
     { label: "Approval Rate",   value: `${approvalRate}%`,        icon: ThumbsUp,      iconColor: "text-primary",     iconBg: "bg-primary/15",     sub: "SLA target 95%" },
-    { label: "Avg Response",    value: formatResponseTime(avgResponseSecs), icon: Timer, iconColor: "text-warning", iconBg: "bg-warning/15",     sub: "Call to dispatch" },
+    { label: "Avg Response",    value: formatResponseTime(avgResponseSecs), icon: Timer, iconColor: "text-warning", iconBg: "bg-warning/15",     sub: "End call to Dispatch Request" },
     { label: "Human Involved",  value: humanInvolved,             icon: HeartPulse,    iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "Override or assist" },
   ]
 
@@ -184,7 +184,7 @@ export function HistoryTab() {
         </div>
 
         {/* table */}
-        <div className="rounded-xl border overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-black transition-all duration-200 hover:shadow-secondary hover:shadow-md dark:border-neutral-700">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
