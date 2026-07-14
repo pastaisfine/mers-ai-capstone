@@ -75,7 +75,7 @@ export default function HeroSection() {
         <div className="flex flex-wrap justify-center gap-6 mt-12 animate-fade-up delay-400 text-muted-foreground text-[0.8rem] font-mono">
           <span className="flex items-center gap-1.5 text-foreground/80">
             <span className="text-emerald">✓</span>
-            Multi-language AI (BM / EN / ZH / Manglish)
+            Multi-language AI (BM / EN / CN / Manglish)
           </span>
           <span className="flex items-center gap-1.5 text-foreground/80">
             <span className="text-emerald">✓</span>

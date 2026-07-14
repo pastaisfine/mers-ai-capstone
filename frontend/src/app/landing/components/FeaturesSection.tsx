@@ -1,7 +1,7 @@
 /**
  * MERS-AI Features Section
- * Design: Dark, 3-column glass card grid with emerald icon accents
- * Layout: Section label + headline + 6-card grid (2 rows of 3)
+ * Design: Dark feature network with emerald icon accents
+ * Layout: Section label + headline + central Multi-Agent card connected to core capabilities
  */
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -10,12 +10,19 @@ import {
   BookOpen,
   MapPin,
   LayoutDashboard,
-  FlaskConical,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const AGENT_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663787316997/gb22xsXfyGcqiVdZiXdoCR/mers-ai-feature-agents-gSudV5QYyVZ4R4b4kNiHuw.webp";
+type Feature = {
+  icon: LucideIcon;
+  tag: string;
+  title: string;
+  description: string;
+  highlight?: boolean;
+  central?: boolean;
+};
 
-const features = [
+const features: Feature[] = [
   {
     icon: Globe2,
     tag: '🇲🇾 Malaysia-First',
@@ -25,18 +32,19 @@ const features = [
     highlight: true,
   },
   {
-    icon: Network,
-    tag: '🤖 LangGraph',
-    title: 'Multi-Agent System',
-    description:
-      'Parallel agents handle transcription, triage, location, SOP retrieval, and dispatch recommendations simultaneously — no bottlenecks.',
-  },
-  {
     icon: BookOpen,
     tag: '📋 Advanced RAG',
     title: 'Live SOP Retrieval',
     description:
       'Pulls actual emergency SOPs (CPR, Bomba, flood protocols) in real time with proper citations. Operators know exactly why the AI recommends each action.',
+  },
+  {
+    icon: Network,
+    tag: '🤖 LangGraph',
+    title: 'Multi-Agent System',
+    description:
+      'Parallel agents handle transcription, triage, location, SOP retrieval, and dispatch recommendations simultaneously — no bottlenecks.',
+    central: true,
   },
   {
     icon: MapPin,
@@ -51,13 +59,6 @@ const features = [
     title: 'Human-in-Control',
     description:
       'Operators stay in command — accept, reject, or override any AI decision. The system augments, never replaces, human judgment.',
-  },
-  {
-    icon: FlaskConical,
-    tag: '🔥 Simulation',
-    title: 'Disaster Scenario Engine',
-    description:
-      'Built-in simulation for flash floods in KL, highway accidents, and mass casualty events — demo-ready without real call data.',
   },
 ];
 
@@ -76,19 +77,51 @@ function useInView(threshold = 0.1) {
   return { ref, inView };
 }
 
+function FeatureCard({
+  feature,
+  className = '',
+}: {
+  feature: Feature;
+  className?: string;
+}) {
+  const Icon = feature.icon;
+
+  return (
+    <div className={`glass-card p-6 flex flex-col gap-4 ${className}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="w-10 h-10 rounded-xl flex shrink-0 items-center justify-center bg-emerald/12 border border-emerald-400 bg-emerald-950">
+          <Icon size={18} className="text-emerald-500" />
+        </div>
+        <span className="font-mono text-[0.7rem] text-muted-foreground bg-background/70 border border-border rounded-full px-2.5 py-1 dark:bg-white/4 dark:border-white/7">
+          {feature.tag}
+        </span>
+      </div>
+
+      <div>
+        <h3 className="font-display font-semibold text-[1.05rem] text-foreground mb-2">
+          {feature.title}
+        </h3>
+        <p className="font-body text-[0.875rem] leading-[1.65] text-muted-foreground">
+          {feature.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturesSection() {
   const { ref, inView } = useInView();
+  const centralFeature = features.find((feat) => feat.central);
+  const connectedFeatures = features.filter((feat) => !feat.central);
 
   return (
     <section
       id="features"
       className="py-24 relative bg-muted/35 dark:bg-[oklch(0.08_0.01_160)] overflow-hidden"
     >
-      {/* Emerald glow blob */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] opacity-[0.06] pointer-events-none bg-[radial-gradient(ellipse,oklch(0.67_0.19_162)_0%,transparent_70%)] blur-[40px]" />
 
       <div className="container relative z-10" ref={ref}>
-        {/* Section header */}
         <div
           className={`text-center mb-16 transition-all duration-600 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
@@ -105,57 +138,112 @@ export default function FeaturesSection() {
           </h2>
         </div>
 
-        {/* Feature cards grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((feat, i) => {
-            const Icon = feat.icon;
-            const cardDelays = [
-              'delay-[0ms]',
-              'delay-[70ms]',
-              'delay-[140ms]',
-              'delay-[210ms]',
-              'delay-[280ms]',
-              'delay-[350ms]',
-            ];
-            return (
-              <div
-                key={feat.title}
-                className={`glass-card p-6 flex flex-col gap-4 transition-all duration-600 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-                  cardDelays[i] || 'delay-[0ms]'
-                } ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'} ${
-                  feat.highlight ? 'border-emerald/30 bg-emerald/4' : ''
-                }`}
-              >
-                {/* Icon + tag row */}
-                <div className="flex items-start justify-between">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald/12 border border-emerald-400 bg-emerald-950">
-                    <Icon size={18} className="text-emerald-500" />
-                  </div>
-                  <span className="font-mono text-[0.7rem] text-muted-foreground bg-background/70 border border-border rounded-full px-2.5 py-1 dark:bg-white/4 dark:border-white/7">
-                    {feat.tag}
-                  </span>
-                </div>
+        <div className="relative max-w-[1180px] mx-auto">
+          <div className="relative z-10">
+            {centralFeature && (
+              <FeatureCard
+                feature={centralFeature}
+                className={`max-w-[720px] mx-auto min-h-[185px] transition-all duration-600 delay-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                  inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'
+                } border-emerald/45 bg-emerald/6 shadow-[0_0_40px_rgba(16,185,129,0.16)]`}
+              />
+            )}
+          </div>
 
-                {/* Text */}
-                <div>
-                  <h3 className="font-display font-semibold text-[1.05rem] text-foreground mb-2">
-                    {feat.title}
-                  </h3>
-                  <p className="font-body text-[0.875rem] leading-[1.65] text-muted-foreground">
-                    {feat.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          <div
+            className={`hidden lg:block h-32 -mb-px transition-all duration-700 delay-[260ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            <svg
+              aria-hidden="true"
+              className="h-full w-full overflow-visible"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="feature-line-gradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="oklch(0.67 0.19 162)" stopOpacity="0.35" />
+                  <stop offset="50%" stopColor="oklch(0.76 0.17 141)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="oklch(0.85 0.15 120)" stopOpacity="0.35" />
+                </linearGradient>
+                <linearGradient id="feature-arrow-gradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="oklch(0.67 0.19 162)" />
+                  <stop offset="100%" stopColor="oklch(0.85 0.15 120)" />
+                </linearGradient>
+                <filter id="feature-line-glow" x="-20%" y="-40%" width="140%" height="180%">
+                  <feGaussianBlur stdDeviation="1.1" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <marker
+                  id="feature-arrow"
+                  markerWidth="5"
+                  markerHeight="5"
+                  refX="4.2"
+                  refY="2.5"
+                  orient="auto"
+                  markerUnits="strokeWidth"
+                >
+                  <path d="M0,0 L0,5 L4.6,2.5 z" fill="url(#feature-arrow-gradient)" />
+                </marker>
+              </defs>
+              <path
+                d="M50 0 V38 M12.5 38 H87.5"
+                stroke="url(#feature-line-gradient)"
+                strokeWidth="0.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                filter="url(#feature-line-glow)"
+              />
+              {[12.5, 37.5, 62.5, 87.5].map((x, i) => (
+                <line
+                  key={x}
+                  x1={x}
+                  y1="38"
+                  x2={x}
+                  y2="99"
+                  markerEnd="url(#feature-arrow)"
+                  stroke="url(#feature-line-gradient)"
+                  strokeWidth="0.75"
+                  strokeLinecap="round"
+                  filter="url(#feature-line-glow)"
+                  style={{ transitionDelay: `${360 + i * 80}ms` }}
+                />
+              ))}
+            </svg>
+          </div>
+
+          <div
+            className={`relative z-10 grid md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-7 transition-all duration-600 delay-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'
+            }`}
+          >
+            {connectedFeatures.map((feat, i) => {
+              const cardDelays = [
+                'delay-[210ms]',
+                'delay-[280ms]',
+                'delay-[350ms]',
+                'delay-[420ms]',
+              ];
+
+              return (
+                <FeatureCard
+                  key={feat.title}
+                  feature={feat}
+                  className={`relative min-h-[260px] transition-all duration-600 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                    cardDelays[i] || 'delay-[0ms]'
+                  } ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'} ${
+                    feat.highlight ? 'bg-emerald/4' : ''
+                  }`}
+                />
+              );
+            })}
+          </div>
         </div>
-
-        {/* Agent network illustration */}
-        <div
-          className={`mt-16 rounded-2xl overflow-hidden relative border border-border/70 dark:border-white/6 transition-all duration-800 delay-[400ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
-            inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        />
       </div>
     </section>
   );

@@ -6,7 +6,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Activity, Shield, Cpu } from 'lucide-react';
 
-const DASHBOARD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663787316997/gb22xsXfyGcqiVdZiXdoCR/mers-ai-dashboard-UpmRqpMukpmMx6vowu2Yve.webp";
+const DASHBOARD_LIGHT_IMG = "/landing-dashboard-light.png";
+const DASHBOARD_DARK_IMG = "/landing-dashboard-dark.png";
 
 const stats = [
   { icon: Activity, value: '<2s', label: 'Triage time' },
@@ -86,9 +87,14 @@ export default function ProductSection() {
 
           {/* Dashboard image */}
           <img
-            src={DASHBOARD_IMG}
+            src={DASHBOARD_LIGHT_IMG}
             alt="MERS-AI Operator Dashboard"
-            className="w-full block"
+            className="w-full block dark:hidden"
+          />
+          <img
+            src={DASHBOARD_DARK_IMG}
+            alt="MERS-AI Operator Dashboard"
+            className="hidden w-full dark:block"
           />
 
           {/* Bottom overlay gradient */}
