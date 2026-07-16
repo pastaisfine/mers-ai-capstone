@@ -30,7 +30,7 @@ function buildGoogleMapsUrl(lat: number, lng: number) {
 
 function buildGoogleEmbedUrl(lat: number, lng: number) {
   if (GOOGLE_MAPS_KEY) {
-    return `https://www.google.com/maps/embed/v1/view?key=${GOOGLE_MAPS_KEY}&center=${lat},${lng}&zoom=17&maptype=roadmap`
+    return `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_KEY}&q=${lat},${lng}&zoom=17`
   }
   return `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=17&output=embed`
 }
@@ -82,6 +82,8 @@ export function DispatchLocationPanel({ incident }: DispatchLocationPanelProps) 
       }
     : {
         formatted: incident.location,
+        city: incident.location.split(",")[0]?.trim(),
+        state: incident.location.split(",")[1]?.trim(),
         landmark: incident.location.includes("(")
           ? incident.location.split("(")[1]?.replace(")", "").trim()
           : undefined,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Filter, Flame, Heart, Shield, Car, Droplets, Search, ShieldAlert, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { Filter, Flame, Heart, Shield, Car, Droplets, Search, ShieldAlert, PanelLeftClose } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
@@ -89,11 +89,10 @@ const TYPE_ICON_STYLE: Record<Incident["type"], string> = {
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
 
-export function IncidentList() {
+export function IncidentList({ collapsed, onCollapsedChange }: { collapsed: boolean; onCollapsedChange: (v: boolean) => void }) {
   const { incidents, selectedIncidentId, setSelectedIncidentId, fetchIncidents } = useIncident()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterSeverity, setFilterSeverity] = useState<SeverityType>(SeverityType.ALL)
-  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     fetchIncidents()
@@ -142,37 +141,8 @@ export function IncidentList() {
       </div>
 
       {/* ── Desktop sidebar ── */}
-      <aside className={cn(
-        "hidden min-h-0 flex-col border-r bg-card transition-all duration-300 md:flex",
-        collapsed ? "w-12" : "w-[350px]"
-      )}>
-        {collapsed ? (
-          <div className="flex h-full flex-col items-center gap-0 py-2">
-            <button
-              type="button"
-              onClick={() => setCollapsed(false)}
-              title="Expand sidebar"
-              className="mb-2 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <PanelLeftOpen className="size-4" />
-            </button>
-
-            <div className="mx-2 mb-2 h-px w-6 bg-border" />
-
-            <div className="mb-1 flex flex-col items-center gap-1">
-              <div className="relative">
-                <ShieldAlert className="size-4 text-destructive" />
-                <span className="absolute -right-1.5 -top-1 flex size-3.5 items-center justify-center rounded-full bg-destructive text-[8px] font-bold text-white">
-                  {activeIncidents.length}
-                </span>
-              </div>
-              <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-                Active
-              </span>
-            </div>
-
-          </div>
-        ) : (
+      {!collapsed && (
+        <aside className="hidden w-[350px] min-h-0 flex-col border-r bg-card transition-all duration-300 md:flex">
           <>
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
@@ -203,7 +173,7 @@ export function IncidentList() {
                   variant="ghost"
                   size="icon-xs"
                   className="text-muted-foreground"
-                  onClick={() => setCollapsed(true)}
+                  onClick={() => onCollapsedChange(true)}
                   title="Collapse sidebar"
                 >
                   <PanelLeftClose className="size-4" />
@@ -289,8 +259,9 @@ export function IncidentList() {
               </div>
             </ScrollArea>
           </>
-        )}
-      </aside>
+        </aside>
+      )}
+
     </>
   )
 }

@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import {
   AlertTriangle,
   Ambulance,
   Brain,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
   GripVertical,
+  MapPin,
   Pencil,
   User,
   X,
@@ -32,9 +34,13 @@ import {
 import { Label } from "@/components/ui/label"
 import { useIncident } from "@/context/incident/useIncident"
 import { useTime } from "@/context/time/useTime"
+import { useMapPreview } from "../operations/map-panel"
+import { cn } from "@/lib/utils"
 import type { Incident } from "@/types"
 import { SeverityType } from "@/types"
 import { DispatchLocationPanel } from "./dispatch-location-panel"
+import { useGooglePlacesAutocomplete } from "@/hooks/useGooglePlacesAutocomplete"
+import type { PlaceDetails, Suggestion } from "@/hooks/useGooglePlacesAutocomplete"
 import {
   LOCATION_OPTIONS,
   RESPONDER_UNITS,
@@ -106,11 +112,37 @@ export function DispatchModal({ incident }: DispatchModalProps) {
     reason: "",
   })
   const [approveConfirmOpen, setApproveConfirmOpen] = useState(false)
+  const [placeCoordinates, setPlaceCoordinates] = useState<{ lat: number; lng: number } | null>(null)
+  const [suggestionOpen, setSuggestionOpen] = useState(false)
   const { setIncidents } = useIncident()
   const { currentTimeText } = useTime()
+  const { setPreviewCoords } = useMapPreview()
+
+  const { suggestions, fetchSuggestions, selectSuggestion, clearSuggestions } = useGooglePlacesAutocomplete({
+    onPlaceSelected: (place: PlaceDetails) => {
+      setOverrideForm((prev) => ({ ...prev, locationLabel: place.formattedAddress || place.name }))
+      setPlaceCoordinates(place.geometry ?? null)
+      setPreviewCoords(place.geometry ?? null)
+      setSuggestionOpen(false)
+    },
+  })
 
   const isPending = incident.status?.dispatch !== "DISPATCHED"
   const pendingCount = isPending ? 1 : 0
+
+  const previewIncident = useMemo(() => {
+    if (!overrideOpen) return incident
+    const locLabel = overrideForm.locationLabel
+    if (!locLabel || locLabel === incident.location) return incident
+    const matchedLoc = findLocationOption(locLabel)
+    return {
+      ...incident,
+      location: matchedLoc ? matchedLoc.formatted : locLabel,
+      coordinates: matchedLoc
+        ? { lat: matchedLoc.lat, lng: matchedLoc.lng }
+        : placeCoordinates ?? incident.coordinates,
+    }
+  }, [overrideOpen, overrideForm.locationLabel, placeCoordinates, incident])
 
   function buildOverrideForm(): OverrideForm {
     const matchedLocation = LOCATION_OPTIONS.find(
@@ -122,7 +154,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
       caller: incident.caller,
       severity: incident.severity,
       panicLevel: incident.panicLevel,
-      responderNames: [incident.responder.name],
+      responderNames: incident.responder.name.split(", ").filter(Boolean),
       reason: "",
     }
   }
@@ -251,7 +283,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               },
               coordinates: matchedLoc
                 ? { lat: matchedLoc.lat, lng: matchedLoc.lng }
-                : inc.coordinates,
+                : placeCoordinates ?? inc.coordinates,
               timeline: [
                 ...inc.timeline,
                 {
@@ -266,6 +298,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
 
     toast.info(`Override applied — ${changes.length} field(s) updated`)
     setOverrideOpen(false)
+    setPreviewCoords(null)
   }
 
   if (!isPending && !expanded) return null
@@ -401,7 +434,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               </section>
             </div>
 
-            <DispatchLocationPanel incident={incident} />
+            <DispatchLocationPanel incident={previewIncident} />
 
             <Separator />
 
@@ -411,29 +444,39 @@ export function DispatchModal({ incident }: DispatchModalProps) {
                 Assigned Responder
               </p>
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium">{incident.responder.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {incident.responder.type}
-                  </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {incident.responder.name.split(", ").filter(Boolean).map((unit) => (
+                    <span
+                      key={unit}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-xs font-medium text-secondary"
+                    >
+                      <Ambulance className="size-4" />
+                      {unit}
+                      <CheckCircle2 className="size-4 text-secondary" />
+                    </span>
+                  ))}
                 </div>
                 <Badge variant="secondary">{incident.responder.status}</Badge>
               </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Type</span>
+                <span className="font-medium">{incident.responder.type}</span>
+              </div>
               <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
-                <div className="rounded-md bg-background/80 p-2">
+                <div className="border rounded-md bg-background/80 p-2">
                   <p className="text-muted-foreground">Distance</p>
-                  <p className="font-mono font-semibold">{incident.responder.distance}</p>
+                  <p className="font-mono font-semibold text-[15px]">{incident.responder.distance}</p>
                 </div>
-                <div className="rounded-md bg-background/80 p-2">
+                <div className="border rounded-md bg-background/80 p-2">
                   <p className="text-muted-foreground">ETA</p>
-                  <p className="flex items-center justify-center gap-1 font-mono font-semibold">
+                  <p className="flex items-center justify-center gap-1 font-mono font-semibold text-[15px]">
                     <Clock className="size-3" />
                     {incident.responder.eta}
                   </p>
                 </div>
-                <div className="rounded-md bg-background/80 p-2">
+                <div className="border rounded-md bg-background/80 p-2">
                   <p className="text-muted-foreground">Lead</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-[15px]">
                     {incident.responder.paramedic ?? "—"}
                   </p>
                 </div>
@@ -456,7 +499,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               />
             </section>
 
-            <div className="flex flex-col gap-2 pt-1 sm:flex-row mb-3">
+            <div className="sticky -bottom-5 bg-white pb-5 lg:pb-1 flex flex-col gap-1 pt-2 sm:flex-row">
               <Button
                 variant="outline"
                 className="flex-1 border-destructive/40 text-destructive hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:text-white dark:bg-destructive dark:hover:bg-red-800"
@@ -543,7 +586,10 @@ export function DispatchModal({ incident }: DispatchModalProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
+      <Dialog open={overrideOpen} onOpenChange={(open) => {
+        setOverrideOpen(open)
+        if (!open) setPreviewCoords(null)
+      }}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Override Request Details</DialogTitle>
@@ -565,14 +611,60 @@ export function DispatchModal({ incident }: DispatchModalProps) {
 
             <div className="grid gap-1.5">
               <Label htmlFor="override-location">Location</Label>
-              <Input
-                id="override-location"
-                value={overrideForm.locationLabel}
-                onChange={(e) => updateOverrideField("locationLabel", e.target.value)}
-              />
+              <div className="relative">
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="override-location"
+                  placeholder="Search for a location..."
+                  value={overrideForm.locationLabel}
+                  onChange={(e) => {
+                    updateOverrideField("locationLabel", e.target.value)
+                    setPlaceCoordinates(null)
+                    const matchedLoc = findLocationOption(e.target.value)
+                    setPreviewCoords(matchedLoc ? { lat: matchedLoc.lat, lng: matchedLoc.lng } : null)
+                    fetchSuggestions(e.target.value)
+                    setSuggestionOpen(true)
+                  }}
+                  onFocus={() => {
+                    if (overrideForm.locationLabel.length >= 2) {
+                      fetchSuggestions(overrideForm.locationLabel)
+                      setSuggestionOpen(true)
+                    }
+                  }}
+                  onBlur={() => setTimeout(() => setSuggestionOpen(false), 150)}
+                  className="pl-9"
+                />
+                {suggestionOpen && suggestions.length > 0 && (
+                  <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border bg-popover shadow-lg">
+                    {suggestions.map((s) => (
+                      <li key={s.placeId}>
+                        <button
+                          type="button"
+                          className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-accent/50"
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            selectSuggestion(s)
+                          }}
+                        >
+                          <MapPin className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium">{s.mainText}</span>
+                            {s.secondaryText && (
+                              <span className="block truncate text-xs text-muted-foreground">{s.secondaryText}</span>
+                            )}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               {overrideForm.locationLabel && (
                 <p className="text-[11px] text-muted-foreground">
-                  {findLocationOption(overrideForm.locationLabel)?.formatted}
+                  {findLocationOption(overrideForm.locationLabel)?.formatted
+                    ?? (placeCoordinates
+                      ? `${placeCoordinates.lat.toFixed(5)}°N, ${placeCoordinates.lng.toFixed(5)}°E`
+                      : null)}
                 </p>
               )}
             </div>
@@ -625,38 +717,49 @@ export function DispatchModal({ incident }: DispatchModalProps) {
             <div className="grid gap-1.5">
               <Label>Responder unit(s)</Label>
               <div className="space-y-1 rounded-md border p-2">
-                {RESPONDER_UNITS.map((unit) => (
-                  <label
-                    key={unit}
-                    className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={overrideForm.responderNames.includes(unit)}
-                      onChange={() => toggleResponder(unit)}
-                      className="size-3.5 shrink-0 rounded border-input"
-                    />
-                    <span>{unit}</span>
-                  </label>
-                ))}
+                {RESPONDER_UNITS.map((unit) => {
+                  const isSelected = overrideForm.responderNames.includes(unit)
+                  return (
+                    <label
+                      key={unit}
+                      className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-xs hover:bg-muted/50"
+                    >
+                      <button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        onClick={() => toggleResponder(unit)}
+                        className={cn(
+                          "flex size-6 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150",
+                          isSelected
+                            ? "border-secondary bg-secondary text-white"
+                            : "border-muted-foreground/30 bg-transparent text-transparent"
+                        )}
+                      >
+                        {isSelected && <Check className="size-4 stroke-[3]" />}
+                      </button>
+                      <span className={cn(isSelected && "font-medium")}>{unit}</span>
+                    </label>
+                  )
+                })}
               </div>
               {overrideForm.responderNames.length > 0 && (
-                <div className="flex flex-wrap gap-1 pt-1">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                   {overrideForm.responderNames.map((name) => (
-                    <Badge
+                    <span
                       key={name}
-                      variant="secondary"
-                      className="gap-1 text-[10px]"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-xs font-medium text-secondary"
                     >
+                      <Ambulance className="size-4" />
                       {name}
                       <button
                         type="button"
                         onClick={() => toggleResponder(name)}
-                        className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20"
+                        className="ml-0.5 rounded-full p-0.5 text-secondary/60 hover:bg-destructive/20 hover:text-destructive"
                       >
-                        <X className="size-2.5" />
+                        <X className="size-3" />
                       </button>
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               )}
