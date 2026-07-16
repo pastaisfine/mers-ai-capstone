@@ -172,3 +172,14 @@ class HospitalCapacity(Base):
     available_beds = Column(Integer, nullable=False)
     icu_beds = Column(Integer, nullable=False)
     er_status = Column(String, nullable=False)
+
+
+class EmergencyDispatchServiceLocation(Base):
+    __tablename__ = "emergency_dispatch_service_location"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    department = Column(Text, nullable=False)
+    station_name = Column(Text, nullable=False)
+    address = Column(Text, nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
