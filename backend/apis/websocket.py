@@ -1,17 +1,18 @@
 import asyncio
-import base64
-import io
+import json
 
 from fastapi import WebSocketDisconnect
 
-from constants.file import to_voice_file_name
+from constants.redis_key import PENDING_CALL_TRANSCRIPT_MAP_KEY, TRANSCRIPT_CONSUME_QUEUE_KEY
 from main import app
 from database import db_dependency
 from fastapi import WebSocket
 
-from models.database.call_transcript import CreateCallTranscriptPayload
-from models.dto.retell import ConfigResponse
-from modules import storage_module, call_module, call_transcript_module
+from modules.redis_module import redis_client
+
+from models.dto.retell import ConfigResponse, inbound_event_adapter, RetellInboundEvent, \
+    RetellInteractionType, ResponseRequiredRequest
+from modules import call_module
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
 
 
@@ -66,81 +67,110 @@ async def media_stream(websocket: WebSocket, db: db_dependency):
     except WebSocketDisconnect:
         print("Websocket connection disconnected")
 
+pipeline = None
 
 @app.websocket("/llm-socket/{call_id}")
 async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call_id: str):
 
     try:
         await websocket.accept()
+        # ref code
+        # llm_client = LlmClient()
         config = ConfigResponse(
             response_type="config",
             config={
                 "auto_reconnect": True,
-                "call_details": True,
+                "call_details": False,
             },
             response_id=1
         )
         await websocket.send_json(config.__dict__)
         response_id = 0
         internal_call_id = call_module.get_call_id_by_sid(call_id, db=db)
+
+        #connect to llm
         if internal_call_id is None:
             print("Call id is not initialized")
             await websocket.close(1011, "Server error")
             return
-        async def handle_message(request_json):
+        # Send first message to signal ready of server
+        response_id = 0
+        # first_event = llm_client.draft_begin_message()
+        # await websocket.send_json(first_event.__dict__)
+        async def handle_message(event: RetellInboundEvent):
             nonlocal response_id
 
-            match request_json["interaction_type"]:
-                case "ping_pong":
+            match event.interaction_type:
+                case RetellInteractionType.PING_PONG:
                     await websocket.send_json(
                         {
                             "response_type": "ping_pong",
-                            "timestamp": request_json["timestamp"],
+                            "timestamp": event.timestamp,
                         }
                     )
-                case "call_details":
-                    print("TODO")
                 case "update_only":
-                    transcripts = request_json["transcript"]
-                    for transcript in transcripts:
-                        default_end_duration = 0
-                        default_start_duration = transcript["words"][0]["start"] if transcript["words"][0]["start"] is not None else default_end_duration
-                        default_end_duration = transcript["words"][-1]["end"] if transcript["words"][-1]["end"] is not None else default_start_duration
-                        call_transcript_module.create_call_transcript(CreateCallTranscriptPayload(
-                            call_id=internal_call_id,
-                            role=transcript["role"],
-                            transcript=transcript["content"],
-                            start_duration=default_start_duration,
-                            end_duration=default_end_duration
-                        ), db)
-                        break
-                    # role
-                    # content
-                    # words
-                    #   word
-                    #   start
-                    #   end
+                    transcript = event.transcript
+                    # if redis_client.hexists(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id):
+                    #     # TODO: Redis Lock mechanism
+                    redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id, transcript)
+                    redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, internal_call_id)
+                    # unused code
+                    unsend_transcript = []
+                    for utterance in reversed(transcript):
+                        transcript_unique_id = f"{internal_call_id}_{utterance.words[0].start}_{utterance.words[-1].end}"
+                        redis_key = f"transcript_{internal_call_id}"
+                        has_in_redis = redis_client.sismember(redis_key, transcript_unique_id)
+                        if has_in_redis:
+                            unsend_transcript.insert(0, utterance)
+                        else:
+                            "check db got"
+                    # for utterance in transcript:
+                    #     default_end_duration:int = 0
+                    #     default_start_duration: int = int(utterance.words[0].start * 1000) if utterance.words[0].start  is not None else default_end_duration
+                    #     default_end_duration: int = int(utterance.words[-1].end * 1000) if utterance.words[-1].end is not None else default_start_duration
+                    #     call_transcript_module.create_call_transcript(CreateCallTranscriptPayload(
+                    #         call_id=internal_call_id,
+                    #         role=utterance.role,
+                    #         transcript=utterance.content,
+                    #         start_duration=default_start_duration,
+                    #         end_duration=default_end_duration
+                    #     ), db)
+                    #     break
                 case "response_required" | "reminder_required":
-                    response_id = request_json["response_id"]
+                    response_id = event.response_id
                     # request = ResponseRequiredRequest(
-                    #     interaction_type=request_json["interaction_type"],
+                    #     interaction_type=event["interaction_type"],
                     #     response_id=response_id,
-                    #     transcript=request_json["transcript"],
+                    #     transcript=event["transcript"],
                     # )
-                    print(
-                        f"""Received interaction_type={request_json['interaction_type']}, response_id={response_id}, last_transcript={request_json['transcript'][-1]['content']}"""
+                    request = ResponseRequiredRequest(
+                        interaction_type=event.interaction_type,
+                        response_id=response_id,
+                        transcript=event.transcript,
                     )
-                    # async for event in llm_client.draft_response(request):
-                    #     await websocket.send_json(event.__dict__)
+                    print(
+                        f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
+                    )
+
+                    # async for my_event in llm_client.draft_response(request):
+                    #     await websocket.send_json(my_event.__dict__)
                     #     if request.response_id < response_id:
                     #         break  # new response needed, abandon this one
 
-        async for data in websocket.iter_json():
-            asyncio.create_task(handle_message(data))
+                    # ref code
+
+                    print(
+                        f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
+                    )
+
+
+        async for data in websocket.iter_text():
+            event = inbound_event_adapter.validate_json(data)
+            asyncio.create_task(handle_message(event))
     except WebSocketDisconnect:
         print(f"LLM WebSocket disconnected for {call_id}")
     except ConnectionTimeoutError as e:
-        print("Connection timeout error for {call_id}")
+        print(f"Connection timeout error for {call_id}")
     except Exception as e:
         print(f"Error in LLM WebSocket: {e} for {call_id}")
         await websocket.close(1011, "Server error")

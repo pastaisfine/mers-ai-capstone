@@ -18,3 +18,4 @@ soundfile
 uuid-v7
 google-genai
 langchain_core
+redis[hiredis]
