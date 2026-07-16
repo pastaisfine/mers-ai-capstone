@@ -52,7 +52,7 @@ export default function ProductSection() {
             <div className="h-px w-8 bg-emerald" />
             <span className="section-label">The Product</span>
           </div>
-          <div className="grid lg:grid-cols-2 gap-8 items-end">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
             <h2 className="font-display font-bold text-[clamp(1.75rem,3.5vw,2.75rem)] leading-1.2 tracking-[-0.02em] text-foreground">
               The operator dashboard that{' '}
               <span className="gradient-text">keeps humans in command.</span>
