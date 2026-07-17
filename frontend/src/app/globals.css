@@ -106,7 +106,7 @@
 @utility container {
   margin-inline: auto;
   padding-inline: 1.5rem;
-  max-width: 80rem; /* 1280px */
+  max-width: 120rem; /* 1280px */
 }
 
 /* Custom, premium, thin scrollbar styling */
@@ -167,18 +167,28 @@
 }
 
 .glass-card {
-  background: rgba(11, 17, 14, 0.6);
+  background: hsl(var(--card) / 0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid hsl(var(--border) / 0.8);
+  box-shadow: 0 4px 30px rgba(15, 23, 42, 0.08);
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .glass-card:hover {
   border-color: rgba(16, 185, 129, 0.2);
-  background: rgba(11, 17, 14, 0.75);
+  background: hsl(var(--card) / 0.95);
   transform: translateY(-2px);
+}
+
+.dark .glass-card {
+  background: rgba(11, 17, 14, 0.6);
+  border-color: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dark .glass-card:hover {
+  background: rgba(11, 17, 14, 0.75);
 }
 
 /* Animation classes and keyframes */
@@ -298,5 +308,11 @@
 }
 .incident-hover-popup-dark .mapboxgl-popup-tip {
   border-top-color: #1e293b;
+}
+
+/* Dark mode — native <select> dropdown options */
+.dark select option {
+  background-color: hsl(165 7% 11%);
+  color: hsl(0 0% 100%);
 }
 

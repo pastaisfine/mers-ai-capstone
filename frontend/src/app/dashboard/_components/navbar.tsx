@@ -17,6 +17,8 @@ import { TabName, SeverityType } from "@/types"
 import { ThemeToggle } from "./theme-toggle"
 import { ProfileDropdown } from "./profile-dropdown"
 import { useTab } from "@/context/tab/useTab"
+import Image from 'next/image';
+import Logo from '@/assets/MERS-AI_Mascot-rmbg1.png';
 
 const NAV_TABS = [
   { id: TabName.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
@@ -48,8 +50,13 @@ export function Navbar() {
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
       {/* Left */}
       <div className="flex min-w-0 items-center gap-3 lg:gap-4">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="size-5 text-primary" />
+        <div className="flex items-center gap-1">
+          <Image
+          src={Logo}
+          alt="Picture of a Logo"
+          className="size-10 text-primary"
+          />
+
           <h1 className="text-lg font-bold tracking-tight">MERS-AI</h1>
         </div>
 

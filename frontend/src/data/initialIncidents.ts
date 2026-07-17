@@ -11,6 +11,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     lang: "EN / BM",
     occurDateTime: "2026-06-01T15:00:00Z",
     caller: "MR. TAN",
+    callerAge: "62",
+    callerGender: "Male",
     duration: "03:42",
     distressScore: 87,
     panicLevel: "Extreme",
