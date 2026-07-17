@@ -1,12 +1,12 @@
 import redis
 
-from environment import REDIS_EXPIRE_DURATION_IN_SECONDS
+from environment import REDIS_EXPIRE_DURATION_IN_SECONDS, REDIS_PASSWORD, REDIS_HOST
 
 
 class RedisClient:
 
     def __init__(self):
-        self.client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        self.client = redis.Redis(host=REDIS_HOST, port=6379, password=REDIS_PASSWORD, decode_responses=True)
 
     def hexists(self, key, name) -> bool:
         return self.client.hexists(key, name)
