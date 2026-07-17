@@ -1,3 +1,4 @@
+import asyncio
 import json
 from uuid import UUID
 
@@ -5,24 +6,32 @@ from fastapi.sse import EventSourceResponse
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 
-from database import db_dependency
 from main import app
-from modules import call_transcript_module, job_queue_module
+from modules.transcripts import call_transcript_module
+from modules.transcripts.call_transcript_broadcaster import call_transcript_broadcaster
 
 
 class Payload(BaseModel):
     call_id: UUID
 
 @app.post("transcripts/stream", response_class=EventSourceResponse)
-async def read_transcripts(db: db_dependency) -> StreamingResponse:
+async def read_transcripts() -> StreamingResponse:
     async def event_stream():
-        while True:
-            call_id = job_queue_module.pop_job()
-            if call_id is not None:
-                print(f"SSE Event called: {call_id}")
-                transcripts = call_transcript_module.read_transcripts(call_id=call_id, db=db)
-                yield json.dumps(transcripts)
+        # Create a private queue just for this specific connected client
+        client_queue = call_transcript_broadcaster.subscribe()
+        try:
+            while True:
+                # Blocks until the background worker broadcasts a new call_id
+                transcripts = await client_queue.get()
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+                yield json.dumps(transcripts)
+        except asyncio.CancelledError:
+            # Triggered automatically when the frontend client disconnects
+            print("Client disconnected from SSE")
+        finally:
+            # Clean up so we don't leak memory
+            call_transcript_broadcaster.unsubscribe(client_queue)
+
+    return EventSourceResponse(event_stream())
 
 
