@@ -16,20 +16,20 @@ import { cn } from "@/lib/utils"
 
 // ── Constants ───────────────────────────────────────────────────────────────
 const VOICE_OPTIONS = [
-  { id: "11labs-Adrian",    label: "Adrian",   desc: "Male · EN" },
-  { id: "11labs-Aria",      label: "Aria",     desc: "Female · EN" },
-  { id: "11labs-Sarah",     label: "Sarah",    desc: "Female · EN" },
-  { id: "11labs-Charlie",   label: "Charlie",  desc: "Male · EN" },
-  { id: "openai-Alloy",     label: "Alloy",    desc: "Neutral · EN" },
-  { id: "openai-Nova",      label: "Nova",     desc: "Female · EN" },
-  { id: "deepgram-Asteria", label: "Asteria",  desc: "Female · EN" },
+  { id: "11labs-Adrian", label: "Adrian", desc: "Male · EN" },
+  { id: "11labs-Aria", label: "Aria", desc: "Female · EN" },
+  { id: "11labs-Sarah", label: "Sarah", desc: "Female · EN" },
+  { id: "11labs-Charlie", label: "Charlie", desc: "Male · EN" },
+  { id: "openai-Alloy", label: "Alloy", desc: "Neutral · EN" },
+  { id: "openai-Nova", label: "Nova", desc: "Female · EN" },
+  { id: "deepgram-Asteria", label: "Asteria", desc: "Female · EN" },
 ]
 
 const LANGUAGE_OPTIONS = [
   { id: "en-US", label: "English (US)" },
-  { id: "ms",    label: "Bahasa Melayu" },
+  { id: "ms", label: "Bahasa Melayu" },
   { id: "zh-CN", label: "Chinese (Mandarin)" },
-  { id: "ta",    label: "Tamil" },
+  { id: "ta", label: "Tamil" },
 ]
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? ""
@@ -53,7 +53,7 @@ function AuraOrb({ active }: { active: boolean }) {
         style={{ width: 34, height: 34 }}
       >
         {active
-          ? <Mic    className="size-3.5 text-secondary drop-shadow-[0_0_4px_rgba(34,182,123,0.8)]" />
+          ? <Mic className="size-3.5 text-secondary drop-shadow-[0_0_4px_rgba(34,182,123,0.8)]" />
           : <MicOff className="size-3.5 text-muted-foreground/35" />
         }
       </div>
@@ -64,19 +64,19 @@ function AuraOrb({ active }: { active: boolean }) {
 // ── Agent settings panel ────────────────────────────────────────────────────
 interface AgentSettings {
   agent_name: string
-  voice_id:   string
-  language:   string
+  voice_id: string
+  language: string
 }
 
 function AgentSettingsPanel() {
   const [settings, setSettings] = useState<AgentSettings | null>(null)
-  const [saving,   setSaving]   = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/retell/agent`)
       .then(r => r.ok ? r.json() : null)
       .then((d: AgentSettings | null) => { if (d) setSettings(d) })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   async function patch(field: keyof AgentSettings, value: string) {
@@ -183,9 +183,9 @@ function LiveTranscript({ incident }: { incident: ReturnType<typeof useIncident>
             </div>
           ) : (
             lines.map((line, i) => {
-              const speaker  = line.speaker.toLowerCase()
-              const isCaller = speaker === "caller" || speaker === "[caller]"
-              const isNew    = i === lines.length - 1
+              const speaker = line.speaker.toLowerCase()
+              const isCaller = speaker === "user" || speaker === "[user]"
+              const isNew = i === lines.length - 1
 
               return (
                 <div
@@ -272,7 +272,7 @@ export function LiveIntelligence() {
             </span>
           </div>
           {settingsOpen
-            ? <ChevronUp   className="size-3 text-muted-foreground/60" />
+            ? <ChevronUp className="size-3 text-muted-foreground/60" />
             : <ChevronDown className="size-3 text-muted-foreground/60" />
           }
         </button>

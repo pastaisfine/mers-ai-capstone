@@ -7,7 +7,6 @@ import { Search } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { ActiveIncidentsListBox } from './ActiveIncidentsListBox';
 import { useIncident } from '@/context/incident/useIncident';
-import { IncidentApi } from '@/apis/incidents';
 
 
 /**

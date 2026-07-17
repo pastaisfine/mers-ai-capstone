@@ -1,19 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { IncidentContext } from './useIncident';
 import { Incident, SeverityType } from '@/types';
 import { IncidentApi } from '@/apis/incidents';
 import { IncidentDto } from '@/dtos/incidents';
-import { supabase } from '@/lib/supabaseClient';
 import { INITIAL_INCIDENTS } from '@/data/initialIncidents';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? '';
-
-function formatMs(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
-    const s = (totalSec % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-}
+import { addMilliseconds, uuidv7ToDate } from '@/lib/utils';
 
 export function IncidentProvider({ children }: { children: ReactNode }) {
     const [incidents, setIncidents] = useState<Incident[]>(INITIAL_INCIDENTS);
@@ -27,106 +18,48 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
     function fetchIncidents() {
         IncidentApi.readIncidents({ page: 1, size: 100 })
             .then((result: IncidentDto[]) => {
+                console.log(`result: ${result}`);
                 if (result.length === 0) return;
                 setIncidents(result.map<Incident>((r) => ({
                     ...r,
+                    responder: {
+                        name: r.responder?.name ?? '',
+                        distance: r.responder?.distance ?? '',
+                        eta: r.responder?.eta ?? '',
+                        status: r.responder?.status ?? '',
+                        type: r.responder?.type ?? '',
+                        paramedic: r.responder?.paramedic
+                    },
+                    sopCitation: r.sopCitation ?? '',
+                    reason: r.reason ?? '',
+                    panicLevel: r.panicLevel ?? "",
+                    distressScore: r.distressScore ?? 0,
+                    caller: r.caller ?? "",
+                    occurDateTime: r.occurDateTime ?? new Date().toLocaleString(),
+                    lang: r.lang ?? "",
+                    priority: r.priority ?? 0,
+                    location: r.location ?? '',
+                    transcript: r.transcript.map((t) => {
+                        const call_id = t.call_id;
+                        const datetime = uuidv7ToDate(call_id);
+                        const newDatetime = addMilliseconds(datetime, t.start_duration)
+                        return {
+                            time: newDatetime.toTimeString(),
+                            speaker: t.role,
+                            text: t.transcript,
+                            highlight: undefined
+                        }
+                    }),
                     type: r.type ?? undefined,
                     severity: (r.severity?.toLowerCase() as Exclude<SeverityType, SeverityType.ALL> ?? SeverityType.MODERATE),
                     contradiction: r.contradiction ?? undefined,
                 })));
             })
-            .catch(() => {});
+            .catch((e) => {
+                console.error(e)
+            });
     }
 
-    // Load historical transcripts and subscribe to live inserts via Supabase realtime
-    useEffect(() => {
-        if (!selectedIncidentId) return;
-        let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
-
-        async function loadTranscripts() {
-            try {
-                const res = await fetch(`${BACKEND_URL}/incidents/${selectedIncidentId}/transcripts`);
-                if (!res.ok) return;
-                const data = await res.json() as {
-                    call_id: string | null;
-                    transcripts: {
-                        id: string;
-                        seq: number;
-                        role: string;
-                        transcript: string;
-                        start_duration: number;
-                        end_duration: number;
-                    }[];
-                };
-
-                const { call_id, transcripts } = data;
-
-                if (transcripts.length > 0) {
-                    setIncidents(prev =>
-                        prev.map(inc =>
-                            inc.id === selectedIncidentId
-                                ? {
-                                    ...inc,
-                                    transcript: transcripts.map(t => ({
-                                        time: formatMs(t.start_duration),
-                                        speaker: t.role === 'agent' ? 'Operator' : 'Caller',
-                                        text: t.transcript,
-                                    })),
-                                }
-                                : inc
-                        )
-                    );
-                }
-
-                if (call_id) {
-                    realtimeChannel = supabase
-                        .channel(`transcripts-${call_id}`)
-                        .on(
-                            'postgres_changes',
-                            {
-                                event: 'INSERT',
-                                schema: 'public',
-                                table: 'call_transcripts',
-                                filter: `call_id=eq.${call_id}`,
-                            },
-                            payload => {
-                                const row = payload.new as {
-                                    role: string;
-                                    transcript: string;
-                                    start_duration: number;
-                                };
-                                setIncidents(prev =>
-                                    prev.map(inc =>
-                                        inc.id === selectedIncidentId
-                                            ? {
-                                                ...inc,
-                                                transcript: [
-                                                    ...inc.transcript,
-                                                    {
-                                                        time: formatMs(row.start_duration),
-                                                        speaker: row.role === 'agent' ? 'Operator' : 'Caller',
-                                                        text: row.transcript,
-                                                    },
-                                                ],
-                                            }
-                                            : inc
-                                    )
-                                );
-                            }
-                        )
-                        .subscribe();
-                }
-            } catch (err) {
-                console.error('[IncidentProvider] Failed to load transcripts:', err);
-            }
-        }
-
-        loadTranscripts();
-
-        return () => {
-            if (realtimeChannel) supabase.removeChannel(realtimeChannel);
-        };
-    }, [selectedIncidentId]);
 
     return (
         <IncidentContext value={{

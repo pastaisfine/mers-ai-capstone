@@ -35,10 +35,13 @@ export const TimelineItemSchema = z.object({
 });
 
 export const TranscriptItemSchema = z.object({
-  time: z.string(),
-  speaker: z.string(),
-  text: z.string(),
-  highlight: z.boolean().optional(),
+  id: z.uuidv7(),
+  transcript: z.string(),
+  created_at: z.transform((i: string) => new Date(i)),
+  start_duration: z.int().positive(),
+  end_duration: z.int().positive(),
+  call_id: z.uuidv7(),
+  role: z.string(),
 });
 
 export const CoordinatesSchema = z.object({

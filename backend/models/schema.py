@@ -49,7 +49,6 @@ class Incident(BaseTable):
     sop_procedure = Column(JSON, nullable=True)
     responder = Column(JSON, nullable=True)  # Dict / Object
     timeline = Column(JSON, nullable=True)  # List[Dict]
-    transcript = Column(JSON, nullable=True)  # List[Dict]
     status = Column(JSON, nullable=True)
 
 class IncidentLog(BaseTable):
