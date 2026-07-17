@@ -81,16 +81,16 @@ export default function ProblemSection() {
               Malaysia's emergency dispatch system is running on{' '}
               <span className="gradient-text">human limits alone.</span>
             </h2>
-            <p className="text-slate-300 font-body text-[1.05rem] leading-[1.75] mb-6">
+            <p className="text-muted-foreground font-body text-[1.05rem] leading-[1.75] mb-6">
               When a 999 call comes in, operators must simultaneously transcribe, triage, locate the caller, look up SOPs, and coordinate responders — all in real time, often in mixed languages, under extreme pressure.
             </p>
-            <p className="text-slate-300 font-body text-[1.05rem] leading-[1.75]">
+            <p className="text-muted-foreground font-body text-[1.05rem] leading-[1.75]">
               No AI tool exists that understands the linguistic and operational complexity of Malaysian emergency response. Until now.
             </p>
 
             {/* Divider */}
-            <div className="mt-8 pt-8 border-t border-white/5">
-              <p className="text-slate-400 font-mono text-[0.8rem] tracking-[0.05em]">
+            <div className="mt-8 pt-8 border-t border-border/70">
+              <p className="text-muted-foreground font-mono text-[0.8rem] tracking-[0.05em]">
                 MERS-AI was built to change this — a co-pilot for every operator on Malaysia's frontline.
               </p>
             </div>
@@ -119,10 +119,10 @@ export default function ProblemSection() {
                   <div className="font-display font-bold text-[1.5rem] text-foreground mb-1">
                     {item.stat}
                   </div>
-                  <div className="font-display font-semibold text-[0.85rem] text-slate-300 mb-2">
+                  <div className="font-display font-semibold text-[0.85rem] text-foreground/80 mb-2">
                     {item.label}
                   </div>
-                  <p className="font-body text-[0.8rem] leading-[1.6] text-slate-400">
+                  <p className="font-body text-[0.8rem] leading-[1.6] text-muted-foreground">
                     {item.detail}
                   </p>
                 </div>

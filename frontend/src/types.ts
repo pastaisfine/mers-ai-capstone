@@ -13,6 +13,8 @@ export interface Incident {
   lang: string;
   occurDateTime: string;
   caller: string;
+  callerAge?: string;
+  callerGender?: string;
   duration: string;
   distressScore: number;
   panicLevel: string;
