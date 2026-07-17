@@ -110,7 +110,7 @@ export default function HowItWorksSection() {
                 <h3 className="font-display font-semibold text-[1rem] text-foreground mb-2">
                   {step.title}
                 </h3>
-                <p className="font-body text-[0.85rem] leading-[1.65] text-slate-400">
+                <p className="font-body text-[0.85rem] leading-[1.65] text-muted-foreground">
                   {step.description}
                 </p>
               </div>
