@@ -62,6 +62,13 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
       inc.id.toLowerCase().includes(q),
     ).slice(0, 6);}, [searchQuery, searchableIncidents]);
 
+    const hasQuery = searchQuery.trim().length > 0;
+
+    // Keep the active incident visible as the default suggestion when the
+    // // search box is opened but nothing has been typed yet.
+    const displayResults = hasQuery ? searchResults : searchableIncidents;
+    const noResults = hasQuery && searchResults.length === 0;
+
   // All non-resolved incidents, shown by default when the dropdown opens with no query
   const activeIncidents = useMemo(
     () => searchableIncidents.filter(inc => inc.severity !== 'resolved'),
@@ -240,62 +247,22 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                                 }`}
                               />
                 
-                              {(searchQuery.trim() === '' || searchResults.length > 0) && (
+                              {(displayResults.length > 0 || noResults) && (
                                 <div
                                   className={`absolute top-full mt-1 w-56 max-h-56 overflow-y-auto rounded-md backdrop-blur-md z-30 ${
                                     isDark ? 'bg-black/85 border border-[#2D334A]' : 'bg-white/95 border border-slate-300'
                                   }`}
                                 >
-                                  {searchQuery.trim() === '' ? (
-                                    <>
-                                      <div
-                                        className={`px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider ${
-                                          isDark ? 'text-slate-500 bg-white/5' : 'text-slate-400 bg-slate-50'
-                                        }`}
-                                      >
-                                        Active Incidents
-                                      </div>
-                                      {activeIncidents.length > 0 ? (
-                                        activeIncidents.map(inc => (
-                                          <button
-                                            key={inc.id}
-                                            type="button"
-                                            onClick={() => { flyToIncident(inc); setSearchOpen(false); setSearchQuery(''); }}
-                                            className={`w-full text-left px-3 py-2 text-[10px] font-mono border-b last:border-b-0 transition-colors ${
-                                              isDark
-                                                ? 'border-[#2D334A] text-slate-300 hover:bg-white/5'
-                                                : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-                                            } ${inc.id === activeIncident.id ? (isDark ? 'bg-white/5' : 'bg-slate-100') : ''}`}
-                                          >
-                                            <div className="flex items-center gap-1.5">
-                                              <span
-                                                className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                                                style={{
-                                                  backgroundColor:
-                                                    inc.severity === 'critical' ? '#E63946' :
-                                                    inc.severity === 'urgent'   ? '#F59E0B' : '#EAB308',
-                                                }}
-                                              />
-                                              <div className="font-bold truncate">{inc.title}</div>
-                                            </div>
-                                            <div className="opacity-60 truncate flex items-center gap-1 ml-3">
-                                              <MapPin className="w-2.5 h-2.5 shrink-0" />
-                                              {inc.location}
-                                            </div>
-                                          </button>
-                                        ))
-                                      ) : (
-                                        <div
-                                          className={`px-3 py-3 text-[10px] font-mono text-center ${
-                                            isDark ? 'text-slate-500' : 'text-slate-400'
-                                          }`}
-                                        >
-                                          No active incidents
-                                        </div>
-                                      )}
-                                    </>
+                                  {noResults ? (
+                                    <div
+                                      className={`px-3 py-2 text-[10px] font-mono ${
+                                        isDark ? 'text-slate-500' : 'text-slate-400'
+                                      }`}
+                                    >
+                                      No Result Incident
+                                    </div>
                                   ) : (
-                                    searchResults.map(inc => (
+                                    displayResults.map(inc => (
                                       <button
                                         key={inc.id}
                                         type="button"
@@ -306,7 +273,19 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                                             : 'border-slate-200 text-slate-700 hover:bg-slate-100'
                                         }`}
                                       >
-                                        <div className="font-bold truncate">{inc.title}</div>
+                                        <div className="font-bold truncate flex items-center gap-1.5">
+                                          <span
+                                          className="inline-block w-1 h-1 rounded-full shrink-0 "
+                                          style={
+                                          {backgroundColor:
+                                          inc.severity === 'critical' ? '#E63946' :
+                                          inc.severity === 'urgent'   ? '#F59E0B' :
+                                          inc.severity === 'moderate' ? '#EAB308' : '#10B981',
+                                        }}
+                                        />
+                                        {inc.title}
+                                        </div>
+        
                                         <div className="opacity-60 truncate flex items-center gap-1">
                                           <MapPin className="w-2.5 h-2.5 shrink-0" />
                                           {inc.location}
