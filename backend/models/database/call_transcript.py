@@ -9,3 +9,8 @@ class CreateCallTranscriptPayload(BaseModel):
     call_id: UUID
     transcript: str
     role: str
+
+class UtteranceExistsPayload(BaseModel):
+    call_id: UUID
+    start_duration: int
+    end_duration: int

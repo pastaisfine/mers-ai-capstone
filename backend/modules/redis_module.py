@@ -18,6 +18,15 @@ class RedisClient:
     def hdel(self, key, name):
         self.client.hdel(key, name)
 
+    def hget(self, key, name):
+        return self.client.hget(key, name)
+
+    def hpop(self, key, name):
+        result = self.hget(key, name)
+        if result is not None:
+            self.hdel(key, name)
+        return result
+
     def zadd(self, key, values):
         self.client.zadd(key, values)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS, gt=True)
@@ -28,5 +37,8 @@ class RedisClient:
     def sadd(self, key, value):
         self.client.sadd(key, value)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
+
+    def close(self):
+        self.client.close()
 
 redis_client = RedisClient()

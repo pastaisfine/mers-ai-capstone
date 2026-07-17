@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from apis.incidents import router as incident_router
+from async_context_managers.lifespan import lifespan
 from database import engine
 from environment import ALLOW_ORIGINS
 import models.schema as models
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 def db_setup():
     models.Base.metadata.create_all(engine)

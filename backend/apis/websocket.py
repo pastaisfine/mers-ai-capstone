@@ -114,35 +114,8 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     #     # TODO: Redis Lock mechanism
                     redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id, transcript)
                     redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, internal_call_id)
-                    # unused code
-                    unsend_transcript = []
-                    for utterance in reversed(transcript):
-                        transcript_unique_id = f"{internal_call_id}_{utterance.words[0].start}_{utterance.words[-1].end}"
-                        redis_key = f"transcript_{internal_call_id}"
-                        has_in_redis = redis_client.sismember(redis_key, transcript_unique_id)
-                        if has_in_redis:
-                            unsend_transcript.insert(0, utterance)
-                        else:
-                            "check db got"
-                    # for utterance in transcript:
-                    #     default_end_duration:int = 0
-                    #     default_start_duration: int = int(utterance.words[0].start * 1000) if utterance.words[0].start  is not None else default_end_duration
-                    #     default_end_duration: int = int(utterance.words[-1].end * 1000) if utterance.words[-1].end is not None else default_start_duration
-                    #     call_transcript_module.create_call_transcript(CreateCallTranscriptPayload(
-                    #         call_id=internal_call_id,
-                    #         role=utterance.role,
-                    #         transcript=utterance.content,
-                    #         start_duration=default_start_duration,
-                    #         end_duration=default_end_duration
-                    #     ), db)
-                    #     break
                 case "response_required" | "reminder_required":
                     response_id = event.response_id
-                    # request = ResponseRequiredRequest(
-                    #     interaction_type=event["interaction_type"],
-                    #     response_id=response_id,
-                    #     transcript=event["transcript"],
-                    # )
                     request = ResponseRequiredRequest(
                         interaction_type=event.interaction_type,
                         response_id=response_id,
@@ -151,19 +124,6 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     print(
                         f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
                     )
-
-                    # async for my_event in llm_client.draft_response(request):
-                    #     await websocket.send_json(my_event.__dict__)
-                    #     if request.response_id < response_id:
-                    #         break  # new response needed, abandon this one
-
-                    # ref code
-
-                    print(
-                        f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
-                    )
-
-
         async for data in websocket.iter_text():
             event = inbound_event_adapter.validate_json(data)
             asyncio.create_task(handle_message(event))

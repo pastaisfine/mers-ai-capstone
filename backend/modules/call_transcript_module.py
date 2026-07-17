@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid_v7.base import uuid7, UUID
 
 from database import db_dependency
-from models.database.call_transcript import CreateCallTranscriptPayload
+from models.database.call_transcript import CreateCallTranscriptPayload, UtteranceExistsPayload
 from models.schema import CallTranscript
 from modules import db_module
 
@@ -16,3 +16,11 @@ def read_transcripts(call_id: UUID, db: Session) -> list[CallTranscript]:
     stmt = select(CallTranscript).where(CallTranscript.call_id == call_id).order_by(CallTranscript.start_duration)
     transcripts = db.scalars(stmt).unique().all()
     return list(transcripts)
+
+def utterance_exists(payload: UtteranceExistsPayload, db: Session)-> bool:
+    call_id = payload.call_id
+    start_duration = payload.start_duration
+    end_duration = payload.end_duration
+    stmt = select(CallTranscript).where(CallTranscript.call_id is call_id and CallTranscript.start_duration is start_duration and CallTranscript.end_duration is end_duration)
+    transcript = db.scalars(stmt).first()
+    return transcript is not None
