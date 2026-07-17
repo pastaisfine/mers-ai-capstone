@@ -7,9 +7,7 @@ from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 
 from main import app
-from modules.transcripts import call_transcript_module
 from modules.transcripts.call_transcript_broadcaster import call_transcript_broadcaster
-
 
 class Payload(BaseModel):
     call_id: UUID

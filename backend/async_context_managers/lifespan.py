@@ -10,8 +10,8 @@ from modules.redis_module import redis_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    process_consumer_task = asyncio.create_task(transcript_process_consumer())
-    broadcast_consumer_task = asyncio.create_task(transcript_broadcast_consumer())
+    process_consumer_task = asyncio.create_task(asyncio.to_thread(transcript_process_consumer))
+    broadcast_consumer_task = asyncio.create_task(asyncio.to_thread(transcript_broadcast_consumer))
 
     yield
 
@@ -22,7 +22,10 @@ async def lifespan(app: FastAPI):
         except asyncio.TimeoutError:
             task.cancel()
 
-    await asyncio.gather(wait_for_complete(process_consumer_task), wait_for_complete(broadcast_consumer_task))
+    await asyncio.gather(
+        wait_for_complete(process_consumer_task),
+        wait_for_complete(broadcast_consumer_task)
+    )
 
     async def close_db():
         await base.db.close()

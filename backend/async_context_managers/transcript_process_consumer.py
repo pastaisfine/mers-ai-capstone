@@ -8,7 +8,7 @@ from modules.transcripts import call_transcript_module
 from async_context_managers import base
 
 
-def transcript_process_consumer():
+async def transcript_process_consumer():
     while base.keep_running:
         process_call_id = redis_client.zpopmin(TRANSCRIPT_CONSUME_QUEUE_KEY)
         if process_call_id is not None:

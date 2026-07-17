@@ -1,3 +1,6 @@
+- to run Docker
+  - in docker folder
+    - docker compose -f .\docker\docker-compose.yml --env-file .env up
 - to run server
   - run ngrok first
     - `ngrok http 8000`
