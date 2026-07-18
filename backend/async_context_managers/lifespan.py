@@ -10,8 +10,9 @@ from modules.redis_module import redis_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    base.main_loop = asyncio.get_running_loop()
     process_consumer_task = asyncio.create_task(asyncio.to_thread(transcript_process_consumer))
-    broadcast_consumer_task = asyncio.create_task(asyncio.to_thread(transcript_broadcast_consumer))
+    broadcast_consumer_task = asyncio.create_task(transcript_broadcast_consumer())
 
     yield
 

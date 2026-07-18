@@ -144,7 +144,13 @@ function AgentSettingsPanel() {
 function LiveTranscript({ incident }: { incident: ReturnType<typeof useIncident>["activeIncident"] }) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const lines = incident?.transcript ?? []
-
+  const { setSSEEnabled } = useIncident()
+  useEffect(() => {
+    setSSEEnabled(true)
+    return () => {
+      setSSEEnabled(false)
+    }
+  }, [])
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [lines])

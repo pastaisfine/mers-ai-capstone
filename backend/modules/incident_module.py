@@ -45,7 +45,7 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
             # Fields retrieved directly from the joined 'Call' record
             "lang": getattr(incident.call[0], "lang", ""),
             "caller": getattr(incident.call[0]  ,"caller_name", ""),
-
+            "callId": getattr(incident.call[0] ,"id", ""),
             # Date format converted to ISO-8601 string standard
             "occurDateTime": incident.occur_date_time.isoformat() + "Z" if incident.occur_date_time else None,
 

@@ -1,24 +1,54 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { IncidentContext } from './useIncident';
 import { Incident, SeverityType } from '@/types';
 import { IncidentApi } from '@/apis/incidents';
-import { IncidentDto } from '@/dtos/incidents';
+import { IncidentDto, TranscriptItem } from '@/dtos/incidents';
 import { INITIAL_INCIDENTS } from '@/data/initialIncidents';
 import { addMilliseconds, uuidv7ToDate } from '@/lib/utils';
+import { useSSE } from '@/hooks/useSSE';
+
+function transcriptItemToUtterance(t: TranscriptItem): Incident["transcript"][number] {
+    const call_id = t.call_id;
+    const datetime = uuidv7ToDate(call_id);
+    const newDatetime = addMilliseconds(datetime, t.start_duration)
+    return {
+        time: newDatetime.toTimeString(),
+        speaker: t.role,
+        text: t.transcript,
+        highlight: undefined
+    }
+}
 
 export function IncidentProvider({ children }: { children: ReactNode }) {
     const [incidents, setIncidents] = useState<Incident[]>(INITIAL_INCIDENTS);
     const [selectedIncidentId, setSelectedIncidentId] = useState<string>('INC-0042');
+    const [enabled, setEnabled] = useState<boolean>(false);
 
     const activeIncident = useMemo(
         () => incidents.find(inc => inc.id === selectedIncidentId) || incidents[0],
         [selectedIncidentId, incidents]
     );
 
+    const { data } = useSSE(enabled)
+    useEffect(() => {
+        if (data != null && data.length > 0) {
+            const callId = data[0].call_id
+            setIncidents((prev) => {
+                return prev.map((incident) => (
+                    incident.callId === callId
+                        ? {
+                            ...incident,
+                            transcript: data.map(transcriptItemToUtterance),
+                        }
+                        : incident
+                ))
+            })
+        }
+    }, [data])
+
     function fetchIncidents() {
         IncidentApi.readIncidents({ page: 1, size: 100 })
             .then((result: IncidentDto[]) => {
-                console.log(`result: ${result}`);
                 if (result.length === 0) return;
                 setIncidents(result.map<Incident>((r) => ({
                     ...r,
@@ -39,17 +69,7 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
                     lang: r.lang ?? "",
                     priority: r.priority ?? 0,
                     location: r.location ?? '',
-                    transcript: r.transcript.map((t) => {
-                        const call_id = t.call_id;
-                        const datetime = uuidv7ToDate(call_id);
-                        const newDatetime = addMilliseconds(datetime, t.start_duration)
-                        return {
-                            time: newDatetime.toTimeString(),
-                            speaker: t.role,
-                            text: t.transcript,
-                            highlight: undefined
-                        }
-                    }),
+                    transcript: r.transcript.map(transcriptItemToUtterance),
                     type: r.type ?? undefined,
                     severity: (r.severity?.toLowerCase() as Exclude<SeverityType, SeverityType.ALL> ?? SeverityType.MODERATE),
                     contradiction: r.contradiction ?? undefined,
@@ -69,6 +89,7 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
             setIncidents,
             setSelectedIncidentId,
             fetchIncidents,
+            setSSEEnabled: setEnabled
         }}>
             {children}
         </IncidentContext>

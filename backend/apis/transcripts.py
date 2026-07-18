@@ -1,35 +1,55 @@
 import asyncio
 import json
+import uuid
 from uuid import UUID
 
-from fastapi.sse import EventSourceResponse
+import uuid_v7
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 
+from database import db_dependency
 from main import app
+from models.database.call_transcript import CreateCallTranscriptPayload
+from modules.transcripts import call_transcript_module
 from modules.transcripts.call_transcript_broadcaster import call_transcript_broadcaster
 
 class Payload(BaseModel):
     call_id: UUID
 
-@app.post("transcripts/stream", response_class=EventSourceResponse)
+def serialize_transcript(transcript):
+    return {
+        "id": str(transcript.id),
+        "start_duration": transcript.start_duration,
+        "end_duration": transcript.end_duration,
+        "call_id": str(transcript.call_id),
+        "transcript": transcript.transcript,
+        "role": transcript.role,
+        "created_at": transcript.created_at.isoformat() if transcript.created_at else None,
+        "updated_at": transcript.updated_at.isoformat() if transcript.updated_at else None,
+    }
+
+
+@app.get("/transcripts/stream")
 async def read_transcripts() -> StreamingResponse:
     async def event_stream():
         # Create a private queue just for this specific connected client
         client_queue = call_transcript_broadcaster.subscribe()
+        print(
+            f"Client subscribed to transcript stream; listeners={len(call_transcript_broadcaster._listeners)}",
+            flush=True,
+        )
         try:
             while True:
                 # Blocks until the background worker broadcasts a new call_id
                 transcripts = await client_queue.get()
-
-                yield json.dumps(transcripts)
+                payload = [serialize_transcript(transcript) for transcript in transcripts]
+                print(f"streaming {json.dumps(payload)}", flush=True)
+                yield f"data: {json.dumps(payload)}\n\n"
         except asyncio.CancelledError:
             # Triggered automatically when the frontend client disconnects
-            print("Client disconnected from SSE")
+            print("Client disconnected from SSE", flush=True)
         finally:
             # Clean up so we don't leak memory
             call_transcript_broadcaster.unsubscribe(client_queue)
 
-    return EventSourceResponse(event_stream())
-
-
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

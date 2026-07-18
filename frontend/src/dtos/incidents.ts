@@ -44,6 +44,8 @@ export const TranscriptItemSchema = z.object({
   role: z.string(),
 });
 
+export type TranscriptItem = z.infer<typeof TranscriptItemSchema>;
+
 export const CoordinatesSchema = z.object({
   lat: z.number(),
   lng: z.number(),
@@ -71,7 +73,7 @@ export const IncidentDtoSchema = z.object({
   reason: z.string().nullish(),
   confidence: z.number(),
   contradiction: z.string().nullable().optional(),
-
+  callId: z.string(),
   // CamelCase properties received from backend DTO
   occurDateTime: z.string().nullish(), // Validates strict ISO 8601 string format (ends with Z)
   distressScore: z.number().nullish(),

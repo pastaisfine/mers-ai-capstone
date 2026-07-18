@@ -18,6 +18,7 @@ app.include_router(incident_router)
 import apis.twilio_api
 import apis.websocket
 import apis.transcripts
+import apis.database_event
 
 origins = ALLOW_ORIGINS
 
