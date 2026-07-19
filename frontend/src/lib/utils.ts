@@ -1,8 +1,22 @@
 import { clsx, type ClassValue } from "clsx";
+import dayjs from "dayjs";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function uuidv7ToDate(uuid: string) {
+  const cleanHex = uuid.replace(/-/g, "");
+
+  // 2. Extract the first 12 hex characters (48 bits)
+  const timestampHex = cleanHex.substring(0, 12);
+
+  // 3. Convert the hex string to a base-10 integer (milliseconds)
+  const timestampMs = parseInt(timestampHex, 16);
+
+  // 4. Return a standard JavaScript Date object
+  return new Date(timestampMs);
 }
 
 export function timeAgo(occurDateTime: string): string {
@@ -48,4 +62,12 @@ export function removeUndefinedFields<T extends Record<string, any>>(
   return Object.fromEntries(
     Object.entries(obj).filter(([_, value]) => value !== undefined),
   ) as Partial<T>;
+}
+
+export function addMilliseconds(
+  originalDateTime: Date,
+  milliseconds: number,
+): Date {
+  const newDay = dayjs(originalDateTime);
+  return newDay.add(milliseconds).toDate();
 }

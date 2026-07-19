@@ -13,6 +13,7 @@ export interface Incident {
   lang: string;
   occurDateTime: string;
   caller: string;
+  callId: string;
   callerAge?: string;
   callerGender?: string;
   duration: string;
@@ -69,8 +70,8 @@ export enum TabName {
 }
 
 export interface UserProfile {
-  avatar_url?: string
-  full_name: string
-  role: string
-  unit: string
+  avatar_url?: string;
+  full_name: string;
+  role: string;
+  unit: string;
 }

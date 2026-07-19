@@ -8,6 +8,7 @@ interface Context {
   setIncidents: Dispatch<SetStateAction<Incident[]>>;
   setSelectedIncidentId: Dispatch<SetStateAction<string>>;
   fetchIncidents: () => void;
+  setSSEEnabled: (v: boolean) => void;
 }
 
 export const IncidentContext = createContext<null | Context>(null);
