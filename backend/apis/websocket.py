@@ -3,6 +3,7 @@ import json
 
 from fastapi import WebSocketDisconnect
 
+from agents.voice_agent import prompting_to_voice_agent
 from constants.redis_key import PENDING_CALL_TRANSCRIPT_MAP_KEY, TRANSCRIPT_CONSUME_QUEUE_KEY
 from main import app
 from database import db_dependency
@@ -108,22 +109,19 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                             "timestamp": event.timestamp,
                         }
                     )
-                case "update_only":
+                case RetellInteractionType.UPDATE_ONLY:
                     transcript = event.transcript
                     # if redis_client.hexists(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id):
                     #     # TODO: Redis Lock mechanism
                     redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id, transcript)
                     redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, internal_call_id)
-                case "response_required" | "reminder_required":
+                case RetellInteractionType.RESPONSE_REQUIRED | RetellInteractionType.REMINDER_REQUIRED:
                     response_id = event.response_id
-                    request = ResponseRequiredRequest(
-                        interaction_type=event.interaction_type,
-                        response_id=response_id,
-                        transcript=event.transcript,
-                    )
+                    transcript = event.transcript
                     print(
                         f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
                     )
+                    result = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
         async for data in websocket.iter_text():
             event = inbound_event_adapter.validate_json(data)
             asyncio.create_task(handle_message(event))

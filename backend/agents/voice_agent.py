@@ -74,7 +74,7 @@ def prompting_to_voice_agent(call_id: str, transcripts: List[Utterance]):
            "severity": "...", // Severity of the incident (Only allowed values are "CRITICAL", "URGENT", "MODERATE", "RESOLVED") if able to determined, else no need to set
            "priority": "...", // Priority of the incident based on SOP given if able to determined, else no need to set
            "sop_citation": "...", // SOP citation for the incident based on SOP given if able to determined, else no need to set
-           "sop_procedure": "...", // SOP procedure for the incident based on SOP given if able to determined, else no need to set
+           "sop_procedure": "...", // SOP procedure for the incident based on SOP given if able to determined (dict<str, Any>), else no need to set 
         }
    }
     """, tools=[query_rag_tool])
