@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 from models.database.call import InitCallPayload
-from models.database.incident import InitIncidentPayload
+from models.database.incident import InitIncidentPayload, UpdateIncidentPayload
 
 from fastapi import WebSocketDisconnect
 
@@ -16,7 +16,7 @@ from fastapi import WebSocket
 from modules.redis_module import redis_client
 
 from models.dto.retell import ConfigResponse, inbound_event_adapter, RetellInboundEvent, \
-    RetellInteractionType, ResponseRequiredRequest
+    RetellInteractionType, ResponseRequiredRequest, ResponseResponseEvent, RetellResponseType
 from modules import call_module, db_module, incident_module
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
 
@@ -93,10 +93,10 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
         )
         await websocket.send_json(config.__dict__)
         response_id = 0
-        internal_call_id = call_module.get_call_id_by_sid(call_id, db=db)
+        id_result = call_module.get_call_id_by_sid(call_id, db=db)
 
         # If call_id is not in the database yet, initialize a new Incident and Call
-        if internal_call_id is None:
+        if id_result is None:
             print(f"Call ID {call_id} not found in DB. Creating new incident and call record...")
             init_incident_payload = InitIncidentPayload(title="DRAFT INCIDENT")
             new_incident = incident_module.init_incident(init_incident_payload, db)
@@ -108,13 +108,14 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             )
             call_module.init_call(init_call_payload, db)
             db.commit()
-            internal_call_id = call_module.get_call_id_by_sid(call_id, db=db)
+            id_result = call_module.get_call_id_by_sid(call_id, db=db)
 
-        if internal_call_id is None:
+        if id_result is None:
             print("Failed to initialize call id in database")
             await websocket.close(1011, "Server error")
             return
         # Send first message to signal ready of server
+        internal_call_id, incident_id = id_result
         response_id = 0
         # first_event = llm_client.draft_begin_message()
         # await websocket.send_json(first_event.__dict__)
@@ -142,6 +143,14 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                         f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
                     )
                     result = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
+                    response_response_event = ResponseResponseEvent(
+                        response_id=response_id,
+                        content=result.content,
+                        content_complete=True
+                    )
+                    await websocket.send_json(response_response_event.__dict__)
+                    incident_module.update_incident_by_id(incident_id, UpdateIncidentPayload(**result.incident_update.model_dump()), db)
+
         async for data in websocket.iter_text():
             event = inbound_event_adapter.validate_json(data)
             asyncio.create_task(handle_message(event))

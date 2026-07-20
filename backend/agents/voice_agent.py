@@ -11,6 +11,7 @@ from agents.tools.sop_rag import sop_rag
 from environment import GEMINI_API_KEY
 from models.dto.retell import Utterance, ResponseResponseEvent, RetellRoleType, WordTimings
 from models.dto.sop_rag import RagQueryRequest, RagQueryResponse
+from models.dto.voice_agent import VoiceAgentResponse
 
 llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=GEMINI_API_KEY)
 
@@ -28,7 +29,7 @@ def lastHumanMessage(transcript: List[Utterance]) -> HumanMessage:
             return HumanMessage(content=utterance.content)
     return HumanMessage(content="")
 
-def prompting_to_voice_agent(call_id: str, transcripts: List[Utterance]):
+def prompting_to_voice_agent(call_id: str, transcripts: List[Utterance]) -> VoiceAgentResponse:
     human_message = lastHumanMessage(transcript=transcripts)
     voice_agent = create_agent(model=llm, checkpointer=InMemorySaver(), system_prompt="""
     ## Objective
@@ -81,4 +82,7 @@ def prompting_to_voice_agent(call_id: str, transcripts: List[Utterance]):
 
     config : RunnableConfig= {"configurable": {"thread_id": call_id}}
     response = voice_agent.invoke(input={"messages": human_message} ,config=config)
-    return response
+    return VoiceAgentResponse(
+        content=response["content"],
+        incident_update=response["incident_update"],
+    )
