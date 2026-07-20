@@ -13,6 +13,9 @@ class RetellInteractionType(StrEnum):
     RESPONSE_REQUIRED = "response_required"
     REMINDER_REQUIRED = "reminder_required"
 
+class RetellResponseType(StrEnum):
+    RESPONSE = "response"
+
 class RetellTurningType(StrEnum):
     AGENT_TURN = "agent_turn"
     USER_TURN = "user_turn"
@@ -101,3 +104,15 @@ class ResponseRequiredRequest(BaseModel):
     interaction_type: Literal["reminder_required", "response_required"]
     response_id: int
     transcript: List[Utterance]
+
+# https://docs.retellai.com/api-references/llm-websocket#response-event
+class ResponseResponseEvent(BaseModel):
+    response_type: Literal[RetellResponseType.RESPONSE] = RetellResponseType.RESPONSE
+    response_id: int
+    content: str
+    content_complete: bool
+    no_interruption_allowed: Optional[bool]
+    end_call: Optional[bool]
+    transfer_number: Optional[str]
+    show_transferee_as_caller: Optional[bool]
+    digit_to_press: Optional[str]
