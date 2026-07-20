@@ -1,5 +1,9 @@
 import asyncio
 import json
+from datetime import datetime
+
+from models.database.call import InitCallPayload
+from models.database.incident import InitIncidentPayload
 
 from fastapi import WebSocketDisconnect
 
@@ -13,7 +17,7 @@ from modules.redis_module import redis_client
 
 from models.dto.retell import ConfigResponse, inbound_event_adapter, RetellInboundEvent, \
     RetellInteractionType, ResponseRequiredRequest
-from modules import call_module
+from modules import call_module, db_module, incident_module
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
 
 
@@ -75,6 +79,8 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
 
     try:
         await websocket.accept()
+
+        print(f"Connected call ID: {call_id}")
         # ref code
         # llm_client = LlmClient()
         config = ConfigResponse(
@@ -89,9 +95,23 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
         response_id = 0
         internal_call_id = call_module.get_call_id_by_sid(call_id, db=db)
 
-        #connect to llm
+        # If call_id is not in the database yet, initialize a new Incident and Call
         if internal_call_id is None:
-            print("Call id is not initialized")
+            print(f"Call ID {call_id} not found in DB. Creating new incident and call record...")
+            init_incident_payload = InitIncidentPayload(title="DRAFT INCIDENT")
+            new_incident = incident_module.init_incident(init_incident_payload, db)
+            init_call_payload = InitCallPayload(
+                received_at=datetime.now(),
+                caller_number="UNKNOWN",
+                provider_sid=call_id,
+                incident_id=new_incident.id
+            )
+            call_module.init_call(init_call_payload, db)
+            db.commit()
+            internal_call_id = call_module.get_call_id_by_sid(call_id, db=db)
+
+        if internal_call_id is None:
+            print("Failed to initialize call id in database")
             await websocket.close(1011, "Server error")
             return
         # Send first message to signal ready of server
