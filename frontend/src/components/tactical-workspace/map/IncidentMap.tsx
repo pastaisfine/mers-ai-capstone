@@ -3,7 +3,9 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Map, Marker, Popup, AttributionControl, type MapRef } from 'react-map-gl/mapbox';
 import { SVGFallback } from '../fallback/SvgFallback';
 import { MapButton } from './MapButton';
-import { Crosshair, Layers, Minus, Plus, MapPin, Search, X} from 'lucide-react';
+import { RouteLayer } from './RouteLayer';
+import { Crosshair, Layers, Minus, Plus, MapPin, Search, X, Radar } from 'lucide-react';
+import { EMERGENCY_CENTER } from '@/constants/dispatch';
 
 interface IncidentMapProps {
     activeIncident: Incident;
@@ -11,6 +13,10 @@ interface IncidentMapProps {
     pinColor: string;
     isDark: boolean;
     onSelectIncident?: (incident: Incident) => void;
+    /** True while the AI location agent is analyzing the live transcript */
+    isLocating?: boolean;
+    /** Live GPS fix for the responding unit, if you have real tracking */
+    liveResponderPosition?: { lat: number; lng: number } | null;
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -35,7 +41,15 @@ const MAP_STYLES_LIGHT = [
  */
 // Source by: Qistina
 // ─── IncidentMap ────────────────────────────────────────────────────────────
-export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, onSelectIncident }: IncidentMapProps) {
+export function IncidentMap({
+    activeIncident,
+    allIncidents,
+    pinColor,
+    isDark,
+    onSelectIncident,
+    isLocating = false,
+    liveResponderPosition = null,
+}: IncidentMapProps) {
     const mapRef = useRef<MapRef | null>(null);
     const [styleIndex, setStyleIndex] = useState(0);
     const [hoveredIncident, setHoveredIncident] = useState<Incident | null>(null);
@@ -55,12 +69,15 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
   
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return [];
+    // No query yet -> show active incident by default
+    // if (!q) return activeIncident ? [activeIncident] : [];
+
     return searchableIncidents.filter(inc =>
-      inc.title.toLowerCase().includes(q) ||
-      inc.location.toLowerCase().includes(q) ||
-      inc.id.toLowerCase().includes(q),
-    ).slice(0, 6);}, [searchQuery, searchableIncidents]);
+    inc.title?.toLowerCase().includes(q) ||
+    inc.location?.toLowerCase().includes(q) ||
+    inc.id?.toString().toLowerCase().includes(q),
+  ).slice(0, 6);
+}, [searchQuery, searchableIncidents, activeIncident]);
 
     const hasQuery = searchQuery.trim().length > 0;
 
@@ -74,6 +91,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
     () => searchableIncidents.filter(inc => inc.severity !== 'resolved'),
     [searchableIncidents],
   );
+
     
   const flyToIncident = useCallback((inc: Incident) => {
     if (!inc.coordinates) return;
@@ -156,6 +174,18 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                             )
                     })}
 
+                {/* Route + responder tracker: dispatch center → active incident */}
+                {lat !== 0 && lng !== 0 && (
+                    <RouteLayer
+                        origin={EMERGENCY_CENTER}
+                        destination={{ lat, lng }}
+                        mapboxToken={MAPBOX_TOKEN}
+                        isDark={isDark}
+                        color={pinColor}
+                        liveResponderPosition={liveResponderPosition}
+                    />
+                )}
+
                 {/* Active incident pin */}
                 <Marker longitude={lng} latitude={lat} anchor="center">
                     <div className="relative cursor-pointer"
@@ -225,7 +255,7 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                         <AttributionControl position="bottom-left" compact />
                       </Map>
                 
-                      {/* Search box */}
+                     {/* Search box */}
                       <div className="absolute top-5 right-3 z-10 flex flex-col items-end gap-1.5">
                         <div className="flex items-center">
                           {searchOpen && (
@@ -310,10 +340,11 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                           </MapButton>
                         </div>
                       </div>
+
                       
             {/* Custom map controls */}
             <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
-                <MapButton onClick={handleZoomIn} isDark={isDark} title="oom in">
+                <MapButton onClick={handleZoomIn} isDark={isDark} title="Zoom in">
                     <Plus className="w-3.5 h-3.5" />
                 </MapButton>
                 <MapButton onClick={handleZoomOut} isDark={isDark} title="Zoom out">
@@ -326,6 +357,18 @@ export function IncidentMap({ activeIncident, allIncidents, pinColor, isDark, on
                     <Crosshair className="w-3.5 h-3.5" />
                 </MapButton>
             </div>
+
+            {/* AI location agent status */}
+            {isLocating && (
+                <div
+                    className={`absolute top-5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded text-[9px] font-mono font-bold tracking-widest z-10 ${
+                        isDark ? 'bg-black/70 text-cyan-400 ring-1 ring-cyan-500/40' : 'bg-white/90 text-cyan-700 ring-1 ring-cyan-500/40'
+                    }`}
+                >
+                    <Radar className="w-3 h-3 animate-spin" style={{ animationDuration: '1.5s' }} />
+                    AI LOCATING…
+                </div>
+            )}
 
             {/* Style indicator */}
       <div

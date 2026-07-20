@@ -22,6 +22,7 @@ import { ContradictionCard } from './tactical-workspace/ContradictionCard';
 import { AiConfidenceCard } from './tactical-workspace/AiConfidenceCard';
 import { GpsTriangulationCard } from './tactical-workspace/GpsTriangulationCard';
 import { useIncident } from '@/context/incident/useIncident';
+import { useLocationAgent } from '@/hooks/useLocationAgent';
 
 // ─── TacticalWorkspace ──────────────────────────────────────────────────────
 export interface TacticalWorkspaceProps {
@@ -38,11 +39,35 @@ const SEVERITY_COLORS: Record<Incident['severity'], { bg: string; text: string; 
 export function TacticalWorkspace({
   theme,
 }: TacticalWorkspaceProps) {
-  const { incidents: allIncidents, activeIncident } = useIncident();
+  const { incidents: allIncidents, activeIncident, setIncidents } = useIncident();
   const isDark = theme === 'dark';
   const lat = activeIncident?.coordinates?.lat
   const lng = activeIncident?.coordinates?.lng
   const sev = activeIncident?.severity ? SEVERITY_COLORS[activeIncident.severity] : SEVERITY_COLORS.moderate;
+
+  // Your Incident.transcript is an array of { time, speaker, text } entries
+  // (see data/initialIncident.ts), so flatten it into plain text for the agent.
+  // If your transcript grows live (e.g. via Supabase realtime), this recomputes
+  // automatically each time a new entry is appended.
+  const liveTranscript = (activeIncident?.transcript ?? [])
+    .map((t) => `${t.speaker}: ${t.text}`)
+    .join('\n');
+
+  const { isDetecting: isLocating } = useLocationAgent({
+    incidentId: activeIncident?.id ?? '',
+    transcript: liveTranscript,
+    enabled: Boolean(activeIncident?.id) && !activeIncident?.coordinates,
+    onLocated: (result) => {
+      if (!result.coordinates || !activeIncident) return;
+      setIncidents(prev =>
+        prev.map(inc =>
+          inc.id === activeIncident.id
+            ? { ...inc, coordinates: result.coordinates! }
+            : inc
+        )
+      );
+    },
+  });
 
 
   return (
@@ -127,6 +152,7 @@ export function TacticalWorkspace({
           pinColor={sev.pin}
           isDark={isDark}
           onSelectIncident={useIncident}
+          isLocating={isLocating}
         />
 
         {/* HUD overlays */}
