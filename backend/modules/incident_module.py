@@ -5,6 +5,7 @@ from uuid_v7.base import uuid7
 from models.database.incident import InitIncidentPayload, InitIncidentLogPayload, QueryIncidentPayload
 from models.schema import Incident, IncidentLog, Call
 from modules import db_module
+from modules.transcripts import call_transcript_module
 
 
 def init_incident(payload: InitIncidentPayload, db: Session) -> Incident:
@@ -18,7 +19,6 @@ def init_incident(payload: InitIncidentPayload, db: Session) -> Incident:
 
 def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]:
     stmt = select(Incident).options(joinedload(Incident.call)).join(Call, Call.incident_id == Incident.id).order_by(Incident.created_at.desc())
-
     if payload.pattern:
         stmt = stmt.where(or_(Incident.title.contains(payload.pattern),
                               Incident.location.contains(payload.pattern),
@@ -32,7 +32,8 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
         # Reconstruct coordinates from database ARRAY [lat, lng] back to Frontend JSON structure
         lat = incident.coordinates[0] if incident.coordinates and len(incident.coordinates) > 0 else 0
         lng = incident.coordinates[1] if incident.coordinates and len(incident.coordinates) > 1 else 0
-
+        call_id = getattr(incident.call[0], "id", None)
+        transcript = call_transcript_module.read_transcripts(incident.call[0].id, db) if call_id else []
         formatted_incidents.append({
             "id": str(incident.id),
             "type": incident.type.value if hasattr(incident.type, "value") else incident.type,
@@ -44,7 +45,7 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
             # Fields retrieved directly from the joined 'Call' record
             "lang": getattr(incident.call[0], "lang", ""),
             "caller": getattr(incident.call[0]  ,"caller_name", ""),
-
+            "callId": getattr(incident.call[0] ,"id", ""),
             # Date format converted to ISO-8601 string standard
             "occurDateTime": incident.occur_date_time.isoformat() + "Z" if incident.occur_date_time else None,
 
@@ -58,7 +59,7 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
             "sopProcedure": incident.sop_procedure or [],
             "responder": incident.responder or {},
             "timeline": incident.timeline or [],
-            "transcript": incident.transcript or [],
+            "transcript": transcript,
             "coordinates": {"lat": lat, "lng": lng},
             "status": incident.status or {}
         })

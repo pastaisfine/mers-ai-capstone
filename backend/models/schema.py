@@ -49,7 +49,6 @@ class Incident(BaseTable):
     sop_procedure = Column(JSON, nullable=True)
     responder = Column(JSON, nullable=True)  # Dict / Object
     timeline = Column(JSON, nullable=True)  # List[Dict]
-    transcript = Column(JSON, nullable=True)  # List[Dict]
     status = Column(JSON, nullable=True)
 
 class IncidentLog(BaseTable):
@@ -80,7 +79,6 @@ class CallTranscript(BaseTable):
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     transcript = Column(String, nullable=False)
     role = Column(String, nullable=False, server_default="user")  # "agent" or "user"
-    seq = Column(Integer, nullable=False)
 
 
 class AITriageAssessment(BaseTable):
