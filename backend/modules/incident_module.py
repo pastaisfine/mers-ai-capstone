@@ -1,8 +1,9 @@
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Session, joinedload
-from uuid_v7.base import uuid7
+from uuid_v7.base import uuid7, UUID
 
-from models.database.incident import InitIncidentPayload, InitIncidentLogPayload, QueryIncidentPayload
+from models.database.incident import InitIncidentPayload, InitIncidentLogPayload, QueryIncidentPayload, \
+    UpdateIncidentPayload
 from models.schema import Incident, IncidentLog, Call
 from modules import db_module
 from modules.transcripts import call_transcript_module
@@ -66,5 +67,8 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
 
     return formatted_incidents
 
-
+def update_incident_by_id(incident_id: UUID, payload: UpdateIncidentPayload, db:Session)-> Incident:
+    incident_payload = payload.model_dump()
+    incident = db_module.update_data_by_id(incident_id, incident_payload, db, Incident)
+    return incident
 
