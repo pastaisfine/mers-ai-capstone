@@ -1,1 +1,3 @@
 .codex-devserver*.log
+.opencode
+backend/tests/

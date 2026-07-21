@@ -38,6 +38,12 @@ class RedisClient:
         self.client.sadd(key, value)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
 
+    def brpop(self, key, timeout=0):
+        return self.client.brpop(key, timeout=timeout)
+
+    def lpush(self, key, value):
+        self.client.lpush(key, value)
+
     def close(self):
         self.client.close()
 
