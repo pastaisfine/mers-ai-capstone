@@ -111,8 +111,3 @@ class ResponseResponseEvent(BaseModel):
     response_id: int
     content: str
     content_complete: bool
-    no_interruption_allowed: Optional[bool]
-    end_call: Optional[bool]
-    transfer_number: Optional[str]
-    show_transferee_as_caller: Optional[bool]
-    digit_to_press: Optional[str]

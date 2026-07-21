@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 from datetime import datetime
 
 from models.database.call import InitCallPayload
@@ -93,7 +94,7 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
         )
         await websocket.send_json(config.__dict__)
         response_id = 0
-        id_result = call_module.get_call_id_by_sid(call_id, db=db)
+        id_result = call_module.get_call_id_and_incident_id_by_sid(call_id, db=db)
 
         # If call_id is not in the database yet, initialize a new Incident and Call
         if id_result is None:
@@ -108,7 +109,7 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             )
             call_module.init_call(init_call_payload, db)
             db.commit()
-            id_result = call_module.get_call_id_by_sid(call_id, db=db)
+            id_result = call_module.get_call_id_and_incident_id_by_sid(call_id, db=db)
 
         if id_result is None:
             print("Failed to initialize call id in database")
@@ -134,23 +135,23 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     transcript = event.transcript
                     # if redis_client.hexists(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id):
                     #     # TODO: Redis Lock mechanism
-                    redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id, transcript)
-                    redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, internal_call_id)
+                    redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, str(internal_call_id), json.dumps([utterance.model_dump() for utterance in transcript]))
+                    redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, {str(internal_call_id): time.time()})
                 case RetellInteractionType.RESPONSE_REQUIRED | RetellInteractionType.REMINDER_REQUIRED:
                     response_id = event.response_id
                     transcript = event.transcript
                     print(
                         f"""Received interaction_type={event.interaction_type}, response_id={response_id}, last_transcript={event.transcript[-1].content}"""
                     )
-                    result = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
-                    response_response_event = ResponseResponseEvent(
-                        response_id=response_id,
-                        content=result.content,
-                        content_complete=True
-                    )
-                    await websocket.send_json(response_response_event.__dict__)
-                    incident_module.update_incident_by_id(incident_id, UpdateIncidentPayload(**result.incident_update.model_dump()), db)
-
+                    result_stream = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
+                    async for chunk in result_stream:
+                        print(f"chunk outside: {chunk}")
+                        response_response_event = ResponseResponseEvent(
+                            response_id=response_id,
+                            content=chunk,
+                            content_complete=False
+                        )
+                        await websocket.send_json(response_response_event.__dict__)
         async for data in websocket.iter_text():
             event = inbound_event_adapter.validate_json(data)
             asyncio.create_task(handle_message(event))
@@ -159,8 +160,8 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
     except ConnectionTimeoutError as e:
         print(f"Connection timeout error for {call_id}")
     except Exception as e:
-        print(f"Error in LLM WebSocket: {e} for {call_id}")
         await websocket.close(1011, "Server error")
+        raise e
     finally:
         print(f"LLM WebSocket connection closed for {call_id}")
 

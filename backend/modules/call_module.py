@@ -21,8 +21,10 @@ def get_call_id_by_sid(sid: str, db: db_dependency) -> uuid.UUID | None:
 
 def get_call_id_and_incident_id_by_sid(sid: str, db: db_dependency) -> tuple[uuid.UUID, uuid.UUID] | None:
     stmt = select(Call.id, Call.incident_id).where(Call.provider_sid == sid)
-    row = db.scalars(stmt).first()
-    return row.id, row.incident_id if row else None
+    row = db.execute(stmt).first()
+    if row is None:
+        return None
+    return row.id, row.incident_id
 
 
 def update_call(call_id: uuid.UUID, payload: UpdateCallPayload, db: db_dependency) -> Call:

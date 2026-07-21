@@ -4,7 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(override=True)
 
 DATABASE_URL = os.getenv("POSTGRES_CONNECTION_STRING")
 NGROK_URL = os.getenv("NGROK_URL", "")
