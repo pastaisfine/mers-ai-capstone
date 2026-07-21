@@ -1,15 +1,12 @@
-import asyncio
 import logging
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
 from agents.transcript_incident_agent.chain import chain, format_utterances
-from async_context_managers import base
 from database import SessionLocal
 from models.schema import Call, Incident
 from modules import db_module
-from modules.incidents.incident_update_broadcaster import incident_update_broadcaster
 from modules.transcripts import call_transcript_module
 
 logger = logging.getLogger(__name__)
@@ -43,21 +40,6 @@ def run_incident_extraction(call_id: UUID, db: Session) -> None:
         db_module.update_data_by_id(incident.id, payload, db, Incident)
         db.commit()
         logger.info("Successfully extracted incident %s from call %s", incident.id, call_id)
-
-        broadcast_payload = {
-            "call_id": str(call_id),
-            "incident_id": str(incident.id),
-            "title": extracted.title,
-            "location": extracted.location,
-            "type": extracted.type.value if extracted.type else None,
-            "priority": extracted.priority,
-            "severity": extracted.severity.value if extracted.severity else "URGENT",
-        }
-        loop = base.main_loop
-        if loop is not None and loop.is_running():
-            asyncio.run_coroutine_threadsafe(
-                incident_update_broadcaster.broadcast(broadcast_payload), loop
-            )
     except Exception as e:
         logger.error("Extraction failed for call %s: %s", call_id, e)
         db_module.update_data_by_id(incident.id, {
