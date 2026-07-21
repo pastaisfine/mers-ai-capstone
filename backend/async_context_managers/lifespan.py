@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from async_context_managers.transcript_broadcast_consumer import transcript_broadcast_consumer
 from async_context_managers.transcript_process_consumer import transcript_process_consumer
+from agents.incident_extract_consumer import incident_extract_consumer
 from modules.redis_module import redis_client
 
 @asynccontextmanager
@@ -13,6 +14,7 @@ async def lifespan(app: FastAPI):
     base.main_loop = asyncio.get_running_loop()
     process_consumer_task = asyncio.create_task(asyncio.to_thread(transcript_process_consumer))
     broadcast_consumer_task = asyncio.create_task(transcript_broadcast_consumer())
+    incident_extract_task = asyncio.create_task(asyncio.to_thread(incident_extract_consumer))
 
     yield
 
@@ -25,7 +27,8 @@ async def lifespan(app: FastAPI):
 
     await asyncio.gather(
         wait_for_complete(process_consumer_task),
-        wait_for_complete(broadcast_consumer_task)
+        wait_for_complete(broadcast_consumer_task),
+        wait_for_complete(incident_extract_task),
     )
 
     async def close_db():
