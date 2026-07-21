@@ -46,6 +46,38 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         }
     }, [data])
 
+    useEffect(() => {
+        if (!enabled) return;
+
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/incidents/stream`;
+        const es = new EventSource(url);
+
+        es.onmessage = (event) => {
+            try {
+                const update = JSON.parse(event.data);
+                setIncidents((prev) =>
+                    prev.map((inc) =>
+                        inc.callId === update.call_id
+                            ? {
+                                ...inc,
+                                title: update.title ?? inc.title,
+                                location: update.location ?? inc.location,
+                                type: update.type ?? inc.type,
+                                priority: update.priority ?? inc.priority,
+                                severity: update.severity?.toLowerCase() ?? inc.severity,
+                            }
+                            : inc
+                    )
+                );
+            } catch (e) {
+                console.error("Incident SSE parse error", e);
+            }
+        };
+
+        es.onerror = () => es.close();
+        return () => es.close();
+    }, [enabled])
+
     function fetchIncidents() {
         IncidentApi.readIncidents({ page: 1, size: 100 })
             .then((result: IncidentDto[]) => {
