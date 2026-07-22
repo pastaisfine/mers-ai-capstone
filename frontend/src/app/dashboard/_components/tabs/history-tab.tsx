@@ -4,13 +4,11 @@ import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Search, CheckCircle2, XCircle, UserCheck, Zap,
-  AlertTriangle, Timer, ThumbsUp, HeartPulse, ClipboardList,
-  ChevronRight, MapPin, Flame, Heart, Shield, Car, Droplets,
+  AlertTriangle, ChevronRight, MapPin, Flame, Heart, Shield, Car, Droplets,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -22,7 +20,7 @@ import { HISTORICAL_REPORTS } from "@/data/historicalReports"
 import { cn } from "@/lib/utils"
 import { SeverityType as ReportSeverityType, ApprovalType, IncidentType } from "@/models/report"
 
-const PAGE_SIZE = 8
+const PAGE_SIZE = 10
 
 const SEVERITY_BADGE: Record<string, string> = {
   CRITICAL: "border-destructive/60 bg-destructive/10 text-destructive",
@@ -53,40 +51,6 @@ function formatResponseTime(seconds?: number | null) {
   return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`
 }
 
-// ── Simplified stat card — no trend section ──────────────────────────────────
-
-interface StatCardProps {
-  label: string
-  value: string | number
-  icon: React.ElementType
-  iconColor: string
-  iconBg: string
-  sub?: string
-}
-
-function StatCard({ label, value, icon: Icon, iconColor, iconBg, sub }: StatCardProps) {
-  return (
-    <Card className="cursor-default overflow-hidden border-black transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md dark:border-neutral-700">
-      <CardContent className="px-4">
-        <div className="flex justify-between">
-          <div>
-            <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-          </div>
-          <div className="mb-2 flex items-start justify-between">
-            <div className={cn("flex size-11 items-center justify-center rounded-xl", iconBg)}>
-              <Icon className={cn("size-6", iconColor)} />
-            </div>
-          </div>
-        </div>
-        <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-border/40 pt-2">
-          <span className="text-[11px] text-muted-foreground">{sub}</span>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function HistoryTab() {
@@ -113,33 +77,9 @@ export function HistoryTab() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const pageData   = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  const totalApproved   = HISTORICAL_REPORTS.filter(r => r.approvedStatus === ApprovalType.APPROVED).length
-  const totalRejected   = HISTORICAL_REPORTS.filter(r => r.approvedStatus === ApprovalType.REJECTED).length
-  const humanInvolved   = HISTORICAL_REPORTS.filter(r => r.humanIntervention?.required).length
-  const avgResponseSecs = Math.round(
-    HISTORICAL_REPORTS.filter(r => r.responseTimeSeconds)
-      .reduce((a, r) => a + (r.responseTimeSeconds ?? 0), 0) /
-    (HISTORICAL_REPORTS.filter(r => r.responseTimeSeconds).length || 1)
-  )
-  const approvalRate = Math.round((totalApproved / HISTORICAL_REPORTS.length) * 100)
-
-  const stats: StatCardProps[] = [
-    { label: "Total Cases",     value: HISTORICAL_REPORTS.length, icon: ClipboardList, iconColor: "text-primary",     iconBg: "bg-primary/15",     sub: "All time" },
-    { label: "Dispatched",      value: totalApproved,             icon: CheckCircle2,  iconColor: "text-secondary",   iconBg: "bg-secondary/15",   sub: "Approved & deployed" },
-    { label: "Rejected / False",value: totalRejected,             icon: XCircle,       iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "No resources deployed" },
-    { label: "Approval Rate",   value: `${approvalRate}%`,        icon: ThumbsUp,      iconColor: "text-primary",     iconBg: "bg-primary/15",     sub: "SLA target 95%" },
-    { label: "Avg Response",    value: formatResponseTime(avgResponseSecs), icon: Timer, iconColor: "text-warning", iconBg: "bg-warning/15",     sub: "End call to Dispatch Request" },
-    { label: "Human Involved",  value: humanInvolved,             icon: HeartPulse,    iconColor: "text-destructive", iconBg: "bg-destructive/15", sub: "Override or assist" },
-  ]
-
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
       <div className="mx-auto max-w-7xl space-y-6">
-
-        {/* stat cards */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
-          {stats.map((s) => <StatCard key={s.label} {...s} />)}
-        </div>
 
         {/* filters */}
         <div className="flex flex-wrap items-center gap-3">
