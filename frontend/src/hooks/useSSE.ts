@@ -1,4 +1,3 @@
-import { CallTranscriptAPI } from "@/apis/call-transcripts";
 import { useEffect, useRef, useState } from "react";
 
 interface Utterance {
@@ -12,14 +11,21 @@ interface Utterance {
   updated_at: string | null;
 }
 
-interface SSEHookResult {
-  data: Utterance[] | null;
+interface SSEHookResult<T> {
+  data: T | null;
   error: Error | null;
   isConnected: boolean;
 }
 
-export function useSSE(enabled: boolean): SSEHookResult {
-  const [data, setData] = useState<Utterance[] | null>(null);
+export function useSSE<T>(
+  enabled: boolean,
+  connectEventSource: (payload: {
+    onopen: ((this: EventSource, ev: Event) => any) | null;
+    onmessage: ((this: EventSource, ev: MessageEvent<any>) => any) | null;
+    onerror: ((this: EventSource, ev: Event) => any) | null;
+  }) => EventSource,
+): SSEHookResult<T> {
+  const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -46,14 +52,14 @@ export function useSSE(enabled: boolean): SSEHookResult {
       disconnect();
 
       try {
-        const eventSource = CallTranscriptAPI.connectTranscriptEventSource({
+        const eventSource = connectEventSource({
           onopen: () => {
             setIsConnected(true);
             setError(null);
           },
           onmessage: (event: MessageEvent<any>) => {
             try {
-              const eventData = JSON.parse(event.data) as Utterance[];
+              const eventData = JSON.parse(event.data) as T;
               setData(eventData);
             } catch (parseError) {
               setError(

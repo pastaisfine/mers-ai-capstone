@@ -3,12 +3,13 @@ import json
 import time
 from datetime import datetime
 
+from async_context_managers import base
 from models.database.call import InitCallPayload
-from models.database.incident import InitIncidentPayload
+from models.database.incident import InitIncidentPayload, UpdateIncidentPayload
 from models.schema import Call
-
 from fastapi import WebSocketDisconnect
 
+from agents.voice_agent import prompting_to_voice_agent
 from constants.redis_key import PENDING_CALL_TRANSCRIPT_MAP_KEY, TRANSCRIPT_CONSUME_QUEUE_KEY, INCIDENT_EXTRACT_QUEUE_KEY, ACTIVE_CALLS_SET_KEY
 from main import app
 from database import db_dependency
@@ -77,10 +78,10 @@ pipeline = None
 
 @app.websocket("/llm-socket/{call_id}")
 async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call_id: str):
+    internal_call_id = None
 
     try:
         await websocket.accept()
-
         print(f"Connected call ID: {call_id}")
         # ref code
         # llm_client = LlmClient()
@@ -116,16 +117,28 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             await websocket.close(1011, "Server error")
             return
 
-        redis_client.client.sadd(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
-        print(f"Added call {internal_call_id} to active calls set")
+        internal_call_id, incident_id = id_result
+        loop = base.main_loop
+        if loop is not None and loop.is_running():
+           loop.call_soon_threadsafe(
+                redis_client.sadd, ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+           print(f"Added call {internal_call_id} to active calls set")
 
         # Send first message to signal ready of server
-        internal_call_id, incident_id = id_result
         response_id = 0
-        # first_event = llm_client.draft_begin_message()
-        # await websocket.send_json(first_event.__dict__)
         async def handle_message(event: RetellInboundEvent):
             nonlocal response_id
+
+            if hasattr(event, "transcript") and event.transcript:
+                transcript = event.transcript
+                loop = base.main_loop
+                if loop is not None and loop.is_running():
+                    loop.call_soon_threadsafe(
+                        redis_client.hset, PENDING_CALL_TRANSCRIPT_MAP_KEY, str(internal_call_id), json.dumps([utterance.model_dump() for utterance in transcript])
+                    )
+                    loop.call_soon_threadsafe(
+                        redis_client.zadd, TRANSCRIPT_CONSUME_QUEUE_KEY, {str(internal_call_id): time.time()}
+                    )
 
             match event.interaction_type:
                 case RetellInteractionType.PING_PONG:
@@ -136,11 +149,7 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                         }
                     )
                 case RetellInteractionType.UPDATE_ONLY:
-                    transcript = event.transcript
-                    # if redis_client.hexists(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id):
-                    #     # TODO: Redis Lock mechanism
-                    redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, str(internal_call_id), json.dumps([utterance.model_dump() for utterance in transcript]))
-                    redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, {str(internal_call_id): time.time()})
+                    print("Updating transcript for call", event.transcript)
                 case RetellInteractionType.RESPONSE_REQUIRED | RetellInteractionType.REMINDER_REQUIRED:
                     response_id = event.response_id
                     transcript = event.transcript
@@ -149,7 +158,6 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     )
                     result_stream = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
                     async for chunk in result_stream:
-                        print(f"chunk outside: {chunk}")
                         response_response_event = ResponseResponseEvent(
                             response_id=response_id,
                             content=chunk,
@@ -169,11 +177,14 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
     finally:
         print(f"LLM WebSocket connection closed for {call_id}")
         if internal_call_id is not None:
-            redis_client.client.srem(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+            redis_client.srem(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
             call = db.get(Call, internal_call_id)
             if call and call.ended_at is None:
                 call.ended_at = datetime.now()
                 db.commit()
-                redis_client.lpush(INCIDENT_EXTRACT_QUEUE_KEY, str(internal_call_id))
+                loop = base.main_loop
+                if loop is not None and loop.is_running():
+                    loop.call_soon_threadsafe(
+                        redis_client.lpush, INCIDENT_EXTRACT_QUEUE_KEY, str(internal_call_id))
                 print(f"Enqueued incident extraction for call {internal_call_id}")
 

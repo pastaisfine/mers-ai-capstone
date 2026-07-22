@@ -35,12 +35,12 @@ export const TimelineItemSchema = z.object({
 });
 
 export const TranscriptItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   transcript: z.string(),
   created_at: z.transform((i: string) => new Date(i)),
-  start_duration: z.number().int().positive(),
-  end_duration: z.number().int().positive(),
-  call_id: z.string().uuid(),
+  start_duration: z.int().nonnegative(),
+  end_duration: z.int().nonnegative(),
+  call_id: z.uuidv7(),
   role: z.string(),
 });
 
