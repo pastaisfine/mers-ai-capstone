@@ -1,7 +1,6 @@
 "use client"
 
 import "mapbox-gl/dist/mapbox-gl.css"
-import Image from "next/image"
 import { ExternalLink, MapPin, Navigation, Satellite } from "lucide-react"
 import { Map, Marker } from "react-map-gl/mapbox"
 import { Badge } from "@/components/ui/badge"

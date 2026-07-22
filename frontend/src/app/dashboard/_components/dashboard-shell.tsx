@@ -41,7 +41,7 @@ function MobileTabNav() {
         { id: TabName.DASHBOARD, label: "Dashboard" },
         { id: TabName.OPERATIONS, label: "Operations" },
         { id: TabName.HISTORY, label: "History" },
-        { id: TabName.SIMULATION, label: "Simulation" },
+        // { id: TabName.SIMULATION, label: "Simulation" },
       ].map(({ id, label }) => (
         <button
           key={id}
