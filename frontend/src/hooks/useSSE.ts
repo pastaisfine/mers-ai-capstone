@@ -11,21 +11,21 @@ interface Utterance {
   updated_at: string | null;
 }
 
-interface SSEHookResult {
-  data: Utterance[] | null;
+interface SSEHookResult<T> {
+  data: T | null;
   error: Error | null;
   isConnected: boolean;
 }
 
-export function useSSE(
+export function useSSE<T>(
   enabled: boolean,
   connectEventSource: (payload: {
     onopen: ((this: EventSource, ev: Event) => any) | null;
     onmessage: ((this: EventSource, ev: MessageEvent<any>) => any) | null;
     onerror: ((this: EventSource, ev: Event) => any) | null;
   }) => EventSource,
-): SSEHookResult {
-  const [data, setData] = useState<Utterance[] | null>(null);
+): SSEHookResult<T> {
+  const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -59,7 +59,7 @@ export function useSSE(
           },
           onmessage: (event: MessageEvent<any>) => {
             try {
-              const eventData = JSON.parse(event.data) as Utterance[];
+              const eventData = JSON.parse(event.data) as T;
               setData(eventData);
             } catch (parseError) {
               setError(

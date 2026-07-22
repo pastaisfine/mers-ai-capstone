@@ -38,6 +38,9 @@ class RedisClient:
         self.client.sadd(key, value)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
 
+    def sismember(self, key, value) -> bool:
+        return self.client.sismember(key, value)
+
     # get all members
     def smembers(self, key):
         return self.client.smembers(key)

@@ -8,6 +8,17 @@ import { addMilliseconds, uuidv7ToDate } from '@/lib/utils';
 import { useSSE } from '@/hooks/useSSE';
 import { CallTranscriptAPI } from '@/apis/call-transcripts';
 
+interface Utterance {
+    id: string;
+    start_duration: number;
+    end_duration: number;
+    call_id: string;
+    transcript: string;
+    role: string;
+    created_at: string | null;
+    updated_at: string | null;
+}
+
 function transcriptItemToUtterance(t: TranscriptItem): Incident["transcript"][number] {
     const call_id = t.call_id;
     const datetime = uuidv7ToDate(call_id);
@@ -30,40 +41,23 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         [selectedIncidentId, incidents]
     );
 
-    const { data: callTranscriptData } = useSSE(enabled, CallTranscriptAPI.connectTranscriptEventSource)
+    const { data: callTranscriptData } = useSSE<Utterance[]>(enabled, CallTranscriptAPI.connectTranscriptEventSource)
     useEffect(() => {
         if (callTranscriptData != null && Array.isArray(callTranscriptData) && callTranscriptData.length > 0) {
-            const parsedData = callTranscriptData.map((v) => IncidentDtoSchema.parse(v))
-            const incidentIdsSet = new Set(callTranscriptData.map((d) => d.id));
+            const parsedData = callTranscriptData.map<TranscriptItem>((v) => {
+                return {
+                    ...v,
+                    created_at: v.created_at ? new Date(v.created_at) : new Date(),
+                    updated_at: v.updated_at ? new Date(v.updated_at) : new Date(),
+                }
+            })
+            const callId = parsedData[0].call_id;
             setIncidents((prev) => {
                 return prev.map<Incident>((oldV) => {
-                    if (incidentIdsSet.has(oldV.id)) {
-                        const currIncident = parsedData.find((newData) => newData.id == oldV.id)
-                        if (!currIncident) return oldV;
+                    if (oldV.callId == callId) {
                         return {
-                            ...currIncident,
-                            transcript: currIncident.transcript.map(transcriptItemToUtterance),
-                            title: currIncident.title ?? oldV.title,
-                            location: currIncident.location ?? oldV.location,
-                            type: currIncident.type ?? oldV.type,
-                            priority: currIncident.priority ?? oldV.priority,
-                            severity: (currIncident.severity?.toLowerCase() as Incident["severity"]) ?? oldV.severity,
-                            lang: currIncident.lang ?? '',
-                            occurDateTime: currIncident.occurDateTime ?? new Date().toLocaleString(),
-                            sopCitation: currIncident.sopCitation ?? '',
-                            reason: currIncident.reason ?? '',
-                            panicLevel: currIncident.panicLevel ?? "",
-                            distressScore: currIncident.distressScore ?? 0,
-                            caller: currIncident.caller ?? "",
-                            contradiction: currIncident.contradiction ?? undefined,
-                            responder: {
-                                name: currIncident.responder?.name ?? '',
-                                distance: currIncident.responder?.distance ?? '',
-                                eta: currIncident.responder?.eta ?? '',
-                                status: currIncident.responder?.status ?? '',
-                                type: currIncident.responder?.type ?? '',
-                                paramedic: currIncident.responder?.paramedic
-                            },
+                            ...oldV,
+                            transcript: parsedData.map(transcriptItemToUtterance),
                         }
                     }
                     return oldV
@@ -72,10 +66,10 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         }
     }, [callTranscriptData])
 
-    const { data: incidentData } = useSSE(enabled, IncidentApi.connectIncidentEvenSource)
+    const { data: incidentData } = useSSE<IncidentDto>(enabled, IncidentApi.connectIncidentEvenSource)
     useEffect(() => {
         if (!enabled) return;
-        if (incidentData != null) {
+        if (!!incidentData) {
             const parsedData = IncidentDtoSchema.parse(incidentData)
             setIncidents((prev) => {
                 const newIncident = {

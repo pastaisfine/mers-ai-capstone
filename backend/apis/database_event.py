@@ -17,16 +17,29 @@ def receive_after_insert_call_transcript(mapper, connection, target):
         try:
             utterances = call_transcript_module.read_transcripts(target.call_id, session)
             print("utterances information getting")
+            serialized_utterances = [
+                {
+                    "id": str(u.id),
+                    "start_duration": u.start_duration,
+                    "end_duration": u.end_duration,
+                    "call_id": str(u.call_id),
+                    "transcript": u.transcript,
+                    "role": u.role,
+                    "created_at": u.created_at.isoformat() if getattr(u, "created_at", None) else None,
+                    "updated_at": u.updated_at.isoformat() if getattr(u, "updated_at", None) else None,
+                }
+                for u in utterances
+            ]
             loop = base.main_loop
             if loop is not None and loop.is_running():
-                loop.call_soon_threadsafe(transcript_job_queue.put_nowait, utterances)
+                loop.call_soon_threadsafe(transcript_job_queue.put_nowait, serialized_utterances)
                 print("queued transcript broadcast")
             else:
                 print("no running event loop available for transcript broadcast")
         finally:
             session.close()
-    except RuntimeError:
-        print("something went wrong")
+    except Exception as e:
+        print(f"receive_after_insert_call_transcript error: {e}")
 
 @event.listens_for(Incident, "after_insert")
 def receive_after_insert_incident(mapper, connection, target):
@@ -36,12 +49,12 @@ def receive_after_insert_incident(mapper, connection, target):
         try:
             incident = incident_module.read_incident(target.id, session)
             loop = base.main_loop
-            if loop is not None and loop.is_running():
+            if incident is not None and loop is not None and loop.is_running():
                 loop.call_soon_threadsafe(incident_job_queue.put_nowait, incident)
         finally:
             session.close()
-    except RuntimeError:
-        print("something went wrong")
+    except Exception as e:
+        print(f"receive_after_insert_incident error: {e}")
 
 @event.listens_for(Incident, "after_update")
 def receive_after_update_incident(mapper, connection, target):
@@ -51,9 +64,9 @@ def receive_after_update_incident(mapper, connection, target):
         try:
             incident = incident_module.read_incident(target.id, session)
             loop = base.main_loop
-            if loop is not None and loop.is_running():
+            if incident is not None and loop is not None and loop.is_running():
                 loop.call_soon_threadsafe(incident_job_queue.put_nowait, incident)
         finally:
             session.close()
-    except RuntimeError:
-        print("something went wrong")
+    except Exception as e:
+        print(f"receive_after_update_incident error: {e}")

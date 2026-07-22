@@ -8,10 +8,11 @@ from constants.redis_key import ACTIVE_CALLS_SET_KEY
 from async_context_managers import base
 from agents.transcript_incident_agent.live_chain import live_chain
 from agents.transcript_incident_agent.chain import format_utterances
-from modules.incidents.incident_update_broadcaster import incident_update_broadcaster
+from modules import db_module
 from modules.redis_module import redis_client
 from modules.transcripts import call_transcript_module
-from models.schema import Call
+from models.enum.index import IncidentType
+from models.schema import Call, Incident
 
 logger = logging.getLogger(__name__)
 
@@ -52,23 +53,20 @@ async def live_incident_extract_consumer():
                 try:
                     extracted = live_chain.invoke({"transcript": transcript_str})
                     call = base.db.get(Call, call_id)
-                    incident_id = str(call.incident_id) if call else ""
+                    if call is None:
+                        continue
 
-                    payload = {
-                        "call_id": call_id_str,
-                        "incident_id": incident_id,
-                        "title": extracted.title,
-                        "location": extracted.location,
-                        "type": extracted.type,
-                        "priority": 1,
-                        "severity": "URGENT",
-                    }
+                    update_payload = {"title": extracted.title}
+                    if extracted.location:
+                        update_payload["location"] = extracted.location
+                    if extracted.type:
+                        try:
+                            update_payload["type"] = IncidentType(extracted.type.lower())
+                        except ValueError:
+                            logger.warning("Invalid incident type: %s", extracted.type)
 
-                    loop = base.main_loop
-                    if loop is not None and loop.is_running():
-                        asyncio.run_coroutine_threadsafe(
-                            incident_update_broadcaster.broadcast(payload), loop
-                        )
+                    db_module.update_data_by_id(call.incident_id, update_payload, base.db, Incident)
+                    base.db.commit()
 
                     last_extracted[call_id_str] = now
                     logger.info("Live extracted: %s — %s", call_id_str, extracted.title)

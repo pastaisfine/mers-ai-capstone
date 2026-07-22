@@ -21,7 +21,7 @@ def init_incident(payload: InitIncidentPayload, db: Session) -> Incident:
     return new_incident
 
 def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]:
-    stmt = select(Incident).options(joinedload(Incident.call)).join(Call, Call.incident_id == Incident.id).order_by(Incident.created_at.desc())
+    stmt = select(Incident).options(joinedload(Incident.call)).outerjoin(Call, Call.incident_id == Incident.id).order_by(Incident.created_at.desc())
     if payload.pattern:
         stmt = stmt.where(or_(Incident.title.contains(payload.pattern),
                               Incident.location.contains(payload.pattern),
@@ -36,7 +36,7 @@ def read_incidents(payload:QueryIncidentPayload , db: Session) -> list[Incident]
     return formatted_incidents
 
 def read_incident(incident_id: UUID, db: Session) -> dict | None:
-    stmt = select(Incident).options(joinedload(Incident.call)).join(Call, Call.incident_id == Incident.id).where(Incident.id == incident_id)
+    stmt = select(Incident).options(joinedload(Incident.call)).outerjoin(Call, Call.incident_id == Incident.id).where(Incident.id == incident_id)
     incident = db.scalars(stmt).unique().one_or_none()
     if not incident:
         return None
@@ -45,8 +45,10 @@ def read_incident(incident_id: UUID, db: Session) -> dict | None:
 def _convert_incident(incident: Any, db: Session):
     lat = incident.coordinates[0] if incident.coordinates and len(incident.coordinates) > 0 else 0
     lng = incident.coordinates[1] if incident.coordinates and len(incident.coordinates) > 1 else 0
-    call_id = getattr(incident.call[0], "id", None)
-    transcript = call_transcript_module.read_transcripts(incident.call[0].id, db) if call_id else []
+    calls = getattr(incident, "call", [])
+    first_call = calls[0] if calls and len(calls) > 0 else None
+    call_id = getattr(first_call, "id", None) if first_call else None
+    transcript = call_transcript_module.read_transcripts(call_id, db) if call_id else []
     return {
         "id": str(incident.id),
         "type": incident.type.value if hasattr(incident.type, "value") else incident.type,
@@ -56,9 +58,9 @@ def _convert_incident(incident: Any, db: Session):
         "priority": incident.priority,
 
         # Fields retrieved directly from the joined 'Call' record
-        "lang": getattr(incident.call[0], "lang", ""),
-        "caller": getattr(incident.call[0], "caller_name", ""),
-        "callId": getattr(incident.call[0], "id", ""),
+        "lang": getattr(first_call, "lang", "") if first_call else "",
+        "caller": getattr(first_call, "caller_name", "") if first_call else "",
+        "callId": str(call_id) if call_id else "",
         # Date format converted to ISO-8601 string standard
         "occurDateTime": incident.occur_date_time.isoformat() + "Z" if incident.occur_date_time else None,
 

@@ -17,6 +17,8 @@ class Payload(BaseModel):
     call_id: UUID
 
 def serialize_transcript(transcript):
+    if isinstance(transcript, dict):
+        return transcript
     return {
         "id": str(transcript.id),
         "start_duration": transcript.start_duration,
@@ -24,8 +26,8 @@ def serialize_transcript(transcript):
         "call_id": str(transcript.call_id),
         "transcript": transcript.transcript,
         "role": transcript.role,
-        "created_at": transcript.created_at.isoformat() if transcript.created_at else None,
-        "updated_at": transcript.updated_at.isoformat() if transcript.updated_at else None,
+        "created_at": transcript.created_at.isoformat() if getattr(transcript, "created_at", None) else None,
+        "updated_at": transcript.updated_at.isoformat() if getattr(transcript, "updated_at", None) else None,
     }
 
 

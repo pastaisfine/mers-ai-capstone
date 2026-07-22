@@ -21,6 +21,15 @@ def utterance_exists(payload: UtteranceExistsPayload, db: Session)-> bool:
     call_id = payload.call_id
     start_duration = payload.start_duration
     end_duration = payload.end_duration
-    stmt = select(CallTranscript).where(CallTranscript.call_id is call_id and CallTranscript.start_duration is start_duration and CallTranscript.end_duration is end_duration)
+    conditions = [
+        CallTranscript.call_id == call_id,
+        CallTranscript.start_duration == start_duration,
+        CallTranscript.end_duration == end_duration,
+    ]
+    if payload.transcript is not None:
+        conditions.append(CallTranscript.transcript == payload.transcript)
+    if payload.role is not None:
+        conditions.append(CallTranscript.role == payload.role)
+    stmt = select(CallTranscript).where(*conditions)
     transcript = db.scalars(stmt).first()
     return transcript is not None
