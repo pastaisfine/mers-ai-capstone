@@ -77,37 +77,43 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         if (!enabled) return;
         if (incidentData != null) {
             const parsedData = IncidentDtoSchema.parse(incidentData)
-            setIncidents((prev) =>
-                prev.map<Incident>((inc) => {
-                    if (inc.callId === parsedData.callId)
-                        return {
-                            ...parsedData,
-                            transcript: parsedData.transcript.map(transcriptItemToUtterance),
-                            title: parsedData.title ?? "",
-                            location: parsedData.location ?? "",
-                            type: parsedData.type ?? undefined,
-                            priority: parsedData.priority ?? 0,
-                            severity: (parsedData.severity?.toLowerCase() as Incident["severity"]) ?? SeverityType.MODERATE,
-                            lang: parsedData.lang ?? '',
-                            occurDateTime: parsedData.occurDateTime ?? new Date().toLocaleString(),
-                            sopCitation: parsedData.sopCitation ?? '',
-                            reason: parsedData.reason ?? '',
-                            panicLevel: parsedData.panicLevel ?? "",
-                            distressScore: parsedData.distressScore ?? 0,
-                            caller: parsedData.caller ?? "",
-                            contradiction: parsedData.contradiction ?? undefined,
-                            responder: {
-                                name: parsedData.responder?.name ?? '',
-                                distance: parsedData.responder?.distance ?? '',
-                                eta: parsedData.responder?.eta ?? '',
-                                status: parsedData.responder?.status ?? '',
-                                type: parsedData.responder?.type ?? '',
-                                paramedic: parsedData.responder?.paramedic
-                            },
-                        }
-                    return inc;
+            setIncidents((prev) => {
+                const newIncident = {
+                    ...parsedData,
+                    transcript: parsedData.transcript.map(transcriptItemToUtterance),
+                    title: parsedData.title ?? "",
+                    location: parsedData.location ?? "",
+                    type: parsedData.type ?? undefined,
+                    priority: parsedData.priority ?? 0,
+                    severity: (parsedData.severity?.toLowerCase() as Incident["severity"]) ?? SeverityType.MODERATE,
+                    lang: parsedData.lang ?? '',
+                    occurDateTime: parsedData.occurDateTime ?? new Date().toLocaleString(),
+                    sopCitation: parsedData.sopCitation ?? '',
+                    reason: parsedData.reason ?? '',
+                    panicLevel: parsedData.panicLevel ?? "",
+                    distressScore: parsedData.distressScore ?? 0,
+                    caller: parsedData.caller ?? "",
+                    contradiction: parsedData.contradiction ?? undefined,
+                    responder: {
+                        name: parsedData.responder?.name ?? '',
+                        distance: parsedData.responder?.distance ?? '',
+                        eta: parsedData.responder?.eta ?? '',
+                        status: parsedData.responder?.status ?? '',
+                        type: parsedData.responder?.type ?? '',
+                        paramedic: parsedData.responder?.paramedic
+                    },
                 }
-                )
+                if (prev.some((v) => v.id == parsedData.id)) {
+                    return prev.map<Incident>((inc) => {
+                        if (inc.id === parsedData.id)
+                            return newIncident
+                        return inc;
+                    }
+                    )
+                } else {
+                    return [newIncident, ...prev]
+                }
+            }
             );
         }
     }, [incidentData])
