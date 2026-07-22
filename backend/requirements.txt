@@ -25,3 +25,4 @@ psycopg[binary,pool]
 pgvector
 psycopg-pool
 langgraph
+pytest
