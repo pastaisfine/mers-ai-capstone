@@ -22,4 +22,5 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS").split(",") if os.getenv("ALLOW_ORIGINS") is not None else None
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 

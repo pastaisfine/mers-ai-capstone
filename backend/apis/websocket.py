@@ -9,6 +9,7 @@ from database import db_dependency
 from fastapi import WebSocket
 
 from modules.redis_module import redis_client
+from modules import location_agent_module  # <-- added
 
 from models.dto.retell import ConfigResponse, inbound_event_adapter, RetellInboundEvent, \
     RetellInteractionType, ResponseRequiredRequest
@@ -114,6 +115,16 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     #     # TODO: Redis Lock mechanism
                     redis_client.hset(PENDING_CALL_TRANSCRIPT_MAP_KEY, internal_call_id, transcript)
                     redis_client.zadd(TRANSCRIPT_CONSUME_QUEUE_KEY, internal_call_id)
+
+                    # --- Location agent: extract straight from Retell's live
+                    # transcript, no DB read needed to get the text itself ---
+                    transcript_text = location_agent_module.flatten_utterances(transcript)
+                    if location_agent_module.should_check_location(str(internal_call_id), transcript_text):
+                        asyncio.create_task(
+                            location_agent_module.extract_and_update_incident_location_from_text(
+                                internal_call_id, transcript_text, db
+                            )
+                        )
                 case "response_required" | "reminder_required":
                     response_id = event.response_id
                     request = ResponseRequiredRequest(
