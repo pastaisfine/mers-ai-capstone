@@ -32,11 +32,22 @@ class RedisClient:
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS, gt=True)
 
     def zpopmin(self, key):
-        self.client.zpopmin(key, count=1)
+        return self.client.zpopmin(key, count=1)
 
     def sadd(self, key, value):
         self.client.sadd(key, value)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
+
+    def sismember(self, key, value) -> bool:
+        return self.client.sismember(key, value)
+
+    # get all members
+    def smembers(self, key):
+        return self.client.smembers(key)
+
+    # remove member
+    def srem(self, key, value):
+        self.client.srem(key, value)
 
     def brpop(self, key, timeout=0):
         return self.client.brpop(key, timeout=timeout)
