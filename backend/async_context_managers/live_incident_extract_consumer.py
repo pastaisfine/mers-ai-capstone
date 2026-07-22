@@ -20,7 +20,7 @@ DEBOUNCE_SECONDS = 3
 
 
 def _get_active_call_ids() -> Set[str]:
-    members = redis_client.client.smembers(ACTIVE_CALLS_SET_KEY)
+    members = redis_client.smembers(ACTIVE_CALLS_SET_KEY)
     return set(members) if members else set()
 
 

@@ -38,6 +38,14 @@ class RedisClient:
         self.client.sadd(key, value)
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
 
+    # get all members
+    def smember(self, key):
+        return self.client.smembers(key)
+
+    # remove member
+    def srem(self, key, value):
+        self.client.srem(key, value)
+
     def brpop(self, key, timeout=0):
         return self.client.brpop(key, timeout=timeout)
 

@@ -77,10 +77,10 @@ pipeline = None
 
 @app.websocket("/llm-socket/{call_id}")
 async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call_id: str):
+    internal_call_id = None
 
     try:
         await websocket.accept()
-
         print(f"Connected call ID: {call_id}")
         # ref code
         # llm_client = LlmClient()
@@ -117,7 +117,7 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             return
 
         internal_call_id, incident_id = id_result
-        redis_client.client.sadd(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+        redis_client.sadd(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
         print(f"Added call {internal_call_id} to active calls set")
 
         # Send first message to signal ready of server
@@ -168,7 +168,7 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
     finally:
         print(f"LLM WebSocket connection closed for {call_id}")
         if internal_call_id is not None:
-            redis_client.client.srem(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+            redis_client.srem(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
             call = db.get(Call, internal_call_id)
             if call and call.ended_at is None:
                 call.ended_at = datetime.now()
