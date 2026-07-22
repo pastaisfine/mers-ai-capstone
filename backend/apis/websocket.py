@@ -149,7 +149,6 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
                     )
                     result_stream = prompting_to_voice_agent(call_id=str(internal_call_id), transcripts=transcript)
                     async for chunk in result_stream:
-                        print(f"chunk outside: {chunk}")
                         response_response_event = ResponseResponseEvent(
                             response_id=response_id,
                             content=chunk,
