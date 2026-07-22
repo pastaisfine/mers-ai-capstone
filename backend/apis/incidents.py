@@ -27,7 +27,7 @@ async def read_incident_updates() -> StreamingResponse:
         try:
             while True:
                 payload = await client_queue.get()
-                yield f"data: {json.dumps(payload)}\n\n"
+                yield f"data: {json.dumps(payload, default=str)}\n\n"
         except asyncio.CancelledError:
             print("Client disconnected from incident SSE", flush=True)
         finally:

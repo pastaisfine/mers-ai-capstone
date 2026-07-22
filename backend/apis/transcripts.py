@@ -45,8 +45,8 @@ async def read_transcripts() -> StreamingResponse:
                 # Blocks until the background worker broadcasts a new call_id
                 transcripts = await client_queue.get()
                 payload = [serialize_transcript(transcript) for transcript in transcripts]
-                print(f"streaming {json.dumps(payload)}", flush=True)
-                yield f"data: {json.dumps(payload)}\n\n"
+                print(f"streaming {json.dumps(payload, default=str)}", flush=True)
+                yield f"data: {json.dumps(payload, default=str)}\n\n"
         except asyncio.CancelledError:
             # Triggered automatically when the frontend client disconnects
             print("Client disconnected from SSE", flush=True)

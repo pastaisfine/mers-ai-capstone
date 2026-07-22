@@ -48,7 +48,20 @@ def _convert_incident(incident: Any, db: Session):
     calls = getattr(incident, "call", [])
     first_call = calls[0] if calls and len(calls) > 0 else None
     call_id = getattr(first_call, "id", None) if first_call else None
-    transcript = call_transcript_module.read_transcripts(call_id, db) if call_id else []
+    raw_transcripts = call_transcript_module.read_transcripts(call_id, db) if call_id else []
+    transcript = [
+        {
+            "id": str(u.id),
+            "start_duration": u.start_duration,
+            "end_duration": u.end_duration,
+            "call_id": str(u.call_id),
+            "transcript": u.transcript,
+            "role": u.role,
+            "created_at": u.created_at.isoformat() if getattr(u, "created_at", None) else None,
+            "updated_at": u.updated_at.isoformat() if getattr(u, "updated_at", None) else None,
+        }
+        for u in raw_transcripts
+    ]
     return {
         "id": str(incident.id),
         "type": incident.type.value if hasattr(incident.type, "value") else incident.type,

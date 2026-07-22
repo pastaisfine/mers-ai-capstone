@@ -54,9 +54,10 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
             const callId = parsedData[0].call_id;
             setIncidents((prev) => {
                 return prev.map<Incident>((oldV) => {
-                    if (oldV.callId == callId) {
+                    if (oldV.callId == callId || (!oldV.callId && prev[0]?.id === oldV.id)) {
                         return {
                             ...oldV,
+                            callId: oldV.callId || callId,
                             transcript: parsedData.map(transcriptItemToUtterance),
                         }
                     }
