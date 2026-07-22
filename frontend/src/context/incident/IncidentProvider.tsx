@@ -7,7 +7,7 @@ import { INITIAL_INCIDENTS } from '@/data/initialIncidents';
 import { addMilliseconds, uuidv7ToDate } from '@/lib/utils';
 import { useSSE } from '@/hooks/useSSE';
 
-function transcriptItemToUtterance(t: TranscriptItem): Incident["transcript"][number] {
+function transcriptItemToUtterance(t: Pick<TranscriptItem, "call_id" | "start_duration" | "transcript" | "role">): Incident["transcript"][number] {
     const call_id = t.call_id;
     const datetime = uuidv7ToDate(call_id);
     const newDatetime = addMilliseconds(datetime, t.start_duration)
