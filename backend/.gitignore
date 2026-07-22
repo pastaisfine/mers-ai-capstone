@@ -6,3 +6,4 @@ test_location_agent.py
 test_location_agent_db.py
 test_gemini.py
 test_llm.py
+.venv
