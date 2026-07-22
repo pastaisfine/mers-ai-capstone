@@ -70,6 +70,7 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!enabled) return;
         if (!!incidentData) {
+            console.log("new incident data:", incidentData)
             const parsedData = IncidentDtoSchema.parse(incidentData)
             setIncidents((prev) => {
                 const newIncident = {
@@ -99,7 +100,7 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
                 }
                 if (prev.some((v) => v.id == parsedData.id)) {
                     return prev.map<Incident>((inc) => {
-                        if (inc.id === parsedData.id)
+                        if (inc.id == parsedData.id)
                             return newIncident
                         return inc;
                     }
