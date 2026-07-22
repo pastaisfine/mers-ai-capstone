@@ -3,6 +3,8 @@ def get_redis_emotional_analysis_key(call_id) -> str:
 
 PENDING_CALL_TRANSCRIPT_MAP_KEY = "pending_call_transcript_map"
 TRANSCRIPT_CONSUME_QUEUE_KEY = "transcript_consume_queue"
+INCIDENT_EXTRACT_QUEUE_KEY = "incident_extract_queue"
+ACTIVE_CALLS_SET_KEY = "active_calls"
 
 def get_transcript_utterance_set_key(call_id):
     return f"transcript_utterance_set:{call_id}"

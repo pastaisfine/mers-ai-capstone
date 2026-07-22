@@ -4,12 +4,12 @@ import time
 from datetime import datetime
 
 from models.database.call import InitCallPayload
-from models.database.incident import InitIncidentPayload, UpdateIncidentPayload
+from models.database.incident import InitIncidentPayload
+from models.schema import Call
 
 from fastapi import WebSocketDisconnect
 
-from agents.voice_agent import prompting_to_voice_agent
-from constants.redis_key import PENDING_CALL_TRANSCRIPT_MAP_KEY, TRANSCRIPT_CONSUME_QUEUE_KEY
+from constants.redis_key import PENDING_CALL_TRANSCRIPT_MAP_KEY, TRANSCRIPT_CONSUME_QUEUE_KEY, INCIDENT_EXTRACT_QUEUE_KEY, ACTIVE_CALLS_SET_KEY
 from main import app
 from database import db_dependency
 from fastapi import WebSocket
@@ -115,6 +115,10 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             print("Failed to initialize call id in database")
             await websocket.close(1011, "Server error")
             return
+
+        redis_client.client.sadd(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+        print(f"Added call {internal_call_id} to active calls set")
+
         # Send first message to signal ready of server
         internal_call_id, incident_id = id_result
         response_id = 0
@@ -164,4 +168,12 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
         raise e
     finally:
         print(f"LLM WebSocket connection closed for {call_id}")
+        if internal_call_id is not None:
+            redis_client.client.srem(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
+            call = db.get(Call, internal_call_id)
+            if call and call.ended_at is None:
+                call.ended_at = datetime.now()
+                db.commit()
+                redis_client.lpush(INCIDENT_EXTRACT_QUEUE_KEY, str(internal_call_id))
+                print(f"Enqueued incident extraction for call {internal_call_id}")
 

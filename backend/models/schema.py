@@ -67,6 +67,7 @@ class Call(BaseTable):
     caller_name = Column(String, nullable=True)
     audio_url = Column(String, nullable=True)
     received_at = Column(DateTime, nullable=False)
+    ended_at = Column(DateTime, nullable=True)
     lang = Column(String, nullable=True)
 
 
