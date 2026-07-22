@@ -79,4 +79,4 @@ async def live_incident_extract_consumer():
         except Exception as e:
             logger.error("Live extract consumer error: %s", e)
 
-        time.sleep(1)
+        await asyncio.sleep(1)

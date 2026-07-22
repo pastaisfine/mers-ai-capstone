@@ -32,7 +32,7 @@ class RedisClient:
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS, gt=True)
 
     def zpopmin(self, key):
-        self.client.zpopmin(key, count=1)
+        return self.client.zpopmin(key, count=1)
 
     def sadd(self, key, value):
         self.client.sadd(key, value)

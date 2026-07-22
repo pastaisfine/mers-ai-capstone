@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from agents.transcript_incident_agent.chain import chain, format_utterances
 from async_context_managers import base
-from database import SessionLocal
 from models.schema import Call, Incident
 from modules import db_module
 from modules.incidents.incident_update_broadcaster import incident_update_broadcaster

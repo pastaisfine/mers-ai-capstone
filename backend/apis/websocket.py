@@ -116,11 +116,11 @@ async def llm_websocket_for_retell(websocket: WebSocket, db: db_dependency, call
             await websocket.close(1011, "Server error")
             return
 
+        internal_call_id, incident_id = id_result
         redis_client.client.sadd(ACTIVE_CALLS_SET_KEY, str(internal_call_id))
         print(f"Added call {internal_call_id} to active calls set")
 
         # Send first message to signal ready of server
-        internal_call_id, incident_id = id_result
         response_id = 0
         # first_event = llm_client.draft_begin_message()
         # await websocket.send_json(first_event.__dict__)
