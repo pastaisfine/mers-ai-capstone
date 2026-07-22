@@ -3,16 +3,21 @@
 import {
   AlertTriangle,
   CheckCircle2,
+  XCircle,
   HeartPulse,
   ThumbsUp,
   Timer,
-  TrendingDown,
-  TrendingUp,
+  ClipboardList,
+  UserCheck,
+  Clock3,
+  Archive,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useIncident } from "@/context/incident/useIncident"
 import { SeverityType } from "@/types"
+import { ApprovalType } from "@/models/report"
+import { HISTORICAL_REPORTS } from "@/data/historicalReports"
 import { useMemo } from "react"
 
 interface StatCardProps {
@@ -21,96 +26,63 @@ interface StatCardProps {
   icon: React.ElementType
   iconColor: string
   iconBg: string
-  accentColor: string
-  trend: number
   subtitle?: string
-  progress?: number
 }
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  iconColor,
-  iconBg,
-  accentColor,
-  trend,
-  subtitle,
-  progress,
-}: StatCardProps) {
-  const isUp = trend >= 0
-
+function StatCard({ label, value, icon: Icon, iconColor, iconBg, subtitle }: StatCardProps) {
   return (
     <Card className="cursor-default overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:border-secondary hover:shadow-secondary hover:shadow-md">
-      {/* Colored top accent */}
-      {/* <div className={cn("h-[3px] w-full", accentColor)} /> */}
-
       <CardContent className="px-4">
         <div className="flex justify-between">
-          {/* Primary value */}
           <div>
-            <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+            <p className="text-3xl font-bold leading-none tabular-nums">{value}</p>
+            <p className="mt-1.5 text-sm font-medium text-foreground/75">{label}</p>
           </div>
-
-          {/* Icon + trend pill */}
           <div className="mb-2 flex items-start justify-between">
-            <div className={cn("flex size-11 items-center justify-center rounded-xl", iconBg)}>
-              <Icon className={cn("size-6", iconColor)} />
+            <div className={cn("flex size-12 items-center justify-center rounded-xl", iconBg)}>
+              <Icon className={cn("size-6.5", iconColor)} />
             </div>
           </div>
         </div>
 
-        {/* Optional progress bar (e.g. Approval Rate) */}
-        {/* {progress !== undefined && (
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className={cn("h-full rounded-full transition-all duration-700", accentColor)}
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
+        {subtitle && (
+          <div className="mt-2.5 flex items-center justify-center border-t border-white/18 pt-4">
+            <span className="text-center text-sm font-medium text-muted-foreground">{subtitle}</span>
           </div>
-        )} */}
-
-        {/* Footer divider + secondary info */}
-        <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-border/40 pt-2">
-          <span
-              className={cn(
-                "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums",
-                isUp
-                  ? "bg-secondary/15 text-secondary"
-                  : "bg-destructive/15 text-destructive"
-              )}
-            >
-              {isUp ? (
-                <TrendingUp className="size-2.5" />
-              ) : (
-                <TrendingDown className="size-2.5" />
-              )}
-              {isUp ? "+" : ""}
-              {trend}%
-            </span>
-            <span className="text-[11px] text-muted-foreground">vs yesterday</span>
-            {/* {subtitle && (
-              <span className="text-[10px] font-medium text-muted-foreground">{subtitle}</span>
-            )} */}
-        </div>
+        )}
       </CardContent>
     </Card>
   )
 }
 
-export function StatCards() {
+function SectionHeader({
+  icon: Icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ElementType
+  title: string
+  subtitle: string
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <Icon className="size-5 text-muted-foreground" />
+      <h3 className="text-sm font-bold uppercase tracking-widest text-foreground sm:text-lg">{title}</h3>
+      <span className="text-sm text-muted-foreground capitalize">— {subtitle}</span>
+    </div>
+  )
+}
+
+export function TodayStatCards() {
   const { incidents } = useIncident()
 
   const stats = useMemo(() => {
-    const active    = incidents.filter((i) => i.severity !== SeverityType.RESOLVED).length
-    const completed = incidents.filter((i) => i.severity === SeverityType.RESOLVED).length
-    const critical  = incidents.filter((i) => i.severity === SeverityType.CRITICAL).length
-    const urgent    = incidents.filter((i) => i.severity === SeverityType.URGENT).length
-    const total     = incidents.length
-    const approvalRate = total
-      ? Math.round(((total - critical * 0.1) / total) * 100)
-      : 0
+    const total    = incidents.length
+    const active   = incidents.filter((i) => i.severity !== SeverityType.RESOLVED).length
+    const critical = incidents.filter((i) => i.severity === SeverityType.CRITICAL).length
+    const urgent   = incidents.filter((i) => i.severity === SeverityType.URGENT).length
+    const resolved = incidents.filter((i) => i.severity === SeverityType.RESOLVED).length
+    const pct = (n: number) => (active > 0 ? Math.round((n / active) * 100) : 0)
 
     return [
       {
@@ -119,19 +91,74 @@ export function StatCards() {
         icon: AlertTriangle,
         iconColor: "text-destructive",
         iconBg: "bg-destructive/15",
-        accentColor: "bg-destructive",
-        trend: 12,
         subtitle: critical > 0 ? `${critical} critical · ${urgent} urgent` : "None critical",
       },
       {
-        label: "Completed Cases",
-        value: completed,
+        label: "Critical",
+        value: critical,
+        icon: HeartPulse,
+        iconColor: "text-destructive",
+        iconBg: "bg-destructive/15",
+        subtitle: critical > 0 ? `${pct(critical)}% of active cases` : "None right now",
+      },
+      {
+        label: "Urgent",
+        value: urgent,
+        icon: Timer,
+        iconColor: "text-warning",
+        iconBg: "bg-warning/15",
+        subtitle: urgent > 0 ? `${pct(urgent)}% of active cases` : "None right now",
+      },
+      {
+        label: "Resolved",
+        value: resolved,
         icon: CheckCircle2,
         iconColor: "text-secondary",
         iconBg: "bg-secondary/15",
-        accentColor: "bg-secondary",
-        trend: 8,
-        subtitle: total > 0 ? `${Math.round((completed / total) * 100)}% of total` : "—",
+        subtitle: total > 0 ? `${Math.round((resolved / total) * 100)}% of live queue` : "—",
+      },
+    ]
+  }, [incidents])
+
+  return (
+    <div className="flex flex-col gap-3">
+      <SectionHeader icon={Clock3} title="Today" subtitle="live incident queue, right now" />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function formatResponseTime(seconds?: number | null) {
+  if (!seconds) return "—"
+  return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+}
+
+export function AllTimeStatCards() {
+  const stats = useMemo(() => {
+    const total      = HISTORICAL_REPORTS.length
+    const dispatched = HISTORICAL_REPORTS.filter((r) => r.approvedStatus === ApprovalType.APPROVED).length
+    const overridden = HISTORICAL_REPORTS.filter((r) => r.humanIntervention?.required)
+    const aiOnly     = HISTORICAL_REPORTS.filter((r) => !r.humanIntervention?.required)
+    const approvedAiOnly = aiOnly.filter((r) => r.approvedStatus === ApprovalType.APPROVED).length
+    const rejectedAiOnly = aiOnly.filter((r) => r.approvedStatus === ApprovalType.REJECTED).length
+    const withResponse = HISTORICAL_REPORTS.filter((r) => r.responseTimeSeconds)
+    const avgResponse = withResponse.length
+      ? Math.round(withResponse.reduce((sum, r) => sum + (r.responseTimeSeconds ?? 0), 0) / withResponse.length)
+      : 0
+    const approvalRate = total ? Math.round((dispatched / total) * 100) : 0
+
+    return [
+      {
+        label: "Total Cases",
+        value: total,
+        icon: ClipboardList,
+        iconColor: "text-primary",
+        iconBg: "bg-primary/15",
+        subtitle: "All-time archive",
       },
       {
         label: "Approval Rate",
@@ -139,39 +166,51 @@ export function StatCards() {
         icon: ThumbsUp,
         iconColor: "text-primary",
         iconBg: "bg-primary/15",
-        accentColor: "bg-primary",
-        trend: 3,
-        progress: approvalRate,
         subtitle: "SLA target 95%",
       },
       {
-        label: "Avg Response Time",
-        value: "4:32",
+        label: "Avg Response",
+        value: formatResponseTime(avgResponse),
         icon: Timer,
         iconColor: "text-warning",
         iconBg: "bg-warning/15",
-        accentColor: "bg-warning",
-        trend: -5,
-        subtitle: "Target: 5:00 min",
+        subtitle: "Call to dispatch",
       },
       {
-        label: "Need Intervention",
-        value: critical,
-        icon: HeartPulse,
+        label: "Approved (AI-only)",
+        value: approvedAiOnly,
+        icon: CheckCircle2,
+        iconColor: "text-secondary",
+        iconBg: "bg-secondary/15",
+        subtitle: "Dispatched, no review needed",
+      },
+      {
+        label: "Rejected (AI-only)",
+        value: rejectedAiOnly,
+        icon: XCircle,
         iconColor: "text-destructive",
         iconBg: "bg-destructive/15",
-        accentColor: "bg-destructive",
-        trend: 15,
-        subtitle: critical > 0 ? "Immediate action needed" : "All clear",
+        subtitle: "No resources deployed",
+      },
+      {
+        label: "Overridden",
+        value: overridden.length,
+        icon: UserCheck,
+        iconColor: "text-warning",
+        iconBg: "bg-warning/15",
+        subtitle: "Resolved with a dispatcher",
       },
     ]
-  }, [incidents])
+  }, [])
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-      {stats.map((stat) => (
-        <StatCard key={stat.label} {...stat} />
-      ))}
+    <div className="flex flex-col gap-3">
+      <SectionHeader icon={Archive} title="All Time" subtitle="historical archive" />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
+        ))}
+      </div>
     </div>
   )
 }
