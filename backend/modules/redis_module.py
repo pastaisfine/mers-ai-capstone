@@ -39,7 +39,7 @@ class RedisClient:
         self.client.expire(key, REDIS_EXPIRE_DURATION_IN_SECONDS)
 
     # get all members
-    def smember(self, key):
+    def smembers(self, key):
         return self.client.smembers(key)
 
     # remove member
