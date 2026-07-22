@@ -1,4 +1,3 @@
-import { CallTranscriptAPI } from "@/apis/call-transcripts";
 import { useEffect, useRef, useState } from "react";
 
 interface Utterance {
@@ -18,7 +17,14 @@ interface SSEHookResult {
   isConnected: boolean;
 }
 
-export function useSSE(enabled: boolean): SSEHookResult {
+export function useSSE(
+  enabled: boolean,
+  connectEventSource: (payload: {
+    onopen: ((this: EventSource, ev: Event) => any) | null;
+    onmessage: ((this: EventSource, ev: MessageEvent<any>) => any) | null;
+    onerror: ((this: EventSource, ev: Event) => any) | null;
+  }) => EventSource,
+): SSEHookResult {
   const [data, setData] = useState<Utterance[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -46,7 +52,7 @@ export function useSSE(enabled: boolean): SSEHookResult {
       disconnect();
 
       try {
-        const eventSource = CallTranscriptAPI.connectTranscriptEventSource({
+        const eventSource = connectEventSource({
           onopen: () => {
             setIsConnected(true);
             setError(null);

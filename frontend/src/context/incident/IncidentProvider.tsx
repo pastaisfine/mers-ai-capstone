@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { IncidentContext } from './useIncident';
 import { Incident, SeverityType } from '@/types';
 import { IncidentApi } from '@/apis/incidents';
-import { IncidentDto, TranscriptItem } from '@/dtos/incidents';
+import { IncidentDto, IncidentDtoSchema, TranscriptItem } from '@/dtos/incidents';
 import { INITIAL_INCIDENTS } from '@/data/initialIncidents';
 import { addMilliseconds, uuidv7ToDate } from '@/lib/utils';
 import { useSSE } from '@/hooks/useSSE';
+import { CallTranscriptAPI } from '@/apis/call-transcripts';
 
 function transcriptItemToUtterance(t: TranscriptItem): Incident["transcript"][number] {
     const call_id = t.call_id;
@@ -29,54 +30,87 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         [selectedIncidentId, incidents]
     );
 
-    const { data } = useSSE(enabled)
+    const { data: callTranscriptData } = useSSE(enabled, CallTranscriptAPI.connectTranscriptEventSource)
     useEffect(() => {
-        if (data != null && data.length > 0) {
-            const callId = data[0].call_id
+        if (callTranscriptData != null && Array.isArray(callTranscriptData) && callTranscriptData.length > 0) {
+            const parsedData = callTranscriptData.map((v) => IncidentDtoSchema.parse(v))
+            const incidentIdsSet = new Set(callTranscriptData.map((d) => d.id));
             setIncidents((prev) => {
-                return prev.map((incident) => (
-                    incident.callId === callId
-                        ? {
-                            ...incident,
-                            transcript: data.map(transcriptItemToUtterance),
+                return prev.map<Incident>((oldV) => {
+                    if (incidentIdsSet.has(oldV.id)) {
+                        const currIncident = parsedData.find((newData) => newData.id == oldV.id)
+                        if (!currIncident) return oldV;
+                        return {
+                            ...currIncident,
+                            transcript: currIncident.transcript.map(transcriptItemToUtterance),
+                            title: currIncident.title ?? oldV.title,
+                            location: currIncident.location ?? oldV.location,
+                            type: currIncident.type ?? oldV.type,
+                            priority: currIncident.priority ?? oldV.priority,
+                            severity: (currIncident.severity?.toLowerCase() as Incident["severity"]) ?? oldV.severity,
+                            lang: currIncident.lang ?? '',
+                            occurDateTime: currIncident.occurDateTime ?? new Date().toLocaleString(),
+                            sopCitation: currIncident.sopCitation ?? '',
+                            reason: currIncident.reason ?? '',
+                            panicLevel: currIncident.panicLevel ?? "",
+                            distressScore: currIncident.distressScore ?? 0,
+                            caller: currIncident.caller ?? "",
+                            contradiction: currIncident.contradiction ?? undefined,
+                            responder: {
+                                name: currIncident.responder?.name ?? '',
+                                distance: currIncident.responder?.distance ?? '',
+                                eta: currIncident.responder?.eta ?? '',
+                                status: currIncident.responder?.status ?? '',
+                                type: currIncident.responder?.type ?? '',
+                                paramedic: currIncident.responder?.paramedic
+                            },
                         }
-                        : incident
-                ))
+                    }
+                    return oldV
+                })
             })
         }
-    }, [data])
+    }, [callTranscriptData])
 
+    const { data: incidentData } = useSSE(enabled, IncidentApi.connectIncidentEvenSource)
     useEffect(() => {
         if (!enabled) return;
-
-        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/incidents/stream`;
-        const es = new EventSource(url);
-
-        es.onmessage = (event) => {
-            try {
-                const update = JSON.parse(event.data);
-                setIncidents((prev) =>
-                    prev.map((inc) =>
-                        inc.callId === update.call_id
-                            ? {
-                                ...inc,
-                                title: update.title ?? inc.title,
-                                location: update.location ?? inc.location,
-                                type: update.type ?? inc.type,
-                                priority: update.priority ?? inc.priority,
-                                severity: update.severity?.toLowerCase() ?? inc.severity,
-                            }
-                            : inc
-                    )
-                );
-            } catch (e) {
-                console.error("Incident SSE parse error", e);
-            }
-        };
-
-        es.onerror = () => es.close();
-        return () => es.close();
-    }, [enabled])
+        if (incidentData != null) {
+            const parsedData = IncidentDtoSchema.parse(incidentData)
+            setIncidents((prev) =>
+                prev.map<Incident>((inc) => {
+                    if (inc.callId === parsedData.callId)
+                        return {
+                            ...parsedData,
+                            transcript: parsedData.transcript.map(transcriptItemToUtterance),
+                            title: parsedData.title ?? "",
+                            location: parsedData.location ?? "",
+                            type: parsedData.type ?? undefined,
+                            priority: parsedData.priority ?? 0,
+                            severity: (parsedData.severity?.toLowerCase() as Incident["severity"]) ?? SeverityType.MODERATE,
+                            lang: parsedData.lang ?? '',
+                            occurDateTime: parsedData.occurDateTime ?? new Date().toLocaleString(),
+                            sopCitation: parsedData.sopCitation ?? '',
+                            reason: parsedData.reason ?? '',
+                            panicLevel: parsedData.panicLevel ?? "",
+                            distressScore: parsedData.distressScore ?? 0,
+                            caller: parsedData.caller ?? "",
+                            contradiction: parsedData.contradiction ?? undefined,
+                            responder: {
+                                name: parsedData.responder?.name ?? '',
+                                distance: parsedData.responder?.distance ?? '',
+                                eta: parsedData.responder?.eta ?? '',
+                                status: parsedData.responder?.status ?? '',
+                                type: parsedData.responder?.type ?? '',
+                                paramedic: parsedData.responder?.paramedic
+                            },
+                        }
+                    return inc;
+                }
+                )
+            );
+        }
+    }, [incidentData])
 
     function fetchIncidents() {
         IncidentApi.readIncidents({ page: 1, size: 100 })
