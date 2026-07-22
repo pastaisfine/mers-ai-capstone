@@ -1,8 +1,9 @@
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Session, joinedload
-from uuid_v7.base import uuid7, UUID
+from uuid_v7.base import uuid7
 
 from models.database.incident import InitIncidentPayload, InitIncidentLogPayload, QueryIncidentPayload, \
     UpdateIncidentPayload

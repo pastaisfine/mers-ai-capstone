@@ -27,8 +27,8 @@ async def transcript_process_consumer():
             if transcript_json is None:
                 continue
             transcript = [Utterance(**u) for u in json.loads(transcript_json)]
-            unsend_utterances: List[CreateCallTranscriptPayload] = []
-            for utterance in reversed(transcript):
+
+            for utterance in transcript:
                 default_start_duration: int = 0
                 default_end_duration: int = 0
                 if utterance.words and len(utterance.words) > 0:
@@ -36,35 +36,17 @@ async def transcript_process_consumer():
                         default_start_duration = int(utterance.words[0].start * 1000)
                     if utterance.words[-1].end is not None:
                         default_end_duration = int(utterance.words[-1].end * 1000)
-                    utterance_unique_id = f"{process_call_id}_{utterance.words[0].start}_{utterance.words[-1].end}"
-                else:
-                    utterance_unique_id = f"{process_call_id}_{hash(utterance.role + '_' + utterance.content)}"
 
-                redis_key = get_transcript_utterance_set_key(process_call_id)
-                has_in_redis = redis_client.sismember(redis_key, utterance_unique_id)
-                if has_in_redis:
-                    break
-                has_utterance = call_transcript_module.utterance_exists(UtteranceExistsPayload(
+                call_transcript_module.upsert_call_transcript(
                     call_id=process_call_id,
+                    role=utterance.role,
+                    content=utterance.content,
                     start_duration=default_start_duration,
                     end_duration=default_end_duration,
-                    transcript=utterance.content,
-                    role=utterance.role,
-                ), base.db)
-                if has_utterance:
-                    break
-                unsend_utterances.insert(0, CreateCallTranscriptPayload(
-                    call_id=process_call_id,
-                    role=utterance.role,
-                    transcript=utterance.content,
-                    start_duration=default_start_duration,
-                    end_duration=default_end_duration
-                ))
-                redis_client.sadd(redis_key, utterance_unique_id)
+                    db=base.db,
+                )
 
-            for u in unsend_utterances:
-                call_transcript_module.create_call_transcript(u, base.db)
-                base.db.commit()
+            base.db.commit()
         except Exception as e:
             print(f"transcript_process_consumer error: {e}")
             await asyncio.sleep(0.5)
