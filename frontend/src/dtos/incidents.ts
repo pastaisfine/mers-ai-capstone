@@ -38,8 +38,8 @@ export const TranscriptItemSchema = z.object({
   id: z.uuidv7(),
   transcript: z.string(),
   created_at: z.transform((i: string) => new Date(i)),
-  start_duration: z.int().positive(),
-  end_duration: z.int().positive(),
+  start_duration: z.int().nonnegative(),
+  end_duration: z.int().nonnegative(),
   call_id: z.uuidv7(),
   role: z.string(),
 });
