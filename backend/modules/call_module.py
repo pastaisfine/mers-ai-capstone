@@ -14,11 +14,17 @@ def init_call(payload: InitCallPayload, db: db_dependency) -> Call:
     new_call = db_module.init_data(call_payload, db, Call)
     return new_call
 
-
 def get_call_id_by_sid(sid: str, db: db_dependency) -> uuid.UUID | None:
     stmt = select(Call.id).where(Call.provider_sid == sid)
     call_id = db.scalars(stmt).first()
     return call_id
+
+def get_call_id_and_incident_id_by_sid(sid: str, db: db_dependency) -> tuple[uuid.UUID, uuid.UUID] | None:
+    stmt = select(Call.id, Call.incident_id).where(Call.provider_sid == sid)
+    row = db.execute(stmt).first()
+    if row is None:
+        return None
+    return row.id, row.incident_id
 
 
 def update_call(call_id: uuid.UUID, payload: UpdateCallPayload, db: db_dependency) -> Call:

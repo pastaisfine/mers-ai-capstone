@@ -1,0 +1,168 @@
+{
+  "scoring": {
+    "high_signal_weight": 3,
+    "supporting_weight": 1,
+    "required_match_bonus": 2
+  },
+  "generic_queries": [
+    "help",
+    "need help",
+    "something happened",
+    "emergency",
+    "it's urgent",
+    "come quick"
+  ],
+  "aliases": {
+    "fell down": "collapsed",
+    "no normal breathing": "not breathing normally",
+    "not briefing": "not breathing",
+    "chest is not moving": "not breathing",
+    "face is drooping": "face drooping",
+    "cannot speak properly": "speech difficulty",
+    "hit their head": "hit head",
+    "hit his head": "hit head",
+    "hit her head": "hit head",
+    "unresponsive": "no response",
+    "will not respond": "no response"
+  },
+  "sops": {
+    "MED-CARDIAC-ARREST-001": {
+      "high_signal_phrases": ["suspected cardiac arrest", "not breathing", "not breathing normally", "only gasping", "breathing strangely", "stopped breathing", "CPR"],
+      "supporting_phrases": ["collapsed", "unconscious", "gasping", "blue lips", "no response", "AED"],
+      "required_any": ["not breathing", "not breathing normally", "gasping", "only gasping", "breathing strangely", "stopped breathing"],
+      "ambiguity_phrases": ["traffic", "trauma", "car accident", "road crash", "drowning", "water", "overdose", "hanging", "electrocution"]
+    },
+    "MED-002-BREATHING-DIFFICULTY": {
+      "high_signal_phrases": ["breathing difficulty", "short of breath", "asthma attack", "cannot breathe", "wheezing", "allergic reaction", "anaphylaxis signs"],
+      "supporting_phrases": ["unable to speak", "turning blue", "blue lips", "swelling of face", "swelling of tongue", "widespread rash", "smoke inhalation"],
+      "required_any": ["breathing difficulty", "short of breath", "asthma attack", "cannot breathe", "wheezing", "breathing trouble"],
+      "ambiguity_phrases": ["choking", "foreign object", "chest pain", "smoke", "chemical", "gas exposure", "cardiac arrest"]
+    },
+    "MED-003-CHEST-PAIN": {
+      "high_signal_phrases": ["chest pain", "pressure", "tightness", "pain to arm", "pain radiating to arm", "pain radiating to jaw", "pain radiating to back", "heart attack"],
+      "supporting_phrases": ["sweating", "nausea", "shortness of breath", "fainting", "heart history"],
+      "required_any": ["chest pain", "pressure", "tightness", "pain to arm", "pain radiating to arm", "pain radiating to jaw", "pain radiating to back", "heart attack"],
+      "ambiguity_phrases": ["unconscious", "not breathing", "cardiac arrest"]
+    },
+    "MED-004-STROKE": {
+      "high_signal_phrases": ["face droop", "face drooping", "slurred speech", "arm weakness", "weak arm", "one side numb"],
+      "supporting_phrases": ["speech difficulty", "cannot talk", "sudden weakness", "sudden confusion", "last known well", "very drowsy"],
+      "required_any": ["face droop", "face drooping", "slurred speech", "arm weakness", "weak arm", "speech difficulty", "one side numb", "sudden weakness"],
+      "ambiguity_phrases": ["seizure", "fall", "head injury", "unconscious", "not breathing"]
+    },
+    "MED-005-CHOKING": {
+      "high_signal_phrases": ["choking", "food stuck", "cannot speak", "hands on throat", "airway obstruction"],
+      "supporting_phrases": ["cannot breathe", "turning blue", "coughing", "partially choking", "foreign object", "object expelled"],
+      "required_any": ["choking", "food stuck", "cannot speak", "hands on throat", "airway obstruction", "severe airway obstruction"],
+      "ambiguity_phrases": ["breathing difficulty", "unconscious", "not breathing normally", "cardiac arrest"]
+    },
+    "MED-006-SEVERE-BLEEDING": {
+      "high_signal_phrases": ["bleeding a lot", "blood pumping", "blood spurting", "amputation", "deep cut", "stab wound", "gunshot"],
+      "supporting_phrases": ["soaking through cloth", "direct pressure", "embedded object", "weapon", "attacker", "sleepy", "confused"],
+      "required_any": ["bleeding a lot", "blood pumping", "blood spurting", "soaking through cloth", "amputation", "deep cut", "stab wound", "gunshot"],
+      "ambiguity_phrases": ["road accident", "assault", "industrial injury", "unsafe scene", "unconscious", "not breathing normally"]
+    },
+    "MED-007-SEIZURE": {
+      "high_signal_phrases": ["seizure", "fit", "convulsion", "jerking", "foaming", "epileptic episode"],
+      "supporting_phrases": ["epilepsy", "repeated seizure", "first seizure", "postictal confusion", "movement stops"],
+      "required_any": ["seizure", "fit", "convulsion", "jerking", "foaming", "epileptic episode"],
+      "ambiguity_phrases": ["pregnancy", "diabetes", "water involved", "abnormal breathing", "cardiac arrest"]
+    },
+    "MED-008-POISONING-OVERDOSE": {
+      "high_signal_phrases": ["overdose", "poison ingestion", "took pills", "chemical swallowed", "carbon monoxide", "gas leak", "pesticide exposure"],
+      "supporting_phrases": ["toxic ingestion", "swallowed", "inhaled", "injected", "container", "label", "number exposed", "fresh air"],
+      "required_any": ["overdose", "poison", "took pills", "chemical swallowed", "carbon monoxide", "gas leak", "pesticide"],
+      "ambiguity_phrases": ["intentional self harm", "violence", "unconscious", "not breathing"]
+    },
+    "MED-009-BURNS-SCALDS": {
+      "high_signal_phrases": ["burn", "scald", "on fire", "chemical burn", "electrical burn", "smoke inhalation"],
+      "supporting_phrases": ["large burn", "face burn", "neck burn", "breathing trouble", "thermal burn", "stuck clothing", "cooling started"],
+      "required_any": ["burn", "scald", "on fire", "chemical burn", "electrical burn", "person on fire"],
+      "ambiguity_phrases": ["active fire", "explosion", "smoke", "chemical", "trapped", "breathing difficulty", "unconscious", "cardiac arrest"]
+    },
+    "MED-010-CHILDBIRTH": {
+      "high_signal_phrases": ["giving birth", "baby coming", "pregnant bleeding", "labour", "water broke", "contractions"],
+      "supporting_phrases": ["weeks pregnant", "contractions very close", "see the head", "crowning", "visible head", "imminent delivery"],
+      "required_any": ["giving birth", "baby coming", "pregnant bleeding", "labour", "water broke", "water breaking", "contractions"],
+      "ambiguity_phrases": ["severe bleeding", "heavy bleeding", "unconscious", "seizure", "baby not breathing", "cord complications"]
+    },
+    "MED-011-DROWNING": {
+      "high_signal_phrases": ["drowning", "fell into water", "not breathing after swimming", "river rescue", "flood water"],
+      "supporting_phrases": ["still in the water", "underwater", "out of water", "last seen point", "fast current", "water rescue"],
+      "required_any": ["drowning", "fell into water", "not breathing after swimming", "river rescue", "flood water"],
+      "ambiguity_phrases": ["flood", "electrical hazard", "not breathing normally", "CPR", "trapped"]
+    },
+    "TRA-001-ROAD-TRAFFIC-COLLISION": {
+      "high_signal_phrases": ["car accident", "motorcycle accident", "motorbike crash", "lorry collision", "hit pedestrian", "road crash", "rollover"],
+      "supporting_phrases": ["road name", "direction", "kilometre marker", "many vehicles", "trapped", "hazardous cargo", "bleeding roadside"],
+      "required_any": ["car accident", "motorcycle accident", "motorbike crash", "lorry collision", "hit pedestrian", "road crash", "rollover"],
+      "ambiguity_phrases": ["bleeding", "fire", "fuel leak", "smoke", "power lines", "hazardous material", "not breathing", "drowning"]
+    },
+    "TRA-002-FALL-HEAD-INJURY": {
+      "high_signal_phrases": ["fell", "fall", "hit head", "unconscious after fall", "neck pain", "elderly fall", "bleeding head"],
+      "supporting_phrases": ["fall height", "neck pain", "back pain", "weakness", "numbness", "vomiting", "confusion", "blood thinner"],
+      "required_any": ["fell", "fall", "hit head", "unconscious after fall", "neck pain", "elderly fall", "bleeding head", "head injury"],
+      "ambiguity_phrases": ["cannot move", "seizure", "bleeding", "unconscious", "not breathing normally", "alcohol", "drugs"]
+    },
+    "FIR-001-BUILDING-FIRE": {
+      "high_signal_phrases": ["building fire", "house fire", "burning building", "fire", "smoke", "persons trapped"],
+      "supporting_phrases": ["smoke in stairwell", "floor", "unit", "trapped", "missing", "alarm", "assembly point", "gas cylinders"],
+      "required_any": ["building fire", "house fire", "burning building", "fire", "smoke"],
+      "ambiguity_phrases": ["smoke inhalation", "explosion", "chemicals", "electricity risk"]
+    },
+    "FIR-002-HAZMAT-CHEMICAL-GAS": {
+      "high_signal_phrases": ["chemical spill", "gas smell", "chlorine", "ammonia", "pesticide", "unknown fumes", "hazmat", "lab accident"],
+      "supporting_phrases": ["label", "placard number", "number exposed", "wind direction", "indoor", "outdoor", "safe staging location", "symptoms"],
+      "required_any": ["chemical spill", "gas smell", "chlorine", "ammonia", "pesticide", "unknown fumes", "hazmat", "lab accident"],
+      "ambiguity_phrases": ["gas leak", "chemical on skin", "chemical in eyes", "fire", "explosion", "smoke"]
+    },
+    "FIR-003-ELEVATOR-CONFINED": {
+      "high_signal_phrases": ["stuck in lift", "elevator trapped", "cannot open door", "panic in lift", "lift entrapment"],
+      "supporting_phrases": ["lift number", "floor", "number trapped", "alarm", "intercom", "heat", "ventilation", "prolonged entrapment"],
+      "required_any": ["stuck in lift", "elevator trapped", "cannot open door", "panic in lift", "lift entrapment"],
+      "ambiguity_phrases": ["panic attack", "breathing difficulty", "chest pain", "faints", "smoke", "fire", "water", "pregnancy"]
+    },
+    "POL-001-DOMESTIC-VIOLENCE": {
+      "high_signal_phrases": ["husband hitting", "wife assaulted", "family violence", "being hit", "locked in", "children in danger"],
+      "supporting_phrases": ["abuser nearby", "safe to talk", "protection order", "safer room", "discreet approach", "yes or no"],
+      "required_any": ["husband hitting", "wife assaulted", "family violence", "being hit", "locked in", "children in danger"],
+      "ambiguity_phrases": ["threatened", "weapon", "injuries", "bleeding", "strangulation", "unconscious"]
+    },
+    "POL-002-WEAPON-ASSAULT-ROBBERY": {
+      "high_signal_phrases": ["knife", "gun", "robbery", "being attacked", "fight", "stabbed", "armed", "hostage", "weapon threat"],
+      "supporting_phrases": ["suspect still there", "weapon type", "number of suspects", "direction of travel", "stay hidden", "stay quiet", "hostages"],
+      "required_any": ["knife", "gun", "robbery", "being attacked", "fight", "stabbed", "armed", "hostage", "weapon threat"],
+      "ambiguity_phrases": ["injuries", "bleeding", "trauma", "children", "unsafe scene", "suspect left"]
+    },
+    "POL-003-MISSING-CHILD": {
+      "high_signal_phrases": ["missing child", "lost kid", "cannot find my son", "abduction", "wandered off", "autism missing"],
+      "supporting_phrases": ["last seen", "exact location", "clothing", "direction of travel", "recent photo", "last known location", "search direction"],
+      "required_any": ["missing child", "lost kid", "cannot find my son", "abduction", "wandered off", "autism missing"],
+      "ambiguity_phrases": ["water", "traffic", "abduction suspicion", "vulnerable person", "suspect", "vehicle", "construction", "forest"]
+    },
+    "RES-001-TRAPPED-COLLAPSE": {
+      "high_signal_phrases": ["trapped person", "trapped", "collapsed building", "landslide buried", "cannot get out", "confined space"],
+      "supporting_phrases": ["structural instability", "unstable structure", "last known location", "number trapped", "victim contact", "specialist rescue"],
+      "required_any": ["trapped person", "trapped", "collapsed building", "landslide buried", "cannot get out", "confined space"],
+      "ambiguity_phrases": ["landslide", "lift stuck", "fire", "gas", "electrical", "water", "multiple victims", "MCI"]
+    },
+    "DIS-001-FLOOD-LANDSLIDE": {
+      "high_signal_phrases": ["flood", "flash flood", "landslide", "water rising", "rising water", "trapped on roof", "mudslide"],
+      "supporting_phrases": ["trapped on roof", "trapped in car", "water depth", "higher ground", "moving floodwater", "GPS", "landmark", "vulnerable persons"],
+      "required_any": ["flood", "flash flood", "landslide", "water rising", "rising water", "trapped on roof", "mudslide"],
+      "ambiguity_phrases": ["trapped", "in water", "injury", "electricity", "gas hazards", "multiple locations", "widespread"]
+    },
+    "MCI-001-MASS-CASUALTY": {
+      "high_signal_phrases": ["many injured", "multiple casualties", "mass poisoning", "multiple emergency calls same location", "major incident"],
+      "supporting_phrases": ["casualty estimate", "number injured", "number trapped", "not moving", "bleeding heavily", "walking wounded", "safe staging area"],
+      "required_any": ["many injured", "multiple casualties", "mass poisoning", "multiple emergency calls same location"],
+      "ambiguity_phrases": ["bus crash", "explosion", "building collapse", "train crash", "fire", "smoke", "chemicals", "weapons"]
+    },
+    "MH-001-SUICIDE-SELF-HARM": {
+      "high_signal_phrases": ["suicide", "suicidal thoughts", "want to die", "self harm", "self-harm", "on bridge", "hanging attempt"],
+      "supporting_phrases": ["active attempt", "ideation", "immediate danger", "means present", "high risk location", "standing on bridge", "cutting", "jump"],
+      "required_any": ["suicide", "suicidal thoughts", "want to die", "self harm", "self-harm", "on bridge", "standing on bridge", "hanging attempt", "cutting", "jump"],
+      "ambiguity_phrases": ["took pills", "overdose", "hanging", "weapon", "medicine", "injury", "bleeding", "CPR"]
+    }
+  }
+}
