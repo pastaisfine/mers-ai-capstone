@@ -7,7 +7,7 @@
 import { ArrowRight } from 'lucide-react';
 // @ts-ignore
 import Lightfall from './Lightfall.jsx';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 export default function HeroSection() {
   return (

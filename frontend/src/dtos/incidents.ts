@@ -35,7 +35,7 @@ export const TimelineItemSchema = z.object({
 });
 
 export const TranscriptItemSchema = z.object({
-  id: z.uuidv7(),
+  id: z.uuid(),
   transcript: z.string(),
   created_at: z.transform((i: string) => new Date(i)),
   start_duration: z.int().nonnegative(),
