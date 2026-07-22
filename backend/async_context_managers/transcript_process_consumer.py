@@ -1,3 +1,4 @@
+import json
 import time
 from typing import List
 
@@ -16,7 +17,10 @@ def transcript_process_consumer():
             time.sleep(0.1)
             continue
 
-        transcript = redis_client.hpop(PENDING_CALL_TRANSCRIPT_MAP_KEY, process_call_id)
+        transcript_json = redis_client.hpop(PENDING_CALL_TRANSCRIPT_MAP_KEY, process_call_id)
+        if transcript_json is None:
+            continue
+        transcript = json.loads(transcript_json)
         unsend_utterances: List[CreateCallTranscriptPayload] = []
         for utterance in reversed(transcript):
             default_end_duration: int = 0

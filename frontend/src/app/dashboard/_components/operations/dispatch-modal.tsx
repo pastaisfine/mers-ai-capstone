@@ -499,7 +499,7 @@ export function DispatchModal({ incident }: DispatchModalProps) {
               />
             </section>
 
-            <div className="sticky -bottom-5 bg-card pb-5 lg:pb-1 flex flex-col gap-1 pt-2 sm:flex-row">
+            <div className="sticky -bottom-5 bg-white dark:bg-card pb-5 lg:pb-1 flex flex-col gap-1 pt-2 sm:flex-row">
               <Button
                 variant="outline"
                 className="flex-1 border-destructive/40 text-destructive hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:text-white dark:bg-destructive dark:hover:bg-red-800"

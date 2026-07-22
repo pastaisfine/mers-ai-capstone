@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(override=True)
 
 DATABASE_URL = os.getenv("POSTGRES_CONNECTION_STRING")
 NGROK_URL = os.getenv("NGROK_URL", "")
@@ -23,3 +25,8 @@ ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS").split(",") if os.getenv("ALLOW_ORIGIN
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+PROJECT_DIR = Path(__file__).parent
+DATA_DIR = PROJECT_DIR / "data"
+RETRIEVAL_SIGNALS_PATH= DATA_DIR / "retrieval_signals.json"
+SKILL_CARDS_PATH = DATA_DIR / "sop_skill_cards.jsonl"
+FULL_SOPS_PATH = DATA_DIR / "full_sops"
