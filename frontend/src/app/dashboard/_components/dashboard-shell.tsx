@@ -22,7 +22,7 @@ function DashboardContent() {
       {/* Mobile tab nav */}
       <MobileTabNav />
 
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {currentTab === TabName.DASHBOARD && <DashboardTab />}
         {currentTab === TabName.OPERATIONS && <OperationsTab />}
         {currentTab === TabName.HISTORY && <HistoryTab />}

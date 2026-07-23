@@ -14,3 +14,5 @@ class UtteranceExistsPayload(BaseModel):
     call_id: UUID
     start_duration: int
     end_duration: int
+    transcript: str | None = None
+    role: str | None = None

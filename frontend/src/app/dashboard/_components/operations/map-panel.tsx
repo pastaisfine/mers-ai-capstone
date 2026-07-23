@@ -5,7 +5,6 @@ import { useMemo, useState, createContext, useContext } from "react"
 import { useTheme } from "next-themes"
 import { useIncident } from "@/context/incident/useIncident"
 import { IncidentMap } from "./map/IncidentMap"
-import { ContradictionCard } from "./map/ContradictionCard"
 import { DispatchModal } from "./dispatch-modal"
 import { SeverityType, type Incident } from "@/types"
 
@@ -20,7 +19,7 @@ interface MapPreviewCtx {
   setPreviewCoords: (coords: { lat: number; lng: number } | null) => void
 }
 
-export const MapPreviewContext = createContext<MapPreviewCtx>({ setPreviewCoords: () => {} })
+export const MapPreviewContext = createContext<MapPreviewCtx>({ setPreviewCoords: () => { } })
 
 export function useMapPreview() {
   return useContext(MapPreviewContext)
